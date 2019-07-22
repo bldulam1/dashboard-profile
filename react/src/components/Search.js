@@ -10,7 +10,14 @@ import SearchIcon from "@material-ui/icons/Search";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import useToggle from "../hooks/useToggle";
-import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+
+import { api_server } from "../environment/environment";
+import { ProjectContext } from "../context/Project.Context";
+import { TextField } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -80,31 +87,42 @@ function SimpleSearch(props) {
 function Relation(value, symbol) {
   return (
     <MenuItem key={uuid()} value={value}>
-      {" "}
-      {symbol}{" "}
+      {symbol}
     </MenuItem>
   );
 }
 
-function getRelations(type) {
-  console.log(type);
+function getRelations(selectedKey) {
   const numericRelations = [
     Relation("lte", "≤"),
     Relation("lt", "<"),
-    Relation("e", "="),
     Relation("gt", ">"),
-    Relation("gte", "≥"),
-    Relation("ne", "≠")
+    Relation("gte", "≥")
   ];
 
   const stringRelations = [Relation("w", "with"), Relation("wo", "without")];
-  return numericRelations;
+  const fixedRelations = [Relation("e", "="), Relation("ne", "≠")];
+
+  if (
+    ["extension", "parentFolder"].includes(selectedKey) ||
+    selectedKey.includes("tags")
+  ) {
+    return fixedRelations;
+  } else if (["path", "fileName"].includes(selectedKey)) {
+    return [...stringRelations, ...fixedRelations];
+  } else if (selectedKey.includes("date") || selectedKey.includes("size")) {
+    return [...fixedRelations, ...numericRelations];
+  } else {
+    return [...fixedRelations, ...numericRelations, ...fixedRelations];
+  }
 }
 
-function NewRule() {
+function NewRule(props) {
+  const { activeProject } = React.useContext(ProjectContext);
+
   React.useEffect(() => {
-    axios.get("https://jsonplaceholder.typicode.com/posts").then(res => {
-      setKeys(Object.keys(res.data[0]));
+    axios.get(`${api_server}/search/${activeProject}/unique/tags`).then(res => {
+      setKeys(res.data);
     });
   }, []);
 
@@ -116,22 +134,31 @@ function NewRule() {
   });
 
   const [keys, setKeys] = React.useState([]);
+  const [keyOptions, setKeyOptions] = React.useState([]);
   const [selectedKey, setSelectedKey] = React.useState("");
-  const [selectedKeyType, setSelectedKeyType] = React.useState(null);
 
-  function onNewKey(key) {
+  async function onNewKey(key, activeProject) {
     console.log(key);
     setSelectedKey(key);
     setRule({ ...rule, key });
+
+    axios
+      .get(`${api_server}/search/${activeProject}/unique/tag/${key}`)
+      .then(res => {
+        const count = res.data.length;
+        if (count > 0 && count < 50) {
+          setKeyOptions(res.data);
+        }
+      });
   }
 
   return (
     <div>
-      <FormControl style={{ width: "40%" }}>
+      <FormControl style={{ width: "30%" }}>
         <InputLabel htmlFor="key-input">Key</InputLabel>
         <Select
           value={rule.key}
-          onChange={event => onNewKey(event.target.value)}
+          onChange={event => onNewKey(event.target.value, activeProject)}
           inputProps={{
             name: "key",
             id: "key-input"
@@ -145,48 +172,54 @@ function NewRule() {
         </Select>
       </FormControl>
 
-      {selectedKeyType && (
-        <FormControl style={{ width: "20%" }}>
-          <InputLabel htmlFor="rel-input">Relation</InputLabel>
-          <Select
-            value={rule.relation}
-            onChange={event =>
-              setRule({ ...rule, relation: event.target.value })
-            }
-            inputProps={{
-              name: "rel",
-              id: "rel-input"
-            }}
-          >
-            {getRelations("string")}
-          </Select>
-        </FormControl>
-      )}
-
-      <FormControl style={{ width: "40%" }}>
-        <InputLabel htmlFor="value-input">
-          {" "}
-          {rule.key.toUpperCase()}{" "}
-        </InputLabel>
+      <FormControl style={{ width: "20%" }}>
+        <InputLabel htmlFor="rel-input">Relation</InputLabel>
         <Select
-          value={rule.key}
-          onChange={event => setRule({ ...rule, value: event.target.value })}
+          value={rule.relation}
+          onChange={event => setRule({ ...rule, relation: event.target.value })}
           inputProps={{
-            name: "value",
-            id: "value-input"
+            name: "rel",
+            id: "rel-input"
           }}
         >
-          <MenuItem value={10}>Ten</MenuItem>
-          <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem>
+          {getRelations(selectedKey)}
         </Select>
       </FormControl>
+
+      {keyOptions.length ? (
+        <FormControl style={{ width: "50%" }}>
+          <InputLabel htmlFor="value-input">
+            {rule.key.toLocaleUpperCase()}
+          </InputLabel>
+          <Select
+            value={rule.value}
+            onChange={event => setRule({ ...rule, value: event.target.value })}
+            inputProps={{
+              name: "value",
+              id: "value-input"
+            }}
+          >
+            {keyOptions.map(keyOption => (
+              <MenuItem key={uuid()} value={keyOption}>
+                {keyOption}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      ) : (
+        <TextField
+          id="standard-name"
+          label={rule.key ? rule.key.toLocaleUpperCase() : 'Value'}
+          value={rule.value}
+          onChange={event => setRule({ ...rule, value: event.target.value })}
+          style={{width: '50%'}}
+        />
+      )}
     </div>
   );
 }
 
 function AdvancedSearch(props) {
-  const classes = useStyles();
   return (
     <div>
       <NewRule />
@@ -194,7 +227,7 @@ function AdvancedSearch(props) {
   );
 }
 
-function SearchBar() {
+function SearchBar(props) {
   const classes = useStyles();
   const [isAdvancedSearch, toggleAdvancedSearch] = useToggle(false);
   const [searchValue, setSearchValue] = React.useState("");
@@ -235,13 +268,6 @@ function SearchBar() {
 
 export default props => {
   const classes = useStyles();
-  const [users, setUsers] = React.useState([]);
-
-  React.useEffect(() => {
-    axios
-      .get("https://jsonplaceholder.typicode.com/users")
-      .then(res => setUsers(res.data));
-  }, []);
 
   return (
     <Paper className={classes.contentPaper}>
@@ -249,7 +275,7 @@ export default props => {
         <Grid item xs={12} sm={12} md={9}>
           <SearchBar />
           <Grid item>
-            {users.map(user => (
+            {/* {users.map(user => (
               <div key={uuid()}>
                 <Typography gutterBottom variant="h5" component="h2">
                   {user.name}
@@ -259,7 +285,7 @@ export default props => {
                   6,000 species, ranging across all continents except Antarctica
                 </Typography>
               </div>
-            ))}
+            ))} */}
           </Grid>
         </Grid>
         <Grid item xs={12} sm={12} md={3}>

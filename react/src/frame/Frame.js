@@ -27,6 +27,7 @@ import {
 } from "../frame/Projects";
 
 import { useStyles } from "../styles/classes";
+import { ProjectContext } from "../context/Project.Context";
 
 export default () => {
   const [open, toggleDrawer] = useToggle(false);
@@ -84,17 +85,20 @@ export default () => {
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        {getProjectComponents(activeProject).map(comp => (
-          <Route
-            exact
-            key={uuid()}
-            path={comp.route}
-            component={comp.component}
-          />
-        ))}
-        {settingsComponents.map(({ route, component }) => (
-          <Route exact key={uuid()} path={route} component={component} />
-        ))}
+        <ProjectContext.Provider value={{ activeProject }}>
+          {getProjectComponents(activeProject).map(comp => (
+            <Route
+              exact
+              key={uuid()}
+              activeProject={activeProject}
+              path={comp.route}
+              component={comp.component}
+            />
+          ))}
+          {settingsComponents.map(({ route, component }) => (
+            <Route exact key={uuid()} path={route} component={component} />
+          ))}
+        </ProjectContext.Provider>
       </main>
     </div>
   );

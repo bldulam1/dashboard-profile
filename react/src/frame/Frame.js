@@ -1,0 +1,274 @@
+import React from "react";
+import clsx from "clsx";
+import Drawer from "@material-ui/core/Drawer";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import Typography from "@material-ui/core/Typography";
+import IconButton from "@material-ui/core/IconButton";
+import MenuIcon from "@material-ui/icons/Menu";
+import Avatar from "@material-ui/core/Avatar";
+import Tooltip from "@material-ui/core/Tooltip";
+import Divider from "@material-ui/core/Divider";
+
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+
+import useToggle from "../hooks/useToggle";
+import uuid from "uuid";
+import { Route, Link } from "react-router-dom";
+
+import logo from "../logo.svg";
+
+import {
+  projects,
+  getProjectComponents,
+  settingsComponents
+} from "../frame/Projects";
+
+import { useStyles } from "../styles/classes";
+
+export default () => {
+  const [open, toggleDrawer] = useToggle(false);
+  const [activeProject, setActiveProject] = React.useState(projects[0]);
+  const classes = useStyles();
+
+  return (
+    <div className={classes.root}>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: open
+        })}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="Open drawer"
+            onClick={toggleDrawer}
+            edge="start"
+            className={clsx(classes.menuButton)}
+          >
+            <MenuIcon />
+          </IconButton>
+          <div className={classes.toolbar}>
+            <img src={logo} alt="Clarity" style={{ height: "3rem" }} />
+          </div>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        variant="permanent"
+        className={clsx(classes.drawer, {
+          [classes.drawerOpen]: open,
+          [classes.drawerClose]: !open
+        })}
+        classes={{
+          paper: clsx({
+            [classes.drawerOpen]: open,
+            [classes.drawerClose]: !open
+          })
+        }}
+        open={open}
+      >
+        <div className={classes.toolbar} />
+
+        <ProjectSelection
+          open={open}
+          activeProject={activeProject}
+          setActiveProject={setActiveProject}
+        />
+
+        <ProjectComponents open={open} activeProject={activeProject} />
+        <SettingsComponents open={open} activeProject={activeProject} />
+      </Drawer>
+      <main className={classes.content}>
+        <div className={classes.toolbar} />
+        {getProjectComponents(activeProject).map(comp => (
+          <Route
+            exact
+            key={uuid()}
+            path={comp.route}
+            component={comp.component}
+          />
+        ))}
+        {settingsComponents.map(({ route, component }) => (
+          <Route exact key={uuid()} path={route} component={component} />
+        ))}
+      </main>
+    </div>
+  );
+};
+
+function getInitials(name) {
+  return name
+    .split(/[\s,-]+/)
+    .map(p => p[0])
+    .join("");
+}
+function ProjectNavItem(props) {
+  const {
+    open,
+    project,
+    toggleList,
+    listOpen,
+    isPrimary,
+    setActiveProject
+  } = props;
+  const classes = useStyles();
+  const onProjectClick = () => {
+    toggleList();
+    !isPrimary && setActiveProject(project);
+  };
+
+  return (
+    <div
+      className={classes.navBarItem}
+      style={{
+        justifyContent: open ? "left" : "center",
+        paddingLeft: open ? "1rem" : "0rem"
+      }}
+      onClick={onProjectClick}
+    >
+      <Tooltip title={isPrimary ? `Active Project: ${project}` : project}>
+        <Avatar
+          className={
+            isPrimary ? classes.primaryAvatar : classes.secondaryAvatar
+          }
+        >
+          {getInitials(project)}
+        </Avatar>
+      </Tooltip>
+      <Typography hidden={!open} style={{ paddingLeft: "1rem" }}>
+        {project}
+      </Typography>
+      {isPrimary && (
+        <span hidden={!open} style={{ float: "right" }}>
+          {listOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function ProjectSelection(props) {
+  const [listOpen, toggleList] = useToggle(false);
+  const { open, activeProject, setActiveProject } = props;
+  const classes = useStyles();
+
+  return (
+    <div>
+      <Typography
+        className={classes.navBarGroupLabel}
+        variant="subtitle2"
+        hidden={!open}
+        style={{ paddingTop: "1rem" }}
+      >
+        Active Project
+      </Typography>
+      <ProjectNavItem
+        open={open}
+        project={activeProject}
+        toggleList={toggleList}
+        listOpen={listOpen}
+        isPrimary={true}
+        setActiveProject={setActiveProject}
+      />
+      {listOpen &&
+        projects.map(project => (
+          <ProjectNavItem
+            key={uuid()}
+            open={open}
+            project={project}
+            toggleList={toggleList}
+            listOpen={listOpen}
+            setActiveProject={setActiveProject}
+          />
+        ))}
+      {!open && <Divider className={classes.drawerDivider} variant="middle" />}
+    </div>
+  );
+}
+
+function ProjectComponents(props) {
+  const { open, activeProject } = props;
+  const classes = useStyles();
+  const components = getProjectComponents(activeProject);
+  return (
+    <div>
+      <Typography
+        className={classes.navBarGroupLabel}
+        variant="subtitle2"
+        hidden={!open}
+      >
+        components
+      </Typography>
+
+      {components.map(({ name, icon, route }) => (
+        <Link
+          to={route.replace(":project", activeProject)}
+          key={uuid()}
+          style={{ textDecoration: "none", color: "#E0C1CB" }}
+        >
+          <div
+            className={classes.navBarItem}
+            style={{
+              justifyContent: open ? "left" : "center",
+              paddingLeft: open ? "1rem" : "0rem"
+            }}
+          >
+            <Tooltip title={name}>{icon}</Tooltip>
+            <Typography
+              hidden={!open}
+              style={{ paddingLeft: "1rem" }}
+              className={classes.navBarItemLabel}
+            >
+              {name}
+            </Typography>
+          </div>
+        </Link>
+      ))}
+      {!open && <Divider className={classes.drawerDivider} variant="middle" />}
+    </div>
+  );
+}
+
+function SettingsComponents(props) {
+  const { open } = props;
+  const classes = useStyles();
+  return (
+    <div>
+      <Typography
+        className={classes.navBarGroupLabel}
+        variant="subtitle2"
+        hidden={!open}
+      >
+        settings
+      </Typography>
+      {settingsComponents.map(({ name, icon, route }) => (
+        <Link
+          to={route}
+          key={uuid()}
+          style={{ textDecoration: "none", color: "#E0C1CB" }}
+        >
+          <div
+            className={classes.navBarItem}
+            style={{
+              justifyContent: open ? "left" : "center",
+              paddingLeft: open ? "1rem" : "0rem"
+            }}
+          >
+            <Tooltip title={name}>{icon}</Tooltip>
+            <Typography
+              hidden={!open}
+              style={{ paddingLeft: "1rem" }}
+              className={classes.navBarItemLabel}
+            >
+              {name}
+            </Typography>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}

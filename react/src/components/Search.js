@@ -3,10 +3,12 @@ import axios from "axios";
 import uuid from "uuid";
 import Paper from "@material-ui/core/Paper";
 import { fade, makeStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import TextField from "@material-ui/core/TextField";
 import InputBase from "@material-ui/core/InputBase";
 import IconButton from "@material-ui/core/IconButton";
 import SearchIcon from "@material-ui/icons/Search";
+
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import useToggle from "../hooks/useToggle";
@@ -14,14 +16,28 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import Typography from "@material-ui/core/Typography";
+
+import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 import { api_server } from "../environment/environment";
 import { ProjectContext } from "../context/Project.Context";
-import { TextField } from "@material-ui/core";
+
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import Checkbox from "@material-ui/core/Checkbox";
+import Avatar from "@material-ui/core/Avatar";
 
 const useStyles = makeStyles(theme => ({
   root: {
-    flexGrow: 1
+    // flexGrow: 1
+  },
+  avatar: {
+    margin: "0.25rem",
+    backgroundColor: theme.palette.secondary.dark
   },
   paper: {
     padding: theme.spacing(2),
@@ -53,19 +69,38 @@ const useStyles = makeStyles(theme => ({
     },
     marginLeft: 0,
     width: "100%"
+  },
+  list: {
+    width: "100%",
+    backgroundColor: theme.palette.background.paper
   }
 }));
 
 function SimpleSearch(props) {
+  const { activeProject } = React.useContext(ProjectContext);
   const classes = useStyles();
-  const { searchValue, setSearchValue } = props;
+  const { setSearchValue } = props;
   const [searchString, setSearchString] = React.useState("");
 
   function onSearchStringChange(search_string) {
+    const regex = search_string.split(/[\s,]+/).join("|");
+    const query = {
+      $and: [
+        { project: activeProject },
+        {
+          $or: [
+            "path",
+            "parentFolder",
+            "fileName",
+            "extension",
+            "tags.values"
+          ].map(field => ({ [`${field}`]: { $regex: regex, $options: "i" } }))
+        }
+      ]
+    };
+
     setSearchString(search_string);
-    setSearchValue({
-      name: search_string
-    });
+    setSearchValue(query);
   }
 
   return (
@@ -119,6 +154,9 @@ function getRelations(selectedKey) {
 
 function NewRule(props) {
   const { activeProject } = React.useContext(ProjectContext);
+  const [keys, setKeys] = React.useState([]);
+  const [keyOptions, setKeyOptions] = React.useState([]);
+  const [selectedKey, setSelectedKey] = React.useState("");
 
   React.useEffect(() => {
     axios.get(`${api_server}/search/${activeProject}/unique/tags`).then(res => {
@@ -133,12 +171,7 @@ function NewRule(props) {
     value: ""
   });
 
-  const [keys, setKeys] = React.useState([]);
-  const [keyOptions, setKeyOptions] = React.useState([]);
-  const [selectedKey, setSelectedKey] = React.useState("");
-
   async function onNewKey(key, activeProject) {
-    console.log(key);
     setSelectedKey(key);
     setRule({ ...rule, key });
 
@@ -209,12 +242,39 @@ function NewRule(props) {
       ) : (
         <TextField
           id="standard-name"
-          label={rule.key ? rule.key.toLocaleUpperCase() : 'Value'}
+          label={rule.key ? rule.key.toLocaleUpperCase() : "Value"}
           value={rule.value}
           onChange={event => setRule({ ...rule, value: event.target.value })}
-          style={{width: '50%'}}
+          style={{ width: "50%" }}
         />
       )}
+    </div>
+  );
+}
+
+function NewGroup() {
+  const [logic, toggleLogic] = useToggle(false);
+
+  return (
+    <div>
+      <div>
+        <ButtonGroup
+          variant="contained"
+          color="primary"
+          size="small"
+          aria-label="Small contained button group"
+        >
+          <Button size="small" onClick={toggleLogic} style={{ width: "5rem" }}>
+            {logic ? "and" : "or"}
+          </Button>
+          <Button>
+            <AddCircleIcon /> rule
+          </Button>
+          <Button>
+            <AddCircleIcon /> group
+          </Button>
+        </ButtonGroup>
+      </div>
     </div>
   );
 }
@@ -222,19 +282,30 @@ function NewRule(props) {
 function AdvancedSearch(props) {
   return (
     <div>
+      <NewGroup />
       <NewRule />
     </div>
   );
 }
 
 function SearchBar(props) {
+  const { skip, limit, setScenes } = props;
   const classes = useStyles();
+  const { activeProject } = React.useContext(ProjectContext);
   const [isAdvancedSearch, toggleAdvancedSearch] = useToggle(false);
   const [searchValue, setSearchValue] = React.useState("");
 
   async function search(event) {
     event.preventDefault();
-    console.log(searchValue);
+    const searchValueString = JSON.stringify(searchValue);
+    axios
+      .get(
+        `${api_server}/search/${activeProject}/${skip}/${limit}/${searchValueString}`
+      )
+      .then(res => {
+        console.log(res.data);
+        setScenes(res.data.scenes);
+      });
   }
 
   return (
@@ -266,29 +337,117 @@ function SearchBar(props) {
   );
 }
 
+function normalizeSize(byteSize) {
+  const units = " KMGTPEZYXSD";
+  let newSize = byteSize;
+  let index = 0;
+  while (newSize > 1000) {
+    newSize /= 1000;
+    index++;
+  }
+  return `${newSize.toFixed(2)} ${units[index]}B`;
+}
+function SceneList(props) {
+  const { scenes } = props;
+  const classes = useStyles();
+  const [checked, setChecked] = React.useState([]);
+
+  const handleToggle = value => () => {
+    const currentIndex = checked.indexOf(value);
+    const newChecked = [...checked];
+
+    if (currentIndex === -1) {
+      newChecked.push(value);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+
+    setChecked(newChecked);
+  };
+
+  return (
+    <List dense className={classes.list}>
+      {scenes.map(scene => {
+        const labelId = uuid();
+        return (
+          <ListItem key={scene._id}>
+            <ListItemAvatar>
+              <Avatar className={classes.avatar}>
+                {scene.extension[0].toLocaleUpperCase()}
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              id={labelId}
+              primary={
+                <React.Fragment>
+                  <Typography component="span" variant="h6" color="textPrimary">
+                    {scene.fileName}
+                  </Typography>
+                </React.Fragment>
+              }
+              secondary={
+                <React.Fragment>
+                  <Typography
+                    component="div"
+                    variant="caption"
+                    className={classes.inline}
+                    color="textPrimary"
+                  >
+                    <b style={{ marginRight: "0.5rem" }}>Path</b>
+                    {scene.path}
+                  </Typography>
+                  <Typography
+                    component="div"
+                    variant="caption"
+                    className={classes.inline}
+                    color="textPrimary"
+                  >
+                    <b style={{ marginRight: "0.5rem" }}>Size</b>
+                    {normalizeSize(scene.size)}
+                  </Typography>
+                  {/* <Typography
+                    component="div"
+                    variant="caption"
+                    className={classes.inline}
+                    color="textPrimary"
+                  >
+                    <b style={{ marginRight: "0.5rem" }}>Date</b>
+                    {scene.date}
+                  </Typography> */}
+                </React.Fragment>
+              }
+            />
+            <ListItemSecondaryAction>
+              <Checkbox
+                edge="end"
+                color="primary"
+                onChange={handleToggle(scene)}
+                checked={checked.indexOf(scene) !== -1}
+                inputProps={{ "aria-labelledby": labelId }}
+              />
+            </ListItemSecondaryAction>
+          </ListItem>
+        );
+      })}
+    </List>
+  );
+}
+
 export default props => {
   const classes = useStyles();
+  const [scenes, setScenes] = React.useState([]);
+  const [isLoading, setIsLoading] = useToggle(false);
 
   return (
     <Paper className={classes.contentPaper}>
       <Grid container spacing={1}>
-        <Grid item xs={12} sm={12} md={9}>
-          <SearchBar />
+        <Grid item md={12} lg={9}>
+          <SearchBar skip={0} limit={10} setScenes={setScenes} />
           <Grid item>
-            {/* {users.map(user => (
-              <div key={uuid()}>
-                <Typography gutterBottom variant="h5" component="h2">
-                  {user.name}
-                </Typography>
-                <Typography variant="body2" color="textSecondary" component="p">
-                  Lizards are a widespread group of squamate reptiles, with over
-                  6,000 species, ranging across all continents except Antarctica
-                </Typography>
-              </div>
-            ))} */}
+            <SceneList scenes={scenes} />
           </Grid>
         </Grid>
-        <Grid item xs={12} sm={12} md={3}>
+        <Grid item md={12} lg={3}>
           <Paper className={classes.paper}>xs=12 sm=6</Paper>
         </Grid>
       </Grid>

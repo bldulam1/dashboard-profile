@@ -1,6 +1,21 @@
 const router = require("express").Router();
 const { Scene, SearchFolder } = require("../schemas/scene");
 
+router.get("/:project/:_skip/:_limit/:queryString(*)", async (req, res) => {
+  const { project, _skip, _limit, queryString } = req.params;
+  const skip = _skip * 1;
+  const limit = _limit * 1;
+
+  const query = JSON.parse(queryString);
+
+  const count_scenes = await Promise.all([
+    Scene.countDocuments(query),
+    Scene.find(query, null, { skip, limit })
+  ]);
+
+  res.send({ skip, limit, count: count_scenes[0], scenes: count_scenes[1] });
+});
+
 router.get("/:project/count", async (req, res) => {
   const count = await Scene.countDocuments({});
   res.send({

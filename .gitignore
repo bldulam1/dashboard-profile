@@ -1,3 +1,5 @@
 /main-server/node_modules
 /react/build
 /react/node_modules
+/helper/node_modules
+/main-server/tmp

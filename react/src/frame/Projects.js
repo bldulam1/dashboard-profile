@@ -34,7 +34,7 @@ const projects = [
   "Renault-Nissan",
   "Subaru SVS",
   "Subaru 77GHz",
-  "Honda NB2.0",
+  "Honda",
   "Toyota"
 ].sort();
 

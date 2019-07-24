@@ -31,7 +31,7 @@ function getProjectComponents(projectName) {
 
 const projects = [
   "Nissan L53H",
-  "Renault-Nissan",
+  "Renault Nissan",
   "Subaru SVS",
   "Subaru 77GHz",
   "Honda",
@@ -51,21 +51,21 @@ const projectComponents = new Set([
     "upload",
     "/:project/upload",
     Upload,
-    ["Nissan L53H", "Renault-Nissan"],
+    ["Nissan L53H", "Renault Nissan"],
     <CloudUploadIcon />
   ),
   Component(
     "maps",
     "/:project/maps",
     Maps,
-    ["Nissan L53H", "Renault-Nissan", "Subaru SVS"],
+    ["Nissan L53H", "Renault Nissan", "Subaru SVS"],
     <MapIcon />
   ),
   Component(
     "testCatalog",
     "/:project/testCatalog",
     TestCatalog,
-    ["Nissan L53H", "Renault-Nissan"],
+    ["Nissan L53H", "Renault Nissan"],
     <LocalLibraryIcon />
   )
 ]);

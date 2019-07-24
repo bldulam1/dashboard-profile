@@ -16,6 +16,7 @@ app.set('view options', { pretty: true });
 
 app.use("/search", require("./routes/Search"));
 app.use("/task", require("./routes/Task"));
+app.use("/tc", require("./routes/TestCatalog"));
 app.get("/", (req, res) => res.send("Hello World!"));
 
 mongoose.connect(`mongodb://localhost:27017/clarity`, {

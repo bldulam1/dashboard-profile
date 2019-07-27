@@ -5,7 +5,9 @@ const GRAY = "#707070";
 
 const useStyles = makeStyles(theme => ({
   root: {
-    display: "flex"
+    display: "flex",
+    flexDirection: "column",
+    minHeight: "100vh"
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -75,7 +77,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "row",
     paddingTop: "0.5rem",
     paddingBottom: "0.5rem",
-    cursor: "pointer",
+    cursor: "pointer"
   },
   drawerDivider: { backgroundColor: theme.palette.secondary.main },
   navBarGroupLabel: {
@@ -86,14 +88,26 @@ const useStyles = makeStyles(theme => ({
   navBarItemLabel: {
     textTransform: "capitalize"
   },
-  content: {
-    flexGrow: 1,
+  contentDrawerOpen: {
+    paddingLeft: drawerWidth,
+    paddingTop: 64,
+    display: "flex",
+    minHeight: '100vh',
+    minWidth: '100vh',
+    backgroundColor: GRAY
+  },
+  contentDrawerClose: {
+    paddingLeft: theme.spacing(9) + 1,
+    paddingTop: 64,
+    display: "flex",
+    minHeight: '100vh',
+    minWidth: '100vh',
     backgroundColor: GRAY
   },
   contentPaper: {
     margin: "1rem",
     padding: "1rem",
-    height: "100%"
+    width: '100%'
   },
   secondaryAvatar: {
     fontWeight: "bold",

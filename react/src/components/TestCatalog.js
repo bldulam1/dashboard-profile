@@ -1,4 +1,5 @@
 import React from "react";
+import uuid from "uuid";
 import clsx from "clsx";
 import PropTypes from "prop-types";
 import { lighten, makeStyles } from "@material-ui/core/styles";
@@ -17,7 +18,7 @@ import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
-import DeleteIcon from "@material-ui/icons/Delete";
+import BallotIcon from "@material-ui/icons/Ballot";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -27,6 +28,7 @@ import Select from "@material-ui/core/Select";
 import Axios from "axios";
 import { api_server } from "../environment/environment";
 import { ProjectContext } from "../context/Project.Context";
+import Download from "../clientExports/DCSchedule";
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -85,7 +87,7 @@ function EnhancedTableHead(props) {
         </TableCell>
         {headCols.map(col => (
           <TableCell
-            key={col.id}
+            key={uuid()}
             align={col.numeric ? "right" : "left"}
             padding={col.disablePadding ? "none" : "default"}
             sortDirection={orderBy === col.id ? order : false}
@@ -115,19 +117,14 @@ EnhancedTableHead.propTypes = {
 
 const useToolbarStyles = makeStyles(theme => ({
   root: {
+    width: "100%",
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(1)
   },
-  highlight:
-    theme.palette.type === "light"
-      ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
-        }
-      : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark
-        },
+  highlight: {
+    color: theme.palette.text.primary,
+    backgroundColor: theme.palette.secondary.main
+  },
   spacer: {
     flex: "1 1 100%"
   },
@@ -141,7 +138,7 @@ const useToolbarStyles = makeStyles(theme => ({
 
 const EnhancedTableToolbar = props => {
   const classes = useToolbarStyles();
-  const { numSelected } = props;
+  const { numSelected, selected } = props;
 
   return (
     <Toolbar
@@ -156,18 +153,14 @@ const EnhancedTableToolbar = props => {
           </Typography>
         ) : (
           <Typography variant="h6" id="tableTitle">
-            Nutrition
+            Test Catalog
           </Typography>
         )}
       </div>
       <div className={classes.spacer} />
       <div className={classes.actions}>
         {numSelected > 0 ? (
-          <Tooltip title="Delete">
-            <IconButton aria-label="Delete">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
+          <Download selected={selected}/>
         ) : (
           <Tooltip title="Filter list">
             <IconButton aria-label="Filter list">
@@ -186,22 +179,24 @@ EnhancedTableToolbar.propTypes = {
 
 const useStyles = makeStyles(theme => ({
   root: {
-    width: "100%",
-    marginTop: theme.spacing(3)
-  },
-  paper: {
-    margin: "1rem",
-    padding: "1rem"
+    maxWidth: "100%"
+    // marginTop: theme.spacing(3)
   },
   table: {
+    tableLayout: "fixed",
     minWidth: 750
   },
   tableWrapper: {
     overflowX: "auto"
+    // maxWidth: (window.innerWidth - drawerWidth) * 0.95
   },
   formControl: {
     margin: theme.spacing(1),
     minWidth: 120
+  },
+  paper: {
+    margin: "1rem",
+    padding: "1rem"
   }
 }));
 
@@ -213,12 +208,15 @@ export default () => {
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(true);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(25);
   const [feature, setFeature] = React.useState("");
   const [sheetOptions, setSheetOptions] = React.useState([]);
+  const [selectedSheet, setSelectedSheet] = React.useState([]);
   const [headerOptions, setHeaderOptions] = React.useState([]);
-  const [generalHeaders, setGeneralHeaders] = React.useState([]);
-  const [query, setQuery] = React.useState({ project: activeProject });
+  const [selHeadersOption, setSelHeadersOption] = React.useState([]);
+  const [query, setQuery] = React.useState({
+    $and: [{ project: activeProject }]
+  });
   const [bodyRows, setBodyRows] = React.useState([]);
   const [rowsLen, setRowsLen] = React.useState(0);
   const [headCols, setHeadCols] = React.useState([]);
@@ -230,10 +228,11 @@ export default () => {
     fetchData();
   }, []);
 
-  function fetchData(_page, _rowsPerPage) {
-    const queryString = JSON.stringify(query);
-    const p = _page  === null ? page : _page;
+  function fetchData(_page, _rowsPerPage, _query) {
+    const p = _page === null ? page : _page;
     const rpp = _rowsPerPage ? _rowsPerPage : rowsPerPage;
+
+    const queryString = JSON.stringify(_query ? _query : query);
     Axios.get(
       `${api_server}/tc/${activeProject}/${p}/${rpp}/${queryString}`
     ).then(res => {
@@ -249,8 +248,8 @@ export default () => {
           const index = rows.findIndex(row => row[key]);
           return createHeader(
             key,
-            !isNaN(rows[index][key]),
-            ["Record ID"].includes(key),
+            index >= 0 && !isNaN(rows[index][key]),
+            false,
             key
           );
         });
@@ -268,19 +267,19 @@ export default () => {
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
-      const newSelecteds = bodyRows.map(n => n.name);
+      const newSelecteds = bodyRows.map(n => n._id);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   }
 
-  function handleClick(event, name) {
-    const selectedIndex = selected.indexOf(name);
+  function handleClick(event, id) {
+    const selectedIndex = selected.indexOf(id);
     let newSelected = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -297,7 +296,7 @@ export default () => {
 
   function handleChangePage(event, newPage) {
     setPage(newPage);
-    fetchData(newPage)
+    fetchData(newPage);
   }
 
   function handleChangeRowsPerPage(event) {
@@ -310,22 +309,43 @@ export default () => {
     setDense(event.target.checked);
   }
 
-  function handleChangeFeature(event) {
+  async function handleChangeFeature(event) {
     const newFeature = event.target.value;
-    setFeature(newFeature);
-    Axios.get(
-      `${api_server}/tc/${activeProject}/unique/feature/${newFeature}`
-    ).then(res => {
-      setHeaderOptions(res.data);
-      const _allHeaders = res.data.reduce(
-        (acc, curr) => [...new Set([...acc, ...curr.headers])].sort(),
-        []
-      );
+    const newQuery = {
+      $and: [
+        { project: activeProject },
+        { sheetName: { $regex: newFeature, $options: "i" } }
+      ]
+    };
+    setQuery(newQuery);
+    fetchData(page, rowsPerPage, newQuery);
 
-      setGeneralHeaders(_allHeaders);
-    });
+    setFeature(newFeature);
+    const { data } = await Axios.get(
+      `${api_server}/tc/${activeProject}/unique/feature/${newFeature}`
+    );
+
+    setHeaderOptions(data);
+    // const _allHeaders = data.reduce(
+    //   (acc, curr) => [...new Set([...acc, ...curr.headers])].sort(),
+    //   []
+    // );
+    // setGeneralHeaders(_allHeaders);
+
+    // console.log(_allHeaders)
   }
 
+  async function handleChangeSheet(event) {
+    const _selectedSheet = event.target.value;
+
+    setSelectedSheet(_selectedSheet);
+
+    const newQuery = {
+      $and: [{ project: activeProject }, { sheetName: _selectedSheet }]
+    };
+    setQuery(newQuery);
+    fetchData(page, rowsPerPage, newQuery);
+  }
   const isSelected = name => selected.indexOf(name) !== -1;
 
   // const emptyRows =
@@ -347,13 +367,13 @@ export default () => {
         />
         <form className={classes.root} autoComplete="off">
           <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="age-simple">Feature</InputLabel>
+            <InputLabel htmlFor="feature-input">Feature</InputLabel>
             <Select
               value={feature}
               onChange={handleChangeFeature}
               inputProps={{
-                name: "age",
-                id: "age-simple"
+                name: "feature",
+                id: "feature-input"
               }}
             >
               {sheetOptions.map(sheetOption => (
@@ -363,9 +383,59 @@ export default () => {
               ))}
             </Select>
           </FormControl>
+          <FormControl className={classes.formControl} disabled={!feature}>
+            <InputLabel htmlFor="sheet input">Sheet</InputLabel>
+            <Select
+              value={selectedSheet}
+              onChange={handleChangeSheet}
+              inputProps={{
+                name: "sheetname",
+                id: "sheet-input"
+              }}
+            >
+              {headerOptions.map(headerOption => (
+                <MenuItem
+                  key={"ho-" + headerOption.sheetName}
+                  value={headerOption.sheetName}
+                >
+                  {headerOption.sheetName.replace(/_/g, " ")}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {/* {headCols.map(hc=>(
+            <div>{hc.id} </div>
+          ))} */}
+
+          {headCols.map(col => (
+            <FormControl
+              className={classes.formControl}
+              disabled={!feature}
+              key={uuid()}
+            >
+              <InputLabel htmlFor={"col-" + col}>{col.id}</InputLabel>
+              <Select
+                value={selectedSheet}
+                onChange={handleChangeSheet}
+                inputProps={{
+                  name: "col-" + col,
+                  id: "sheet-col" + col
+                }}
+              >
+                {/* {headerOptions.map(headerOption => (
+                  <MenuItem key={"col-" + col.id} value={col.id}>
+                    {col.id.replace(/_/g, " ")}
+                  </MenuItem>
+                ))} */}
+              </Select>
+            </FormControl>
+          ))}
         </form>
 
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          selected={bodyRows.filter(row=>selected.includes(row._id))}
+        />
         <div className={classes.tableWrapper}>
           <Table
             className={classes.table}
@@ -382,15 +452,15 @@ export default () => {
               headCols={headCols}
             />
             <TableBody>
-              {stableSort(bodyRows, getSorting(order, orderBy))
-                .map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
+              {stableSort(bodyRows, getSorting(order, orderBy)).map(
+                (row, index) => {
+                  const isItemSelected = isSelected(row._id);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={event => handleClick(event, row.name)}
+                      onClick={event => handleClick(event, row._id)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
@@ -410,7 +480,7 @@ export default () => {
                             component="th"
                             id={labelId}
                             scope="row"
-                            padding="none"
+                            padding="default"
                             key={`${col.id}-${row._id}`}
                           >
                             {row[col.id]}
@@ -423,7 +493,8 @@ export default () => {
                       )}
                     </TableRow>
                   );
-                })}
+                }
+              )}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 49 * emptyRows }}>
                   <TableCell colSpan={6} />
@@ -433,7 +504,7 @@ export default () => {
           </Table>
         </div>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={[5, 10, 25, 50, 75, 100]}
           component="div"
           count={rowsLen}
           rowsPerPage={rowsPerPage}

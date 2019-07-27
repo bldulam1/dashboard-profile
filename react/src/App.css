@@ -1,9 +1,16 @@
-html {
-  height: 100%;
-  background-color: #707070;
+/* html {
+  height: 100vh;
+  width: 100vw;
 }
 
 body {
-  /* margin: 0; */
-  /* height: 100%; */
+  height: 100%;
+  background-color: #707070;
+  margin: 0;
+} */
+
+body,
+html {
+  padding: 0;
+  margin: 0;
 }

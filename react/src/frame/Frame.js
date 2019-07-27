@@ -83,8 +83,7 @@ export default () => {
         <ProjectComponents open={open} activeProject={activeProject} />
         <SettingsComponents open={open} activeProject={activeProject} />
       </Drawer>
-      <main className={classes.content}>
-        <div className={classes.toolbar} />
+      <main className={open ? classes.contentDrawerOpen : classes.contentDrawerClose}>
         <ProjectContext.Provider value={{ activeProject }}>
           {getProjectComponents(activeProject).map(comp => (
             <Route
@@ -189,7 +188,7 @@ function ProjectSelection(props) {
             setActiveProject={setActiveProject}
           />
         ))}
-      {!open && <Divider className={classes.drawerDivider} variant="middle" />}
+      {/* {!open && <Divider className={classes.drawerDivider} variant="middle" />} */}
     </div>
   );
 }
@@ -232,7 +231,7 @@ function ProjectComponents(props) {
           </div>
         </Link>
       ))}
-      {!open && <Divider className={classes.drawerDivider} variant="middle" />}
+      {/* {!open && <Divider className={classes.drawerDivider} variant="middle" />} */}
     </div>
   );
 }

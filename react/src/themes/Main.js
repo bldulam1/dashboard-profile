@@ -2,8 +2,8 @@ import { createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
   typography: {
-    fontFamily: "'Barlow','Raleway','Roboto'",
-    // useNextVariants: true,
+    fontFamily: "'Raleway','Barlow','Roboto'",
+    useNextVariants: true,
   },
   palette: {
     primary: {

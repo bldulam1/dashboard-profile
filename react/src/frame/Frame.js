@@ -9,7 +9,6 @@ import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import Avatar from "@material-ui/core/Avatar";
 import Tooltip from "@material-ui/core/Tooltip";
-import Divider from "@material-ui/core/Divider";
 
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -83,7 +82,11 @@ export default () => {
         <ProjectComponents open={open} activeProject={activeProject} />
         <SettingsComponents open={open} activeProject={activeProject} />
       </Drawer>
-      <main className={open ? classes.contentDrawerOpen : classes.contentDrawerClose}>
+      <main
+        className={
+          open ? classes.contentDrawerOpen : classes.contentDrawerClose
+        }
+      >
         <ProjectContext.Provider value={{ activeProject }}>
           {getProjectComponents(activeProject).map(comp => (
             <Route
@@ -116,6 +119,7 @@ function ProjectNavItem(props) {
     toggleList,
     listOpen,
     isPrimary,
+    activeProject,
     setActiveProject
   } = props;
   const classes = useStyles();
@@ -123,11 +127,13 @@ function ProjectNavItem(props) {
     toggleList();
     !isPrimary && setActiveProject(project);
   };
-
   return (
-    <div
+    <Link
+      to={activeProject !== project ? `/${project}/Dashboard` : "#"}
       className={classes.navBarItem}
       style={{
+        textDecoration: "none",
+        color: "#E0C1CB",
         justifyContent: open ? "left" : "center",
         paddingLeft: open ? "1rem" : "0rem"
       }}
@@ -150,7 +156,7 @@ function ProjectNavItem(props) {
           {listOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </span>
       )}
-    </div>
+    </Link>
   );
 }
 
@@ -175,6 +181,7 @@ function ProjectSelection(props) {
         toggleList={toggleList}
         listOpen={listOpen}
         isPrimary={true}
+        activeProject={activeProject}
         setActiveProject={setActiveProject}
       />
       {listOpen &&

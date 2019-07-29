@@ -35,7 +35,8 @@ const projects = [
   "Subaru SVS",
   "Subaru 77GHz",
   "Honda",
-  "Toyota"
+  "Toyota",
+  "Hello"
 ].sort();
 
 const projectComponents = new Set([
@@ -62,8 +63,8 @@ const projectComponents = new Set([
     <MapIcon />
   ),
   Component(
-    "testCatalog",
-    "/:project/testCatalog",
+    "test catalog",
+    "/:project/test-catalog",
     TestCatalog,
     ["Nissan L53H", "Renault Nissan"],
     <LocalLibraryIcon />

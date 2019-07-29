@@ -2,7 +2,7 @@ import React from "react";
 import uuid from "uuid";
 import clsx from "clsx";
 import PropTypes from "prop-types";
-import { lighten, makeStyles } from "@material-ui/core/styles";
+import { makeStyles, fade } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -18,17 +18,38 @@ import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
-import BallotIcon from "@material-ui/icons/Ballot";
+import SearchIcon from "@material-ui/icons/Search";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import InputBase from "@material-ui/core/InputBase";
 
 import Axios from "axios";
 import { api_server } from "../environment/environment";
 import { ProjectContext } from "../context/Project.Context";
 import Download from "../clientExports/DCSchedule";
+import { debounce } from "../hooks/my-library";
+
+export function getHeaders(rows) {
+  return rows
+    .map(row =>
+      Object.keys(row).filter(
+        key => !["sheetName", "_id", "__v", "project"].includes(key)
+      )
+    )
+    .reduce((acc, curr) => [...new Set([...acc, ...curr])], [])
+    .map(key => {
+      const index = rows.findIndex(row => row[key]);
+      return createHeader(
+        key,
+        index >= 0 && !isNaN(rows[index][key]),
+        false,
+        key
+      );
+    });
+}
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -160,7 +181,7 @@ const EnhancedTableToolbar = props => {
       <div className={classes.spacer} />
       <div className={classes.actions}>
         {numSelected > 0 ? (
-          <Download selected={selected}/>
+          <Download selected={selected} />
         ) : (
           <Tooltip title="Filter list">
             <IconButton aria-label="Filter list">
@@ -179,12 +200,12 @@ EnhancedTableToolbar.propTypes = {
 
 const useStyles = makeStyles(theme => ({
   root: {
-    maxWidth: "100%"
+    width: '100%'
     // marginTop: theme.spacing(3)
   },
   table: {
-    tableLayout: "fixed",
-    minWidth: 750
+    // tableLayout: "fixed",
+    minWidth: '100%'
   },
   tableWrapper: {
     overflowX: "auto"
@@ -197,8 +218,69 @@ const useStyles = makeStyles(theme => ({
   paper: {
     margin: "1rem",
     padding: "1rem"
+  },
+  search: {
+    display: "flex",
+    flexDirection: "row",
+    verticalAlign: "middle",
+    position: "relative",
+
+    border: `0.05rem solid ${theme.palette.primary.main}`,
+    borderRadius: "2rem",
+    "&:hover": {
+      backgroundColor: fade("#707070", 0.1)
+    },
+    marginLeft: 0,
+    marginBottom: "1rem",
+    width: "100%"
+  },
+  input: {
+    width: "100%"
   }
 }));
+
+function SimpleSearch(props) {
+  const { setSearchValue, dense, fetchData } = props;
+  const { activeProject } = React.useContext(ProjectContext);
+  const classes = useStyles();
+  const [searchString, setSearchString] = React.useState("");
+  let inDebounce;
+
+  function onSearchStringChange(search_string) {
+    const regex = search_string.split(/[\s,]+/).join("|");
+    const query = {
+      $and: [
+        { project: activeProject },
+        {
+          "Record ID": { $regex: regex, $options: "i" }
+        }
+      ]
+    };
+
+    setSearchString(search_string);
+    setSearchValue(query);
+
+    clearTimeout(inDebounce);
+    inDebounce = setTimeout(() => {
+      fetchData(0, null, query);
+    }, 750);
+  }
+
+  return (
+    <div className={classes.search}>
+      <IconButton aria-label="Search" size={dense ? "small" : "medium"}>
+        <SearchIcon color="primary" aria-label="Search" />
+      </IconButton>
+      <InputBase
+        className={classes.input}
+        placeholder="Search"
+        inputProps={{ "aria-label": "Search" }}
+        value={searchString}
+        onChange={event => onSearchStringChange(event.target.value)}
+      />
+    </div>
+  );
+}
 
 export default () => {
   const classes = useStyles();
@@ -208,27 +290,22 @@ export default () => {
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(true);
-  const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const [rowsPerPage, setRowsPerPage] = React.useState(15);
   const [feature, setFeature] = React.useState("");
   const [sheetOptions, setSheetOptions] = React.useState([]);
   const [selectedSheet, setSelectedSheet] = React.useState([]);
   const [headerOptions, setHeaderOptions] = React.useState([]);
-  const [selHeadersOption, setSelHeadersOption] = React.useState([]);
+  // const [selHeadersOption, setSelHeadersOption] = React.useState([]);
   const [query, setQuery] = React.useState({
     $and: [{ project: activeProject }]
   });
   const [bodyRows, setBodyRows] = React.useState([]);
   const [rowsLen, setRowsLen] = React.useState(0);
   const [headCols, setHeadCols] = React.useState([]);
+  const [searchValue, setSearchValue] = React.useState("");
 
-  React.useEffect(() => {
-    Axios.get(`${api_server}/tc/${activeProject}/unique/sheetName`).then(res =>
-      setSheetOptions(res.data)
-    );
-    fetchData();
-  }, []);
 
-  function fetchData(_page, _rowsPerPage, _query) {
+  const fetchData = (_page, _rowsPerPage, _query)=> {
     const p = _page === null ? page : _page;
     const rpp = _rowsPerPage ? _rowsPerPage : rowsPerPage;
 
@@ -237,28 +314,21 @@ export default () => {
       `${api_server}/tc/${activeProject}/${p}/${rpp}/${queryString}`
     ).then(res => {
       const { rows, count } = res.data;
-      let header = rows
-        .map(row =>
-          Object.keys(row).filter(
-            key => !["sheetName", "_id", "__v", "project"].includes(key)
-          )
-        )
-        .reduce((acc, curr) => [...new Set([...acc, ...curr])], [])
-        .map(key => {
-          const index = rows.findIndex(row => row[key]);
-          return createHeader(
-            key,
-            index >= 0 && !isNaN(rows[index][key]),
-            false,
-            key
-          );
-        });
+      let headers = getHeaders(rows);
 
-      setHeadCols(header);
+      setHeadCols(headers);
       setBodyRows(rows);
       setRowsLen(count);
     });
   }
+
+  React.useEffect(() => {
+    Axios.get(`${api_server}/tc/${activeProject}/unique/sheetName`).then(res =>
+      setSheetOptions(res.data)
+    );
+    fetchData();
+  }, []);
+
   function handleRequestSort(event, property) {
     const isDesc = orderBy === property && order === "desc";
     setOrder(isDesc ? "asc" : "desc");
@@ -296,12 +366,12 @@ export default () => {
 
   function handleChangePage(event, newPage) {
     setPage(newPage);
-    fetchData(newPage);
+    fetchData(newPage,null,searchValue);
   }
 
   function handleChangeRowsPerPage(event) {
     setRowsPerPage(+event.target.value);
-    fetchData(0, event.target.value);
+    fetchData(0, event.target.value, searchValue);
     setPage(0);
   }
 
@@ -326,13 +396,6 @@ export default () => {
     );
 
     setHeaderOptions(data);
-    // const _allHeaders = data.reduce(
-    //   (acc, curr) => [...new Set([...acc, ...curr.headers])].sort(),
-    //   []
-    // );
-    // setGeneralHeaders(_allHeaders);
-
-    // console.log(_allHeaders)
   }
 
   async function handleChangeSheet(event) {
@@ -346,11 +409,16 @@ export default () => {
     setQuery(newQuery);
     fetchData(page, rowsPerPage, newQuery);
   }
+
   const isSelected = name => selected.indexOf(name) !== -1;
 
-  // const emptyRows =
-  //   rowsPerPage - Math.min(rowsPerPage, bodyRows.length - page * rowsPerPage);
-  const emptyRows = 0;
+  // const totalHeaderWidth =
+  //   headCols
+  //     .map(col => (col.id === "Record ID" ? 15 : col.id.length))
+  //     .reduce((sum, len) => sum + len, 0) + 2;
+  // const headersLen = [2, ...headCols.map(col => col.id.length)].map(
+  //   col => col / totalHeaderWidth
+  // );
 
   return (
     <div className={classes.root}>
@@ -365,7 +433,13 @@ export default () => {
           }
           label="Dense padding"
         />
-        <form className={classes.root} autoComplete="off">
+        <SimpleSearch
+          setSearchValue={setSearchValue}
+          dense={dense}
+          fetchData={fetchData}
+        />
+
+        {/* <form className={classes.root} autoComplete="off">
           <FormControl className={classes.formControl}>
             <InputLabel htmlFor="feature-input">Feature</InputLabel>
             <Select
@@ -403,10 +477,6 @@ export default () => {
               ))}
             </Select>
           </FormControl>
-          {/* {headCols.map(hc=>(
-            <div>{hc.id} </div>
-          ))} */}
-
           {headCols.map(col => (
             <FormControl
               className={classes.formControl}
@@ -421,20 +491,14 @@ export default () => {
                   name: "col-" + col,
                   id: "sheet-col" + col
                 }}
-              >
-                {/* {headerOptions.map(headerOption => (
-                  <MenuItem key={"col-" + col.id} value={col.id}>
-                    {col.id.replace(/_/g, " ")}
-                  </MenuItem>
-                ))} */}
-              </Select>
+              />
             </FormControl>
           ))}
-        </form>
+        </form> */}
 
         <EnhancedTableToolbar
           numSelected={selected.length}
-          selected={bodyRows.filter(row=>selected.includes(row._id))}
+          selected={bodyRows.filter(row => selected.includes(row._id))}
         />
         <div className={classes.tableWrapper}>
           <Table
@@ -442,6 +506,12 @@ export default () => {
             aria-labelledby="tableTitle"
             size={dense ? "small" : "medium"}
           >
+            {/* <colgroup>
+              {headersLen.map(header => (
+                <col key={uuid()} style={{ width: `${header * 100}%` }} />
+              ))}
+            </colgroup> */}
+
             <EnhancedTableHead
               numSelected={selected.length}
               order={order}
@@ -486,8 +556,11 @@ export default () => {
                             {row[col.id]}
                           </TableCell>
                         ) : (
-                          <TableCell align="right" key={`${col.id}-${row._id}`}>
-                            {row[col.id] ? row[col.id] : null}
+                          <TableCell
+                            align={col.numeric ? "right" : "left"}
+                            key={`${col.id}-${row._id}`}
+                          >
+                            {row[col.id] !== null ? row[col.id] : null}
                           </TableCell>
                         )
                       )}
@@ -495,16 +568,11 @@ export default () => {
                   );
                 }
               )}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 49 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </div>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50, 75, 100]}
+          rowsPerPageOptions={[5, 10, 15, 20, 25, 50, 75, 100]}
           component="div"
           count={rowsLen}
           rowsPerPage={rowsPerPage}

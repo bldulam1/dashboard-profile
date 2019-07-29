@@ -3,29 +3,27 @@ import Workbook from "react-excel-workbook";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import BallotIcon from "@material-ui/icons/Ballot";
-
-const data1 = [
-  {
-    foo: "123",
-    bar: "456",
-    baz: "789"
-  },
-  {
-    foo: "abc",
-    bar: "dfg",
-    baz: "hij"
-  },
-  {
-    foo: "aaa",
-    bar: "bbb",
-    baz: "ccc"
-  }
-];
+import { getHeaders } from "../components/TestCatalog";
 
 export default params => {
   const { selected } = params;
-  
-  console.log(selected)
+  const headers = [
+    "Scenario Picture",
+    "#",
+    "Priority",
+    "Status",
+    "Scenario",
+    ...getHeaders(selected)
+      .map(h => h.id)
+      .filter(h => !["Serie", "Pattern"].includes(h)),
+    "Tg Type",
+    "Note",
+    "Data Volume",
+    "DOORS",
+    "JIRA",
+    "PTC"
+  ];
+  console.log(headers);
   return (
     <Workbook
       filename="example.xlsx"
@@ -37,9 +35,14 @@ export default params => {
         </Tooltip>
       }
     >
-      <Workbook.Sheet data={data1} name="Sheet A">
-        <Workbook.Column label="Foo" value="foo" />
-        <Workbook.Column label="Bar" value="bar" />
+      <Workbook.Sheet data={selected} name="Sheet A">
+        {headers.map(header => (
+          <Workbook.Column
+            key={`key-${header}`}
+            label={header}
+            value={header}
+          />
+        ))}
       </Workbook.Sheet>
     </Workbook>
   );

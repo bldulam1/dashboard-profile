@@ -36,7 +36,6 @@ const projects = [
   "Subaru 77GHz",
   "Honda",
   "Toyota",
-  "Hello"
 ].sort();
 
 const projectComponents = new Set([
@@ -52,7 +51,7 @@ const projectComponents = new Set([
     "upload",
     "/:project/upload",
     Upload,
-    ["Nissan L53H", "Renault Nissan"],
+    projects,
     <CloudUploadIcon />
   ),
   Component(

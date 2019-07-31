@@ -3,3 +3,4 @@
 /react/node_modules
 /helper/node_modules
 /main-server/tmp
+/main-server/%HOMEDRIVE%%HOMEPATH%

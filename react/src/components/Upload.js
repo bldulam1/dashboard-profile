@@ -1,7 +1,7 @@
 import React from "react";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from "@material-ui/core/Typography";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -19,10 +19,32 @@ import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import AddIcon from '@material-ui/icons/Add';
+import EditIcon from '@material-ui/icons/Edit';
+import UpIcon from '@material-ui/icons/KeyboardArrowUp';
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import DeleteIcon from "@material-ui/icons/Delete";
+import TextField from "@material-ui/core/TextField";
+import IconButton from "@material-ui/core/IconButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import { useDropzone } from "react-dropzone";
+
+import PropTypes from 'prop-types';
+import clsx from 'clsx';
+import SwipeableViews from 'react-swipeable-views';
+import AppBar from '@material-ui/core/AppBar';
+import Zoom from '@material-ui/core/Zoom';
+import Fab from '@material-ui/core/Fab';
+import { green } from '@material-ui/core/colors';
+import Box from '@material-ui/core/Box';
+
+import uuid from "uuid";
+
+
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -53,7 +75,7 @@ const useStyles = makeStyles(theme => ({
   mainGrid: {
     height: "100%",
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   },
   squareAvatar: {
     background: `linear-gradient(to right bottom, ${
@@ -82,6 +104,27 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     justifyContent: "center",
     flexDirection: "column"
+  },
+  formControl: {
+    width: "100%"
+  },
+  tabPanel: {
+    backgroundColor: theme.palette.background.paper,
+    width: '100%',
+    position: 'relative',
+    minHeight: 200,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+  },
+  fabGreen: {
+    color: theme.palette.common.white,
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[600],
+    },
   }
 }));
 
@@ -104,8 +147,7 @@ function getStatusValue(progress) {
 
 export default props => {
   const classes = useStyles();
-
-  const files = [
+  const [files, setFiles] = React.useState([
     File("asdfasdf.cvw", 0.53),
     File("asdfasdf.cvw", 0),
     File("asdfasdf.dat", 0.4),
@@ -116,7 +158,7 @@ export default props => {
     File("asdfasdf.dat", 0),
     File("asdfasdf.cvw", 0.3),
     File("asdfasdf.cvw", -1)
-  ];
+  ]);
 
   return (
     <Paper className={classes.contentPaper}>
@@ -170,6 +212,7 @@ function UploadStatus(props) {
           .filter(file => getStatusValue(file.progress) === activeStatus)
           .map(file => (
             <Tooltip
+              key={uuid()}
               title={`${(100 * file.progress).toFixed(2)}%`}
               placement="right-end"
             >
@@ -188,6 +231,13 @@ function UploadStatus(props) {
                     />
                   }
                 />
+                {!activeStatus && (
+                  <ListItemSecondaryAction>
+                    <IconButton edge="end" aria-label="delete">
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                )}
               </ListItem>
             </Tooltip>
           ))}
@@ -196,41 +246,50 @@ function UploadStatus(props) {
   );
 }
 
+function MetaData() {
+  return <div>Meta Data</div>;
+}
+
 function UploadInput() {
   const classes = useStyles();
+  const [tags, setTags] = React.useState([]);
   const [state, setState] = React.useState({
     namingConvention: true,
-    ampCheck: false
+    ampCheck: false,
+    addMetaData: false,
+    outputPath: false
   });
 
   const handleChange = name => event => {
     setState({ ...state, [name]: event.target.checked });
   };
+  const addNewTag = tag => setTags([...tags, tag]);
 
-  const { namingConvention, ampCheck } = state;
+  const { namingConvention, ampCheck, outputPath, addMetaData } = state;
+  const { getRootProps, getInputProps } = useDropzone();
 
   return (
     <Grid item xs={12} md={6} className={classes.mainGrid}>
       <Typography variant="h6" color="primary">
         Upload Input
       </Typography>
-      <Card className={classes.dropZoneOuter} onClick={() => alert("Hello")}>
-        <div className={classes.dropZoneInner}>
-          <Typography variant="h3">DROP</Typography>
-          <Typography variant="h2">YOUR FILES</Typography>
-          <Typography variant="h3">HERE</Typography>
 
-          <Typography
-            variant="h6"
-            style={{ marginTop: "3rem" }}
-            color="textPrimary"
-          >
-            OR CLICK TO NAVIGATE
+      <Card className={classes.dropZoneOuter}>
+        <div className={classes.dropZoneInner} {...getRootProps()}>
+          <input
+            {...getInputProps({
+              onDrop: event => console.log(event)
+            })}
+          />
+          <Typography variant="h6">
+            Drop some files here, or click to select files
           </Typography>
         </div>
       </Card>
 
-      <div>
+      <FloatingActionButtonZoom style={{margin: 'auto'}}/>
+
+      {/* <div>
         <FormControl component="fieldset" className={classes.formControl}>
           <FormLabel component="legend">Options</FormLabel>
           <FormGroup>
@@ -245,6 +304,35 @@ function UploadInput() {
               }
               label="Follow Naming Convention"
             />
+            {namingConvention && (
+              <NamingConvention style={{ marginBottom: "1rem" }} />
+            )}
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={outputPath}
+                  onChange={handleChange("outputPath")}
+                  value="outputPath"
+                />
+              }
+              label="Specify Storage Location"
+            />
+            {outputPath && <StorageLocation />}
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={addMetaData}
+                  onChange={handleChange("addMetaData")}
+                  value="addMetaData"
+                />
+              }
+              label="Add Meta Data"
+            />
+            {addMetaData && <MetaData addNewTag={addNewTag} />}
 
             <FormControlLabel
               control={
@@ -259,11 +347,7 @@ function UploadInput() {
             />
           </FormGroup>
         </FormControl>
-      </div>
-
-      {namingConvention && (
-        <NamingConvention style={{ marginBottom: "1rem" }} />
-      )}
+      </div> */}
 
       <section style={{ alignSelf: "flex-end" }}>
         <Button color="secondary" variant="contained">
@@ -274,6 +358,141 @@ function UploadInput() {
         </Button>
       </section>
     </Grid>
+  );
+}
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <Typography
+      component="div"
+      role="tabpanel"
+      hidden={value !== index}
+      id={`action-tabpanel-${index}`}
+      aria-labelledby={`action-tab-${index}`}
+      {...other}
+    >
+      <Box p={3}>{children}</Box>
+    </Typography>
+  );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.any.isRequired,
+  value: PropTypes.any.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `action-tab-${index}`,
+    'aria-controls': `action-tabpanel-${index}`,
+  };
+}
+
+
+function FloatingActionButtonZoom() {
+  const classes = useStyles();
+  const theme = useTheme();
+  const [value, setValue] = React.useState(0);
+
+  function handleChange(event, newValue) {
+    setValue(newValue);
+  }
+
+  function handleChangeIndex(index) {
+    setValue(index);
+  }
+
+  const transitionDuration = {
+    enter: theme.transitions.duration.enteringScreen,
+    exit: theme.transitions.duration.leavingScreen,
+  };
+
+  const fabs = [
+    {
+      color: 'primary',
+      className: classes.fab,
+      icon: <AddIcon />,
+      label: 'Add',
+    },
+    {
+      color: 'secondary',
+      className: classes.fab,
+      icon: <EditIcon />,
+      label: 'Edit',
+    },
+    {
+      color: 'inherit',
+      className: clsx(classes.fab, classes.fabGreen),
+      icon: <UpIcon />,
+      label: 'Expand',
+    },
+  ];
+
+  return (
+    <div className={classes.tabPanel}>
+      <AppBar position="static" color="default">
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="fullWidth"
+          aria-label="action tabs example"
+        >
+          <Tab label="Item One" {...a11yProps(0)} />
+          <Tab label="Item Two" {...a11yProps(1)} />
+          <Tab label="Item Three" {...a11yProps(2)} />
+        </Tabs>
+      </AppBar>
+      <SwipeableViews
+        axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
+        index={value}
+        onChangeIndex={handleChangeIndex}
+      >
+        <TabPanel value={value} index={0} dir={theme.direction}>
+          Item One
+        </TabPanel>
+        <TabPanel value={value} index={1} dir={theme.direction}>
+          Item Two
+        </TabPanel>
+        <TabPanel value={value} index={2} dir={theme.direction}>
+          Item Three
+        </TabPanel>
+      </SwipeableViews>
+      {fabs.map((fab, index) => (
+        <Zoom
+          key={fab.color}
+          in={value === index}
+          timeout={transitionDuration}
+          style={{
+            transitionDelay: `${value === index ? transitionDuration.exit : 0}ms`,
+          }}
+          unmountOnExit
+        >
+          <Fab aria-label={fab.label} className={fab.className} color={fab.color}>
+            {fab.icon}
+          </Fab>
+        </Zoom>
+      ))}
+    </div>
+  );
+}
+
+function StorageLocation() {
+  return (
+    <TextField
+      label="Storage Location"
+      id="simple-start-adornment"
+      // className={clsx(classes.margin, classes.textField)}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">V:\JP01\DataLake\</InputAdornment>
+        )
+      }}
+    />
   );
 }
 
@@ -339,22 +558,23 @@ function NamingConvention() {
   return (
     <React.Fragment>
       <FormControl className={classes.formControl}>
-        <InputLabel htmlFor="age-simple">Naming Convention</InputLabel>
+        <InputLabel htmlFor="naming-convention">Naming Convention</InputLabel>
         <Select
           value={selectedNamingConvention}
           onChange={handleChange}
           inputProps={{
             name: "age",
-            id: "age-simple"
+            id: "naming-convention"
           }}
         >
           {namingConventions.map(nc => (
-            <MenuItem value={nc.name}>{nc.name}</MenuItem>
+            <MenuItem key={"nc-" + nc.name} value={nc.name}>
+              {nc.name}
+            </MenuItem>
           ))}
         </Select>
         <FormHelperText>
-          {" "}
-          Sample: {sampleNamingConvention(namingConventions[0])}
+          Sample: {sampleNamingConvention(namingConventions[1])}
         </FormHelperText>
       </FormControl>
       <div>

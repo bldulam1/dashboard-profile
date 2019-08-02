@@ -19,6 +19,9 @@ import MetaData from "./UploadInput/MetaData";
 import NamingConvention from "./UploadInput/NamingConvention";
 import UploadSummary from "./UploadInput/UploadSummary";
 import StorageLocation from "./UploadInput/StorageLocation";
+import { Checkbox, FormControlLabel } from "@material-ui/core";
+import { UploadContext } from "../../context/Upload.Context";
+import CustomDropzone from "./Dropzone/CustomDropzone";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -101,10 +104,25 @@ const useStyles = makeStyles(theme => ({
     }
   }
 }));
+
+function UploadFile({ lastModifiedDate, name, size }) {
+  const splits = name.split(".");
+  return {
+    name,
+    lastModifiedDate,
+    size,
+    type: splits[splits.length - 1],
+    progress: 0
+  };
+}
+
 export default params => {
   const classes = useStyles();
-
-  const { getRootProps, getInputProps } = useDropzone();
+  const { files, setFiles } = React.useContext(UploadContext);
+  const onDrop = React.useCallback(selectedFiles => {
+    setFiles([...files, ...selectedFiles.map(sf => UploadFile(sf))]);
+  }, []);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
     <Grid item xs={12} md={6} className={classes.mainGrid}>
@@ -112,15 +130,19 @@ export default params => {
         Upload Input
       </Typography>
 
+      <CustomDropzone />
+
       <Card className={classes.dropZoneOuter}>
-        <div className={classes.dropZoneInner} {...getRootProps()}>
+        <div className={classes.dropZoneInner} {...getRootProps({})}>
           <input
             {...getInputProps({
               onDrop: event => console.log(event)
             })}
           />
           <Typography variant="h6">
-            Drop some files here, or click to select files
+            {isDragActive
+              ? "Drop the files here"
+              : "Drop some files here, or click to select files"}
           </Typography>
         </div>
       </Card>
@@ -147,7 +169,13 @@ function FloatingActionButtonZoom() {
     UploadComponent("Meta Data Label", <MetaData />),
     UploadComponent("Naming Convention", <NamingConvention />),
     UploadComponent("Storage Location", <StorageLocation />),
-    UploadComponent("Pre-upload Operations", <StorageLocation />),
+    UploadComponent(
+      "Pre-upload Operations",
+      <div>
+        <FormControlLabel control={<Checkbox />} label="AMP Check" />
+        <FormControlLabel control={<Checkbox />} label="Messie Check" />
+      </div>
+    ),
     UploadComponent("Upload", <UploadSummary />)
   ];
 

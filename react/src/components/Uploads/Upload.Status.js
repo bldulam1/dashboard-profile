@@ -15,7 +15,7 @@ import Typography from "@material-ui/core/Typography";
 import uuid from "uuid";
 import Tab from "@material-ui/core/Tab";
 import { makeStyles } from "@material-ui/core/styles";
-import { UploadContext } from "./Upload";
+import { UploadContext } from "../../context/Upload.Context";
 
 const useStyles = makeStyles(theme => ({
   mainGrid: {
@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
 
 export default () => {
   const classes = useStyles();
-  const { files } = React.useContext(UploadContext);
+  const { files, setFiles } = React.useContext(UploadContext);
   const status = [
     Status("pending", "pending", 0, false),
     Status("in progress", "in progress", 1, false),
@@ -44,6 +44,10 @@ export default () => {
   function handleChange(event, newValue) {
     setActiveStatus(newValue);
   }
+
+  const handleCancelFile = filename => {
+    setFiles(files.filter(({ name }) => name !== filename));
+  };
 
   return (
     <Grid item xs={12} md={6} className={classes.mainGrid}>
@@ -82,7 +86,10 @@ export default () => {
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
-                  primary={file.name}
+                  disableTypography
+                  primary={
+                    <Typography variant="subtitle2">{file.name}</Typography>
+                  }
                   secondary={
                     <LinearProgress
                       variant="determinate"
@@ -92,7 +99,11 @@ export default () => {
                 />
                 {!activeStatus && (
                   <ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="delete">
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => handleCancelFile(file.name)}
+                    >
                       <DeleteIcon />
                     </IconButton>
                   </ListItemSecondaryAction>

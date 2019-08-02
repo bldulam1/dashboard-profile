@@ -6,6 +6,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Button from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
+import { UploadContext } from "../../../context/Upload.Context";
 
 const useStyles = makeStyles(theme => ({
   w100: {
@@ -13,34 +14,13 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default props => {
+export default () => {
   const classes = useStyles();
-
-  const namingConventions = [
-    NConvention(
-      "NC01",
-      [
-        NCElement("date", "8", null),
-        NCElement("time", "6", null),
-        NCElement("function", null, ["RC", "ASD"])
-      ],
-      "_"
-    ),
-    NConvention(
-      "NC02",
-      [
-        NCElement("date", "8", null),
-        NCElement("time", "6", null),
-        NCElement("function", null, ["RC", "ASD"])
-      ],
-      "^"
-    )
-  ];
-
-  const [
-    selectedNamingConvention,
-    setSelectedNamingConvention
-  ] = React.useState("NC01");
+  const {
+    namingConventions,
+    setSelectedNamingConvention,
+    selectedNamingConvention
+  } = React.useContext(UploadContext);
 
   function handleChange(event) {
     setSelectedNamingConvention(event.target.value);
@@ -78,14 +58,6 @@ export default props => {
     </div>
   );
 };
-
-function NCElement(name, length, options) {
-  return { name, length, options };
-}
-
-function NConvention(name, elements, separator) {
-  return { name, elements, separator };
-}
 
 function sampleNamingConvention({ elements, separator }) {
   function fixedString(len) {

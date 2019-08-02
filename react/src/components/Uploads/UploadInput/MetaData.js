@@ -6,30 +6,27 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 
-
 import IconButton from "@material-ui/core/IconButton";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import { UploadContext } from "../../../context/Upload.Context";
 
 export default params => {
-  const group1 = ["Target Vehicle", "Weather", "Recording Location"].sort();
-  const group2 = ["PLM", "PTC", "DOORS", "JIRA", "Sharepoint"].sort();
+  const { keyOptions, tags, setTags } = React.useContext(UploadContext);
 
-  const keyOptions = [...group1, ...group2];
-
-  const [tags, setTags] = React.useState([{ key: keyOptions[0], value: "" }]);
-  const handleAddTag = () =>
-    setTags([...tags, { key: keyOptions[0], value: "" }]);
+  const handleAddTag = () => setTags([...tags, { key: "", value: "" }]);
   const handleUpdateTag = (index, newTag) => {
     const newTags = tags;
     newTags[index] = newTag;
     setTags(newTags);
-    // console.log(JSON.stringify(newTags));
   };
   const handleRemoveTag = index => {
     const newTags = tags.filter((tag, ind) => ind !== index);
     setTags(newTags);
   };
+  // const canAddNewTag = () => {
+  //   return tags.length === 1 || tags[tags.length - 2].value !== "";
+  // };
 
   return (
     <React.Fragment>
@@ -41,7 +38,13 @@ export default params => {
           handleRemoveTag={handleRemoveTag}
           index={index}
           disabled={tags.length < 2}
-          keys={keyOptions}
+          keys={keyOptions.filter(
+            k =>
+              !tags
+                .filter((t, i) => i !== index)
+                .map(tag => tag.key)
+                .includes(k)
+          )}
         />
       ))}
 
@@ -50,18 +53,14 @@ export default params => {
           edge="end"
           aria-label="delete"
           onClick={handleAddTag}
-          // disabled={tags[tags.length - 1].value === ""}
+          // disabled={!canAddNewTag()}
         >
-          <AddCircleIcon
-            color="primary"
-            // color={tags[tags.length - 1].value === "" ? "disabled" : "primary"}
-          />
+          <AddCircleIcon color="primary" />
         </IconButton>
       </div>
     </React.Fragment>
   );
 };
-
 
 function TagComponent(props) {
   const {

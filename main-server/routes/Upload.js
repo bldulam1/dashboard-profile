@@ -14,7 +14,7 @@ var storage = multer.diskStorage({
 });
 
 var upload = multer({ storage: storage });
-router.post("/multiple/:project", upload.array("file", 1), (req, res, next) => {
+router.post("/:project", upload.array("file", 1), (req, res, next) => {
   const destinationFolder = "V:/JP01/DataLake/Valpro/Clarity";
   const files = req.files;
 

@@ -22,8 +22,10 @@ const Input = ({ accept, onFiles, files, getFilesFromEvent }) => {
         accept={accept}
         multiple
         onChange={e => {
+          console.log(e.target.value)
           getFilesFromEvent(e).then(chosenFiles => {
-            onFiles(chosenFiles);
+            console.log(chosenFiles)
+            // onFiles(chosenFiles);
           });
         }}
       />
@@ -52,6 +54,7 @@ export default params => {
       onSubmit={handleSubmit}
       InputComponent={Input}
       getFilesFromEvent={getFilesFromEvent}
+      submitButtonDisabled={files => files.length < 3}
     />
   );
 };

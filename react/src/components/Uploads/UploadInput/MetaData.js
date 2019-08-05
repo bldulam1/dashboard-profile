@@ -18,7 +18,7 @@ export default params => {
   const handleUpdateTag = (index, newTag) => {
     const newTags = tags;
     newTags[index] = newTag;
-    setTags(newTags);
+    setTags([...newTags]);
   };
   const handleRemoveTag = index => {
     const newTags = tags.filter((tag, ind) => ind !== index);
@@ -34,9 +34,11 @@ export default params => {
         <TagComponent
           key={uuid()}
           _tag={tag}
+          handleAddTag={handleAddTag}
           handleUpdateTag={handleUpdateTag}
           handleRemoveTag={handleRemoveTag}
           index={index}
+          isLastIndex={index === tags.length - 1}
           disabled={tags.length < 2}
           keys={keyOptions.filter(
             k =>
@@ -47,17 +49,6 @@ export default params => {
           )}
         />
       ))}
-
-      <div>
-        <IconButton
-          edge="end"
-          aria-label="delete"
-          onClick={handleAddTag}
-          // disabled={!canAddNewTag()}
-        >
-          <AddCircleIcon color="primary" />
-        </IconButton>
-      </div>
     </React.Fragment>
   );
 };
@@ -68,15 +59,24 @@ function TagComponent(props) {
     _tag,
     handleUpdateTag,
     handleRemoveTag,
+    handleAddTag,
     index,
-    keys
+    keys,
+    isLastIndex
   } = props;
   const [tag, setTag] = React.useState(_tag);
 
   const onTagChange = (event, name) => {
     const newTag = { ...tag, [name]: event.target.value };
     setTag(newTag);
-    handleUpdateTag(index, newTag);
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    if(tag.value.length){
+      handleUpdateTag(index, tag);
+      handleAddTag();
+    }
   };
 
   return (
@@ -84,6 +84,7 @@ function TagComponent(props) {
       style={{ display: "flex", flexWrap: "wrap", width: "100%" }}
       noValidate
       autoComplete="off"
+      onSubmit={handleSubmit}
     >
       <FormControl style={{ width: "25%" }}>
         <InputLabel htmlFor="age-simple">Key</InputLabel>
@@ -109,6 +110,19 @@ function TagComponent(props) {
       >
         <RemoveCircleIcon color={disabled ? "disabled" : "error"} />
       </IconButton>
+
+      {isLastIndex && (
+        <div>
+          <IconButton
+            edge="end"
+            aria-label="delete"
+            onClick={handleSubmit}
+            disabled={!tag.value.length}
+          >
+            <AddCircleIcon color={tag.value.length ? "primary" : "disabled"} />
+          </IconButton>
+        </div>
+      )}
     </form>
   );
 }

@@ -189,6 +189,13 @@ export default props => {
     `${rootPath}\\Valpro\\${activeProject}\\username\\`
   );
 
+  const updateFileUploadPercentage = (index, progress) => {
+    console.log(index, progress, files.length);
+    // let updatedFiles = files;
+    // updatedFiles[index].progress = progress;
+    // setFiles(updatedFiles);
+  };
+
   return (
     <Paper className={classes.contentPaper}>
       <Grid container spacing={3} className={classes.container}>
@@ -196,6 +203,7 @@ export default props => {
           value={{
             files,
             setFiles,
+            updateFileUploadPercentage,
             keyOptions,
             tags,
             setTags,
@@ -207,7 +215,7 @@ export default props => {
             setStorageLocation
           }}
         >
-          <UploadStatus />
+          <UploadStatus files={files} setFiles={setFiles} />
           <UploadInput />
         </UploadContext.Provider>
       </Grid>

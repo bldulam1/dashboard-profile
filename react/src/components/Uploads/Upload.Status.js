@@ -30,9 +30,8 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default () => {
+export default ({ files, setFiles }) => {
   const classes = useStyles();
-  const { files, setFiles } = React.useContext(UploadContext);
   const status = [
     Status("pending", "pending", 0, false),
     Status("in progress", "in progress", 1, false),

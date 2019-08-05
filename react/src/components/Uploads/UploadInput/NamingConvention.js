@@ -50,14 +50,12 @@ export default () => {
 
       <CreateNamingConvention/>
 
-      <div>
+      {/* <div>
         <Button size="small" color="primary" variant="outlined">
           Create New
         </Button>
-        <Button size="small" color="secondary" variant="outlined">
-          Edit
-        </Button>
-      </div>
+
+      </div> */}
     </div>
   );
 };

@@ -25,8 +25,8 @@ const namingConventions = [
   NConvention(
     "NC01",
     [
-      NCElement("date", "8", null),
-      NCElement("time", "6", null),
+      NCElement("date", [8], null),
+      NCElement("time", [6], null),
       NCElement("function", null, ["FCR", "RCR", "4CR"]),
       NCElement("customer", null, ["NISSAN", "RENAULT"]),
       NCElement("software", null, [
@@ -133,10 +133,10 @@ const namingConventions = [
         "FRSP",
         "BLCK"
       ]),
-      NCElement("Major", 2, null),
-      NCElement("Minor", 4, null),
+      NCElement("Major", [2], null),
+      NCElement("Minor", [4], null),
       NCElement("Side", null, ["L", "R", "B"]),
-      NCElement("Iteration", 2, null)
+      NCElement("Iteration", [2], null)
     ],
     "_"
   ),

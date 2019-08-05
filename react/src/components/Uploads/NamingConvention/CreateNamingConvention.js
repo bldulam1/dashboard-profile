@@ -9,9 +9,10 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import uuid from 'uuid/v4';
 
 const styles = theme => ({
   root: {
@@ -59,124 +60,138 @@ const DialogActions = withStyles(theme => ({
   }
 }))(MuiDialogActions);
 
-class CustomizedDialogs extends React.Component {
-  state = {
-    open: false
+export default params => {
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true)
   };
 
-  handleClickOpen = () => {
-    this.setState({
-      open: true
-    });
+  const handleClose = () => {
+    setOpen(false)
   };
 
-  handleClose = () => {
-    this.setState({ open: false });
-  };
+  const fields = [
+    'Date', 'Time', 'Function', 
+  ]
 
-  
-
-  render() {
-    return (
-      <div>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={this.handleClickOpen}
-        >
-          Open dialog
-        </Button>
-        <Dialog
-          onClose={this.handleClose}
-          aria-labelledby="customized-dialog-title"
-          open={this.state.open}
-        >
-          <DialogTitle id="customized-dialog-title" onClose={this.handleClose}>
-            Create New Naming Convention
-          </DialogTitle>
-          <DialogContent dividers>
-            <form>
+  return (
+    <div>
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={handleClickOpen}
+        size="small"
+      >
+        Create New
+      </Button>
+      <Button size="small" color="secondary" variant="outlined">
+        Edit
+      </Button>
+      <Dialog
+        onClose={handleClose}
+        aria-labelledby="customized-dialog-title"
+        open={open}
+      >
+        <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+          Create New Naming Convention
+        </DialogTitle>
+        <DialogContent dividers>
+          <form> 
+            {fields.map(fieldName=>(
               <TextField
-                id="standard-name"
-                label="Date"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Time"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Function"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Customer"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Hardware"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Software"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Rec Location"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Vehicle"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Test Catalog Label"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Major"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              {/* <TextField
+              key={uuid()}
+              id="standard-name"
+              label={fieldName}
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            ))}
+          
+          {/* <form>
+            <TextField
+              id="standard-name"
+              label="Date"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Time"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Function"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Customer"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Hardware"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Software"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Rec Location"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Vehicle"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Test Catalog Label"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Major"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            {/* <TextField
                 id="standard-name"
                 label="Minor"
                 // className={classes.textField}
@@ -184,47 +199,53 @@ class CustomizedDialogs extends React.Component {
                 // onChange={handleChange("name")}
                 fullWidth
               /> */}
-              <InputLabel htmlFor="age-simple" fullWidth>Minor</InputLabel>
-              <Select
-                // value={values.age}
-                // onChange={handleChange}
-                inputProps={{
-                  label: "Minor",
-                  id: "Minor_"
-                }} fullWidth
-              >
-                <MenuItem value={3}>3 Digit</MenuItem>
-                <MenuItem value={4}>4 Digit</MenuItem>
-              </Select>
+            <InputLabel htmlFor="age-simple" fullWidth>
+              Minor
+            </InputLabel>
+            <Select
+              // value={values.age}
+              // onChange={handleChange}
+              inputProps={{
+                label: "Minor",
+                id: "Minor_"
+              }}
+              fullWidth
+            >
+              <MenuItem value={3}>3 Digit</MenuItem>
+              <MenuItem value={4}>4 Digit</MenuItem>
+            </Select>
 
+            <TextField
+              id="standard-name"
+              label="Side"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+            <TextField
+              id="standard-name"
+              label="Iteration"
+              // className={classes.textField}
+              // value={values.name}
+              // onChange={handleChange("name")}
+              fullWidth
+            />
+          </form> */}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Save changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
+};
 
-              <TextField
-                id="standard-name"
-                label="Side"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                id="standard-name"
-                label="Iteration"
-                // className={classes.textField}
-                // value={values.name}
-                // onChange={handleChange("name")}
-                fullWidth
-              />
-            </form>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleClose} color="primary">
-              Save changes
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
-    );
-  }
-}
+// class CustomizedDialogs extends React.Component {
+//   state = {
+//     open: false
+//   };
+// }
 
-export default CustomizedDialogs;

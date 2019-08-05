@@ -148,6 +148,7 @@ export default params => {
       "Pre-upload Operations",
       <div>
         <FormControlLabel control={<Checkbox />} label="AMP Check" />
+        <br/>
         <FormControlLabel control={<Checkbox />} label="Messie Check" />
       </div>
     ),

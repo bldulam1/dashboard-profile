@@ -18,6 +18,7 @@ app.use("/upload", require("./routes/Upload"));
 app.use("/search", require("./routes/Search"));
 app.use("/task", require("./routes/Task"));
 app.use("/tc", require("./routes/TestCatalog"));
+app.use("/scene",require("./routes/NamingConventions"));
 app.get("/", (req, res) => res.send("Hello World!2"));
 
 mongoose.connect(`mongodb://localhost:27017/clarity`, {

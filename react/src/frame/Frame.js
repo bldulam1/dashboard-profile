@@ -15,7 +15,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
 import useToggle from "../hooks/useToggle";
 import uuid from "uuid";
-import { Route, Link } from "react-router-dom";
+import { Route, Link, Redirect } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import logo from "../logo.svg";
 
@@ -101,6 +101,11 @@ export default () => {
             {settingsComponents.map(({ route, component }) => (
               <Route exact key={uuid()} path={route} component={component} />
             ))}
+            <Route
+              exact
+              path="/"
+              render={() => <Redirect to={`/${activeProject}/dashboard`} />}
+            />
           </ProjectContext.Provider>
         </main>
       </SnackbarProvider>

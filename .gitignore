@@ -2,5 +2,6 @@
 /react/build
 /react/node_modules
 /helper/node_modules
+/worker/node_modules
 /main-server/tmp
 /main-server/%HOMEDRIVE%%HOMEPATH%

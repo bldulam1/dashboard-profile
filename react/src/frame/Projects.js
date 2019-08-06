@@ -14,6 +14,8 @@ import MapIcon from "@material-ui/icons/Map";
 import LocalLibraryIcon from "@material-ui/icons/LocalLibrary";
 import PersonIcon from "@material-ui/icons/Person";
 import GroupIcon from "@material-ui/icons/Group";
+import WorkIcon from "@material-ui/icons/Work";
+import Tasks from "../components/Tasks/Tasks";
 
 function Component(name, route, component, projects, icon) {
   return { name, route, component, projects, icon };
@@ -40,6 +42,7 @@ const projects = [
 
 const projectComponents = new Set([
   Component("search", "/:project/search", Search, projects, <SearchIcon />),
+  Component("tasks", "/:project/tasks", Tasks, projects, <WorkIcon />),
   Component(
     "dashboard",
     "/:project/dashboard",

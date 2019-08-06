@@ -3,8 +3,11 @@ const cors = require("cors");
 const app = express();
 const mongoose = require("mongoose");
 const logger = require("morgan");
+const bodyParser = require("body-parser");
 
 const port = 8000;
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(logger("dev"));
 app.use(
   cors({
@@ -18,7 +21,7 @@ app.use("/upload", require("./routes/Upload"));
 app.use("/search", require("./routes/Search"));
 app.use("/task", require("./routes/Task"));
 app.use("/tc", require("./routes/TestCatalog"));
-app.use("/scene",require("./routes/NamingConventions"));
+app.use("/naming-convention", require("./routes/NamingConventions"));
 app.get("/", (req, res) => res.send("Hello World!2"));
 
 mongoose.connect(`mongodb://localhost:27017/clarity`, {

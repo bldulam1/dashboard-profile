@@ -16,7 +16,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import useToggle from "../hooks/useToggle";
 import uuid from "uuid";
 import { Route, Link } from "react-router-dom";
-
+import { SnackbarProvider } from "notistack";
 import logo from "../logo.svg";
 
 import {
@@ -82,26 +82,28 @@ export default () => {
         <ProjectComponents open={open} activeProject={activeProject} />
         <SettingsComponents open={open} activeProject={activeProject} />
       </Drawer>
-      <main
-        className={
-          open ? classes.contentDrawerOpen : classes.contentDrawerClose
-        }
-      >
-        <ProjectContext.Provider value={{ activeProject }}>
-          {getProjectComponents(activeProject).map(comp => (
-            <Route
-              exact
-              key={uuid()}
-              activeProject={activeProject}
-              path={comp.route}
-              component={comp.component}
-            />
-          ))}
-          {settingsComponents.map(({ route, component }) => (
-            <Route exact key={uuid()} path={route} component={component} />
-          ))}
-        </ProjectContext.Provider>
-      </main>
+      <SnackbarProvider maxSnack={4}>
+        <main
+          className={
+            open ? classes.contentDrawerOpen : classes.contentDrawerClose
+          }
+        >
+          <ProjectContext.Provider value={{ activeProject }}>
+            {getProjectComponents(activeProject).map(comp => (
+              <Route
+                exact
+                key={uuid()}
+                activeProject={activeProject}
+                path={comp.route}
+                component={comp.component}
+              />
+            ))}
+            {settingsComponents.map(({ route, component }) => (
+              <Route exact key={uuid()} path={route} component={component} />
+            ))}
+          </ProjectContext.Provider>
+        </main>
+      </SnackbarProvider>
     </div>
   );
 };

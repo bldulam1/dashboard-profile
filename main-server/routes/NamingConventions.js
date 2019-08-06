@@ -7,11 +7,9 @@ router.get("/distinct/projects", async (req, res) => {
   res.send(uniqueKeys);
 });
 
-router.get("/distinct/:project/naming-convention", async (req, res) => {
+router.get("/distinct/:project/names", async (req, res) => {
   const { project } = req.params;
-   const uniqueKeys = await Project.find({ name: project }).distinct(
-    "namingConventions.name"
-  );
+  const uniqueKeys = await NamingConvention.find({ project }, { name: 1 });
   res.send(uniqueKeys);
 });
 
@@ -24,29 +22,20 @@ router.get("/distinct/:project/naming-convention/:ncName", async (req, res) => {
       name: { $elemMatch: { name: ncName } }
     }
   );
-
   res.send(uniqueKeys);
 });
 
-router.post("/new-naming-convention", async (req, res) => {
+router.get("/contents/:id", async (req, res) => {
+  const { id } = req.params;
+  const nc = await NamingConvention.findById(id);
+  res.send(nc);
+});
+
+router.post("/new", async (req, res) => {
   const namingConvention = new NamingConvention(req.body);
-// console.log("req",req.body);
-
   const { _id, project, name } = namingConvention;
-  const storingdata = await Promise.all([
-    namingConvention.save(),
-    Project.findOne({ name: project })
-  ]);
-// console.log(".........",_id,project,name);
-
-  console.log("before push: ", JSON.stringify(storingdata), { name: project });
-
-  storingdata[1].namingConventions.push({ id: _id, name });
-  storingdata[1].namingConventions = [
-    ...new Set(storingdata[1].namingConventions)
-  ];
-  await storingdata[1].save();
-  res.send({ _id, name });
+  await namingConvention.save();
+  res.send({ _id, project, name });
 });
 
 router.put("/edit/:id", async (req, res) => {

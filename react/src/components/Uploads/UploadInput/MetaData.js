@@ -87,7 +87,7 @@ function TagComponent(props) {
       onSubmit={handleSubmit}
     >
       <FormControl style={{ width: "25%" }}>
-        <InputLabel htmlFor="age-simple">Key</InputLabel>
+        <InputLabel>Key</InputLabel>
         <Select value={tag.key} onChange={event => onTagChange(event, "key")}>
           {keys.map(key => (
             <MenuItem key={uuid()} value={key}>

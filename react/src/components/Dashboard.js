@@ -1,7 +1,6 @@
 import React from "react";
 import Paper from "@material-ui/core/Paper";
 import { useStyles } from "../styles/classes";
-import { api_server } from "../environment/environment";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 

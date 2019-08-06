@@ -1,20 +1,21 @@
 let mongoose = require("mongoose");
 
-let namingConventionSchema = mongoose.Schema({
-  name:  String, 
-  project: String,
-  patternElements: [
-    {
-      name: String,
-      length: Number,
-      choices: [String]
-    }
-  ]
-});
+let namingConventionSchema = mongoose.Schema(
+  {
+    name: String,
+    project: String,
+    extensions: [String],
+    separator: String,
+    elements: []
+  },
+  { strict: false }
+);
 
 let projectSchema = mongoose.Schema({
   name: String,
-  namingConventions: [{ name:{type: String, index: {unique: true}}, id: String }],
+  namingConventions: [
+    { name: { type: String, index: { unique: true } }, id: String }
+  ],
   operations: [String],
   assigned_servers: [String]
 });

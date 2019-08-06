@@ -64,7 +64,10 @@ export default ({ files, setFiles }) => {
         {status.map(s => (
           <Tab
             key={`status-${s.value}`}
-            label={s.display}
+            label={`${s.display} (${
+              files.filter(file => getStatusValue(file.progress) === s.value)
+                .length
+            })`}
             disabled={s.disabled}
           />
         ))}

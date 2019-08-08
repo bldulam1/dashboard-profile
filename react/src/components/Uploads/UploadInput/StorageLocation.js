@@ -4,13 +4,14 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import { UploadContext } from "../../../context/Upload.Context";
 
 export default params => {
-  const {rootPath, storageLocation, setStorageLocation } = React.useContext(
-    UploadContext
-  );
-
+  const { uploadProps, uploadDispatch } = React.useContext(UploadContext);
+  const { rootPath } = uploadProps;
 
   const handleChange = event => {
-    setStorageLocation(rootPath + event.target.value)
+    uploadDispatch({
+      storageLocation: rootPath + event.target.value,
+      type: "StorageLocation"
+    });
   };
 
   return (
@@ -24,7 +25,7 @@ export default params => {
         )
       }}
       onChange={handleChange}
-      // value={storageLocation.replace(rootPath, '')}
+      value={uploadProps.storageLocation.replace(rootPath, "")}
     />
   );
 };

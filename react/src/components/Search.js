@@ -337,9 +337,9 @@ function SearchBar(props) {
   );
 }
 
-function normalizeSize(byteSize) {
+export function normalizeSize(byteSize) {
   const units = " KMGTPEZYXSD";
-  let newSize = byteSize;
+  let newSize = byteSize ? byteSize : 0;
   let index = 0;
   while (newSize > 1000) {
     newSize /= 1000;

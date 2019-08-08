@@ -6,6 +6,8 @@ import UploadInput from "./Upload.Input";
 import UploadStatus from "./Upload.Status";
 import { ProjectContext } from "../../context/Project.Context";
 import { UploadContext } from "../../context/Upload.Context";
+import Axios from "axios";
+import { api_server } from "../../environment/environment";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -41,44 +43,96 @@ const keyOptions = [...group1, ...group2];
 //     second: newTime.getSeconds()
 //   };
 // }
+function reducer(state, action) {
+  const {
+    type,
+    files,
+    method,
+    sourceDirectory,
+    isSourceDirectoryExists,
+    namingConventions,
+    selectedNC,
+    ncDetails,
+    tags,
+    storageLocation,
+    preUploadOperations
+  } = action;
 
+  switch (type) {
+    case "Files":
+      return { ...state, files };
+    case "UploadMethod":
+      return { ...state, method, files };
+    case "SourceDirectoryExists":
+      return { ...state, isSourceDirectoryExists };
+    case "VDriveSourceDirectory":
+      return { ...state, sourceDirectory };
+    case "CountSize":
+      return { ...state, files };
+    case "NamingConventions":
+      return { ...state, namingConventions };
+    case "SelectedNamingConvention":
+      return { ...state, selectedNC, ncDetails, files };
+    case "StorageLocation":
+      return { ...state, storageLocation };
+    case "Tags":
+      return { ...state, tags };
+    case "PreUploadOperations":
+      return { ...state, preUploadOperations };
+    default:
+      return state;
+  }
+}
 export default props => {
-  const classes = useStyles();
   const { activeProject } = React.useContext(ProjectContext);
+  const classes = useStyles();
 
-  const [files, setFiles] = React.useState([]);
-  const [tags, setTags] = React.useState([{ key: keyOptions[0], value: "" }]);
-  const [
-    selectedNamingConvention,
-    setSelectedNamingConvention
-  ] = React.useState("");
-  const [ncDetails, setNCDetails] = React.useState({});
+  const [uploadProps, uploadDispatch] = React.useReducer(reducer, {
+    files: [],
+    uploadMethods: ["Normal Upload", "V-Drive Upload"],
+    method: 0,
+    sourceDirectory: "V:\\JP01\\DataLake\\Common_Write",
+    isSourceDirectoryExists: true,
+    namingConventions: [],
+    selectedNC: "",
+    ncDetails: {},
+    rootPath: "V:\\JP01\\DataLake",
+    storageLocation: `V:\\JP01\\DataLake\\Valpro\\${activeProject}\\username\\`,
+    keyOptions,
+    tags: [{ key: keyOptions[0], value: "" }],
+    preUploadOperations: {
+      ampCheck: {
+        value: false,
+        disabled: false
+      },
+      messieCheck: {
+        value: false,
+        disabled: true
+      }
+    }
+  });
 
-  const rootPath = "V:\\JP01\\DataLake";
-  const [storageLocation, setStorageLocation] = React.useState(
-    `${rootPath}\\Valpro\\${activeProject}\\username\\`
-  );
+  React.useEffect(() => {
+    const url = `${api_server}/naming-convention/distinct/${activeProject}/names`;
+    Axios.get(url).then(res => {
+      uploadDispatch({
+        type: "NamingConventions",
+        namingConventions: res.data,
+        selectedNC: res.data.length ? res.data[0]._id : ""
+      });
+    });
+  }, [activeProject]);
 
   return (
     <Paper className={classes.contentPaper}>
       <Grid container spacing={3} className={classes.container}>
         <UploadContext.Provider
           value={{
-            files,
-            setFiles,
-            keyOptions,
-            tags,
-            setTags,
-            selectedNamingConvention,
-            setSelectedNamingConvention,
-            ncDetails,
-            setNCDetails,
-            rootPath,
-            storageLocation,
-            setStorageLocation
+            uploadProps,
+            uploadDispatch
           }}
         >
-          <UploadStatus files={files} setFiles={setFiles} />
+          <UploadStatus />
           <UploadInput />
         </UploadContext.Provider>
       </Grid>

@@ -93,10 +93,9 @@ export default params => {
       extensions: property.extensions.split(",").map(ext => ext.trim()),
       project: activeProject
     };
-    const { data: { _id, name } } = await Axios.post(
-      `${api_server}/naming-convention/new`,
-      body
-    );
+    const {
+      data: { _id, name }
+    } = await Axios.post(`${api_server}/naming-convention/new`, body);
 
     enqueueSnackbar(`${name} created. ID: ${_id}`, { variant: "success" });
     handleClose();
@@ -131,11 +130,15 @@ export default params => {
           New Naming Convention
         </DialogTitle>
         <DialogContent dividers>
-          <Typography variant="subtitle1" align="center">
+          <Typography variant="subtitle1" align="center" color="secondary">
             {getNCSample(elements) || "Preview"}
           </Typography>
           <hr />
-          <Typography style={{ marginTop: "1rem" }} variant="subtitle2">
+          <Typography
+            style={{ marginTop: "1rem" }}
+            variant="subtitle2"
+            color="primary"
+          >
             Properties
           </Typography>
           <TextField
@@ -159,7 +162,11 @@ export default params => {
             value={property.separator}
             onChange={event => handlePropertyChange(event, "separator")}
           />
-          <Typography style={{ marginTop: "1rem" }} variant="subtitle2">
+          <Typography
+            style={{ marginTop: "1rem" }}
+            variant="subtitle2"
+            color="primary"
+          >
             Fields
           </Typography>
           <form
@@ -211,7 +218,7 @@ function isNumeric(str) {
 
   for (let index = 0; index < splits.length; index++) {
     const subst = splits[index];
-    if (isNaN(subst) || parseInt(subst) > 15) {
+    if (parseInt(subst) > 15) {
       isNum = false;
       break;
     }

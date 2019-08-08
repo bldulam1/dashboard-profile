@@ -12,22 +12,29 @@ import AddCircleIcon from "@material-ui/icons/AddCircle";
 import { UploadContext } from "../../../context/Upload.Context";
 
 export default params => {
-  const { keyOptions, tags, setTags } = React.useContext(UploadContext);
+  const { uploadProps, uploadDispatch } = React.useContext(UploadContext);
+  const { keyOptions, tags } = uploadProps;
 
-  const handleAddTag = () => setTags([...tags, { key: "", value: "" }]);
+  const handleAddTag = () =>
+    uploadDispatch({
+      tags: [...tags, { key: "", value: "" }],
+      type: "Tags"
+    });
   const handleUpdateTag = (index, newTag) => {
     const newTags = tags;
     newTags[index] = newTag;
-    setTags([...newTags]);
+    uploadDispatch({
+      tags: [...newTags],
+      type: "Tags"
+    });
   };
   const handleRemoveTag = index => {
     const newTags = tags.filter((tag, ind) => ind !== index);
-    setTags(newTags);
+    uploadDispatch({
+      tags: [...newTags],
+      type: "Tags"
+    });
   };
-  // const canAddNewTag = () => {
-  //   return tags.length === 1 || tags[tags.length - 2].value !== "";
-  // };
-
   return (
     <React.Fragment>
       {tags.map((tag, index) => (
@@ -73,7 +80,7 @@ function TagComponent(props) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    if(tag.value.length){
+    if (tag.value.length) {
       handleUpdateTag(index, tag);
       handleAddTag();
     }

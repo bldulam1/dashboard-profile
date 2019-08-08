@@ -9,7 +9,7 @@ import { UploadContext } from "../../../context/Upload.Context";
 import CreateNamingConvention from "../NamingConvention/CreateNamingConvention";
 import Axios from "axios";
 import { api_server } from "../../../environment/environment";
-import { ProjectContext } from "../../../context/Project.Context";
+import { isFollowingNamingConvention } from "../../../util/files";
 const useStyles = makeStyles(theme => ({
   w100: {
     width: "100%"
@@ -18,43 +18,31 @@ const useStyles = makeStyles(theme => ({
 
 export default () => {
   const classes = useStyles();
-  const {
-    setSelectedNamingConvention,
-    selectedNamingConvention,
-    ncDetails,
-    setNCDetails
-  } = React.useContext(UploadContext);
-  const { activeProject } = React.useContext(ProjectContext);
-  const [namingConventions, setNamingConventions] = React.useState([]);
+  const { uploadProps, uploadDispatch } = React.useContext(UploadContext);
 
-  React.useEffect(() => {
-    const url = `${api_server}/naming-convention/distinct/${activeProject}/names`;
-    Axios.get(url).then(res => {
-      setNamingConventions(res.data);
-    });
-  }, []);
+  const { files, namingConventions, ncDetails, selectedNC } = uploadProps;
 
-  function handleChange(event) {
+  async function handleChange(event) {
     const id = event.target.value;
     const url = `${api_server}/naming-convention/contents/${id}`;
-    Axios.get(url).then(res => {
-      setNCDetails(res.data);
+    const { data } = await Axios.get(url);
+    const newFiles = files.map(file => ({
+      ...file,
+      ...isFollowingNamingConvention(file, data)
+    }));
+    uploadDispatch({
+      type: "SelectedNamingConvention",
+      ncDetails: data,
+      selectedNC: id,
+      files: newFiles
     });
-    setSelectedNamingConvention(event.target.value);
   }
 
   return (
     <div>
       <FormControl className={classes.w100}>
         <InputLabel htmlFor="naming-convention">Naming Convention</InputLabel>
-        <Select
-          value={selectedNamingConvention}
-          onChange={handleChange}
-          inputProps={{
-            name: "age",
-            id: "naming-convention"
-          }}
-        >
+        <Select value={selectedNC} onChange={handleChange}>
           {namingConventions.map(nc => (
             <MenuItem key={nc._id} value={nc._id}>
               {nc.name}
@@ -62,7 +50,6 @@ export default () => {
           ))}
         </Select>
         <FormHelperText>
-          {/* Sample: {selectedNamingConvention} */}
           Sample: {sampleNamingConvention(ncDetails)}
         </FormHelperText>
       </FormControl>
@@ -74,12 +61,7 @@ export default () => {
 
 function sampleNamingConvention({ elements, separator }) {
   const fixedString = len => {
-    let tempChar = "X";
-    let retString = "";
-    for (let index = 0; index < len; index++) {
-      retString = retString + tempChar;
-    }
-    return retString;
+    return "X".repeat(len);
   };
   const randomMember = array => {
     return array[Math.floor(array.length * Math.random())];

@@ -30,7 +30,10 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default ({ files, setFiles }) => {
+export default () => {
+  const { uploadProps, uploadDispatch } = React.useContext(UploadContext);
+  const { files } = uploadProps;
+
   const classes = useStyles();
   const status = [
     Status("pending", "pending", 0, false),
@@ -45,7 +48,10 @@ export default ({ files, setFiles }) => {
   }
 
   const handleCancelFile = filename => {
-    setFiles(files.filter(({ name }) => name !== filename));
+    uploadDispatch({
+      type: "Files",
+      files: files.filter(({ name }) => name !== filename)
+    })
   };
 
   return (

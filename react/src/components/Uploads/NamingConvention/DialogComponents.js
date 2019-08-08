@@ -7,7 +7,6 @@ import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 
-
 const styles = theme => ({
   root: {
     margin: 0,
@@ -27,7 +26,9 @@ export const DialogTitle = withStyles(styles)(props => {
   const { children, classes, onClose } = props;
   return (
     <MuiDialogTitle disableTypography className={classes.root}>
-      <Typography variant="h6">{children}</Typography>
+      <Typography variant="h6" color="primary">
+        {children}
+      </Typography>
       {onClose ? (
         <IconButton
           aria-label="close"

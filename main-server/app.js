@@ -17,6 +17,7 @@ app.use(
 );
 app.set("view options", { pretty: true });
 
+app.use("/fs", require("./routes/File"));
 app.use("/upload", require("./routes/Upload"));
 app.use("/search", require("./routes/Search"));
 app.use("/task", require("./routes/Task"));

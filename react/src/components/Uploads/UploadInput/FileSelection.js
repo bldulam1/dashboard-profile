@@ -17,6 +17,8 @@ import { api_server } from "../../../environment/environment";
 import { normalizeSize } from "../../Search";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MemoryIcon from "@material-ui/icons/Memory";
+import { UploadFile, isFollowingNamingConvention } from "../../../util/files";
+import { numberWithCommas } from "../../../util/strings";
 
 var debounceTimer;
 const UPLOAD_ROOT = "V:\\JP01\\DataLake\\Common_Write\\";
@@ -57,17 +59,6 @@ function SummaryItem(icon, title, content) {
   );
 }
 
-function UploadFile({ name, size }) {
-  const splits = name.split(".");
-  return {
-    name,
-    size,
-    type: splits[splits.length - 1],
-    progress: 0,
-    comments: []
-  };
-}
-
 export default () => {
   const { uploadProps, uploadDispatch } = React.useContext(UploadContext);
   const { method, uploadMethods } = uploadProps;
@@ -98,35 +89,33 @@ export default () => {
     </>
   );
 };
-function numberWithCommas(x) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
+
 function NormalUpload() {
-  const { uploadDispatch } = React.useContext(UploadContext);
+  const { uploadProps, uploadDispatch } = React.useContext(UploadContext);
+  const { ncDetails } = uploadProps;
   const classes = useStyles();
   const onDrop = React.useCallback(
     selectedFiles => {
+      uploadDispatch({
+        type: 'DropFiles',
+        selectedDropFiles: selectedFiles
+      });
+
       let formattedFiles = selectedFiles.map(sf => UploadFile(sf));
+      if (ncDetails.elements) {
+        formattedFiles = formattedFiles.map(file => ({
+          ...file,
+          ...isFollowingNamingConvention(file, ncDetails)
+        }));
+      }
+
       uploadDispatch({
         files: formattedFiles,
         type: "Files"
       });
-      selectedFiles.forEach((sf, sfIndex) => {
-        const data = new FormData();
-        data.append("file", sf);
-        // axios.post("http://localhost:8000/upload/Nissan", data, {
-        //   onUploadProgress: ProgressEvent => {
-        //     formattedFiles[sfIndex].progress =
-        //       ProgressEvent.loaded / ProgressEvent.total;
-        //     uploadDispatch({
-        //       files: [...formattedFiles],
-        //       type: "Files"
-        //     });
-        //   }
-        // });
-      });
+
     },
-    [uploadDispatch]
+    [ncDetails, uploadDispatch]
   );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 

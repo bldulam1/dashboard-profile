@@ -14,6 +14,9 @@ import ListAltIcon from "@material-ui/icons/ListAlt";
 import SettingsIcon from "@material-ui/icons/Settings";
 import Tooltip from "@material-ui/core/Tooltip";
 import { normalizeSize } from "../../Search";
+import Axios from "axios";
+import { api_server } from "../../../environment/environment";
+import { ProjectContext } from "../../../context/Project.Context";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -33,7 +36,8 @@ function SummaryItem(icon, title, content) {
   );
 }
 export default () => {
-  const { uploadProps } = React.useContext(UploadContext);
+  const { uploadProps, uploadDispatch } = React.useContext(UploadContext);
+  const { activeProject } = React.useContext(ProjectContext);
   const {
     method,
     uploadMethods,
@@ -41,10 +45,12 @@ export default () => {
     ncDetails,
     storageLocation,
     tags,
-    preUploadOperations
+    preUploadOperations,
+    selectedDropFiles
   } = uploadProps;
   const classes = useStyles();
-  const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+  const validFiles = files.filter(file => file.progress >= 0);
+  const totalSize = validFiles.reduce((acc, file) => acc + file.size, 0);
   const cleanedPreUploadOps = () => {
     const ops = [];
 
@@ -62,8 +68,52 @@ export default () => {
       .map(tag => `${tag.key}:${tag.value}`);
   };
 
-  const handleUpload = () => {
-    console.log(uploadProps);
+  const handleUpload = async () => {
+    const validFilesNames = validFiles.map(vf => vf.name);
+    let formattedFiles = files;
+    const batches = [0, 1, 2, 3, 4];
+    const submitFile = async (sdf, sfIndex) => {
+      const data = new FormData();
+      data.append("file", sdf);
+      data.append("storageLocation", storageLocation);
+      data.append("tags", tags);
+      data.append("preUploadOperations", cleanedPreUploadOps());
+      const res = await Axios.post(
+        `${api_server}/upload/${activeProject}`,
+        data,
+        {
+          onUploadProgress: ProgressEvent => {
+            formattedFiles[sfIndex].progress =
+              ProgressEvent.loaded / ProgressEvent.total;
+            uploadDispatch({
+              files: [...formattedFiles],
+              type: "Files"
+            });
+          }
+        }
+      );
+      return res;
+    };
+
+    batches.forEach(async batch => {
+      for (
+        let sfIndex = batch;
+        sfIndex < selectedDropFiles.length;
+        sfIndex += batches.length
+      ) {
+        const sdf = selectedDropFiles[sfIndex];
+        if (validFilesNames.includes(sdf.name)) {
+          let maxTries = 5;
+          let isSubmitted = false;
+          while (maxTries > 0 && !isSubmitted) {
+            const res = await submitFile(sdf, sfIndex);
+            isSubmitted = res.status === 200;
+            console.log({ isSubmitted });
+            maxTries--;
+          }
+        }
+      }
+    });
   };
 
   return (
@@ -78,7 +128,7 @@ export default () => {
           {SummaryItem(
             <DescriptionIcon />,
             "Files Count",
-            `${files.length} files, ${normalizeSize(totalSize)} total`
+            `${validFiles.length} files, ${normalizeSize(totalSize)} total`
           )}
           {SummaryItem(
             <GavelIcon />,
@@ -104,9 +154,9 @@ export default () => {
           Cancel
         </Button>
         <Button
-          color={files.length ? "primary" : "default"}
+          color={validFiles.length ? "primary" : "default"}
           variant="contained"
-          disabled={!files.length}
+          disabled={!validFiles.length}
           onClick={handleUpload}
         >
           Upload

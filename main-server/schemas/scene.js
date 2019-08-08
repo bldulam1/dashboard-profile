@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const sceneSchema = mongoose.Schema({
   project: String,
@@ -12,12 +12,9 @@ const sceneSchema = mongoose.Schema({
     birth: Date,
     mapped: Date
   },
-  tags: [{
-    key: String,
-    values: [String]
-  }]
+  tags: []
 });
 
 module.exports = {
-  Scene: mongoose.model('Scene', sceneSchema),
+  Scene: mongoose.model("Scene", sceneSchema)
 };

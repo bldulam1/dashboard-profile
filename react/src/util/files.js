@@ -36,3 +36,44 @@ export function isFollowingNamingConvention(file, namingConvention) {
 
   return { progress: 0 };
 }
+
+export function UploadFile({ name, size }) {
+  const splits = name.split(".");
+  return {
+    name,
+    size,
+    type: splits[splits.length - 1],
+    progress: 0,
+    comments: []
+  };
+}
+
+export function sampleNamingConvention({ elements, separator }) {
+  const fixedString = len => {
+    return "X".repeat(len);
+  };
+  const randomMember = array => {
+    return array[Math.floor(array.length * Math.random())];
+  };
+
+  return elements && elements.length
+    ? elements
+        .map(elem =>
+          !elem.type
+            ? fixedString(randomMember(elem.options))
+            : randomMember(elem.options)
+        )
+        .join(separator)
+    : "";
+}
+
+export function Status(display, name, value, disabled) {
+  return { display, name, value, disabled };
+}
+
+export function getStatusValue(progress) {
+  if (progress === 0) return 0;
+  else if (progress < 1 && progress > 0) return 1;
+  else if (progress === 1) return 2;
+  return 3;
+}

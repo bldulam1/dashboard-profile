@@ -46,6 +46,7 @@ const keyOptions = [...group1, ...group2];
 function reducer(state, action) {
   const {
     type,
+    selectedDropFiles,
     files,
     method,
     sourceDirectory,
@@ -59,6 +60,8 @@ function reducer(state, action) {
   } = action;
 
   switch (type) {
+    case "DropFiles":
+      return { ...state, selectedDropFiles };
     case "Files":
       return { ...state, files };
     case "UploadMethod":
@@ -88,6 +91,7 @@ export default props => {
   const classes = useStyles();
 
   const [uploadProps, uploadDispatch] = React.useReducer(reducer, {
+    selectedDropFiles: [],
     files: [],
     uploadMethods: ["Normal Upload", "V-Drive Upload"],
     method: 0,

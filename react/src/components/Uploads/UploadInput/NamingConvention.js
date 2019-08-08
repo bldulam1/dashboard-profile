@@ -4,20 +4,17 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
-import { makeStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
 import { UploadContext } from "../../../context/Upload.Context";
 import CreateNamingConvention from "../NamingConvention/CreateNamingConvention";
 import Axios from "axios";
 import { api_server } from "../../../environment/environment";
-import { isFollowingNamingConvention } from "../../../util/files";
-const useStyles = makeStyles(theme => ({
-  w100: {
-    width: "100%"
-  }
-}));
+import {
+  isFollowingNamingConvention,
+  sampleNamingConvention
+} from "../../../util/files";
 
 export default () => {
-  const classes = useStyles();
   const { uploadProps, uploadDispatch } = React.useContext(UploadContext);
 
   const { files, namingConventions, ncDetails, selectedNC } = uploadProps;
@@ -40,12 +37,12 @@ export default () => {
 
   return (
     <div>
-      <FormControl className={classes.w100}>
+      <FormControl fullWidth>
         <InputLabel htmlFor="naming-convention">Naming Convention</InputLabel>
         <Select value={selectedNC} onChange={handleChange}>
           {namingConventions.map(nc => (
             <MenuItem key={nc._id} value={nc._id}>
-              {nc.name}
+              <Typography>{nc.name}</Typography>
             </MenuItem>
           ))}
         </Select>
@@ -58,22 +55,3 @@ export default () => {
     </div>
   );
 };
-
-function sampleNamingConvention({ elements, separator }) {
-  const fixedString = len => {
-    return "X".repeat(len);
-  };
-  const randomMember = array => {
-    return array[Math.floor(array.length * Math.random())];
-  };
-
-  return elements && elements.length
-    ? elements
-        .map(elem =>
-          !elem.type
-            ? fixedString(randomMember(elem.options))
-            : randomMember(elem.options)
-        )
-        .join(separator)
-    : "";
-}

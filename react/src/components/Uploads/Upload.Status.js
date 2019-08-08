@@ -16,6 +16,8 @@ import uuid from "uuid";
 import Tab from "@material-ui/core/Tab";
 import { makeStyles } from "@material-ui/core/styles";
 import { UploadContext } from "../../context/Upload.Context";
+import { Status, getStatusValue } from "../../util/files";
+import TablePagination from "@material-ui/core/TablePagination";
 
 const useStyles = makeStyles(theme => ({
   mainGrid: {
@@ -30,9 +32,36 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+function reducer(state, action) {
+  const { activeStatus, currentPage, itemsPerPage, type } = action;
+
+  switch (type) {
+    case "ActiveStatus":
+      return { ...state, activeStatus };
+    case "CurrentPage":
+      return { ...state, currentPage };
+    case "ItemsPerPage":
+      return { ...state, itemsPerPage };
+    default:
+      return state;
+  }
+}
+
 export default () => {
   const { uploadProps, uploadDispatch } = React.useContext(UploadContext);
   const { files } = uploadProps;
+  const [uploadListProps, uploadListDispatch] = React.useReducer(reducer, {
+    activeStatus: 0,
+    currentPage: 0,
+    itemsPerPage: 10,
+    itemsPerPageOptions: [5, 10, 25]
+  });
+  const {
+    activeStatus,
+    currentPage,
+    itemsPerPage,
+    itemsPerPageOptions
+  } = uploadListProps;
 
   const classes = useStyles();
   const status = [
@@ -41,18 +70,37 @@ export default () => {
     Status("completed", "completed", 2, false),
     Status("with issues", "with issues", 3, false)
   ];
-  const [activeStatus, setActiveStatus] = React.useState(0);
 
-  function handleChange(event, newValue) {
-    setActiveStatus(newValue);
+  function handleChange(event, activeStatus) {
+    uploadListDispatch({
+      type: "ActiveStatus",
+      activeStatus
+    });
   }
 
   const handleCancelFile = filename => {
     uploadDispatch({
       type: "Files",
       files: files.filter(({ name }) => name !== filename)
-    })
+    });
   };
+
+  const handleChangePage = (event, newPage) => {
+    uploadListDispatch({
+      type: "CurrentPage",
+      currentPage: newPage
+    });
+  };
+  const handleChangeRowsPerPage = event => {
+    uploadListDispatch({
+      type: "ItemsPerPage",
+      itemsPerPage: +event.target.value
+    });
+  };
+
+  const activeFiles = files.filter(
+    file => getStatusValue(file.progress) === activeStatus
+  );
 
   return (
     <Grid item xs={12} md={6} className={classes.mainGrid}>
@@ -78,13 +126,29 @@ export default () => {
           />
         ))}
       </Tabs>
+      <TablePagination
+        rowsPerPageOptions={itemsPerPageOptions}
+        component="div"
+        count={activeFiles.length}
+        rowsPerPage={itemsPerPage}
+        page={currentPage}
+        backIconButtonProps={{
+          "aria-label": "previous page"
+        }}
+        nextIconButtonProps={{
+          "aria-label": "next page"
+        }}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
+
       <List>
-        {files
-          .filter(file => getStatusValue(file.progress) === activeStatus)
+        {activeFiles
+          .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
           .map(file => (
             <Tooltip
               key={uuid()}
-              title={`${(100 * file.progress).toFixed(2)}%`}
+              title={file.progress < 0? file.issue.title :`${(100 * file.progress).toFixed(2)}%`}
               placement="right-end"
             >
               <ListItem>
@@ -96,7 +160,9 @@ export default () => {
                 <ListItemText
                   disableTypography
                   primary={
-                    <Typography variant="subtitle2">{file.name}</Typography>
+                    <Typography noWrap variant="subtitle2">
+                      {file.name}
+                    </Typography>
                   }
                   secondary={
                     <LinearProgress
@@ -123,14 +189,3 @@ export default () => {
     </Grid>
   );
 };
-
-function Status(display, name, value, disabled) {
-  return { display, name, value, disabled };
-}
-
-function getStatusValue(progress) {
-  if (progress === 0) return 0;
-  else if (progress < 1 && progress > 0) return 1;
-  else if (progress === 1) return 2;
-  return 3;
-}

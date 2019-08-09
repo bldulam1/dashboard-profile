@@ -32,17 +32,7 @@ const group1 = [
 const group2 = ["PLM", "PTC", "DOORS", "JIRA", "Sharepoint"].sort();
 const keyOptions = [...group1, ...group2];
 
-// function getTimeStamp() {
-//   const newTime = new Date();
-//   return {
-//     year: newTime.getFullYear(),
-//     month: newTime.getMonth(),
-//     day: newTime.getDate(),
-//     minute: newTime.getMinutes(),
-//     hour: newTime.getHours(),
-//     second: newTime.getSeconds()
-//   };
-// }
+
 function reducer(state, action) {
   const {
     type,

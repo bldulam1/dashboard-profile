@@ -11,7 +11,7 @@ import SearchIcon from "@material-ui/icons/Search";
 
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
-import useToggle from "../hooks/useToggle";
+import useToggle from "../../hooks/useToggle";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
@@ -20,8 +20,8 @@ import Typography from "@material-ui/core/Typography";
 
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 
-import { api_server } from "../environment/environment";
-import { ProjectContext } from "../context/Project.Context";
+import { api_server } from "../../environment/environment";
+import { ProjectContext } from "../../context/Project.Context";
 
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -30,6 +30,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Checkbox from "@material-ui/core/Checkbox";
 import Avatar from "@material-ui/core/Avatar";
+import { normalizeSize } from "../../util/strings";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -162,7 +163,7 @@ function NewRule(props) {
     axios.get(`${api_server}/search/${activeProject}/unique/tags`).then(res => {
       setKeys(res.data);
     });
-  }, []);
+  }, [activeProject]);
 
   // const classes = useStyles();
   const [rule, setRule] = React.useState({
@@ -337,16 +338,7 @@ function SearchBar(props) {
   );
 }
 
-export function normalizeSize(byteSize) {
-  const units = " KMGTPEZYXSD";
-  let newSize = byteSize ? byteSize : 0;
-  let index = 0;
-  while (newSize > 1000) {
-    newSize /= 1000;
-    index++;
-  }
-  return `${newSize.toFixed(2)} ${units[index]}B`;
-}
+
 function SceneList(props) {
   const { scenes } = props;
   const classes = useStyles();
@@ -436,7 +428,7 @@ function SceneList(props) {
 export default props => {
   const classes = useStyles();
   const [scenes, setScenes] = React.useState([]);
-  const [isLoading, setIsLoading] = useToggle(false);
+  // const [isLoading, setIsLoading] = useToggle(false);
 
   return (
     <Paper className={classes.contentPaper}>

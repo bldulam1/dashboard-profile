@@ -14,7 +14,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import Axios from "axios";
 import { api_server } from "../../../environment/environment";
-import { normalizeSize } from "../../Search";
+import { normalizeSize } from "../../../util/strings";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MemoryIcon from "@material-ui/icons/Memory";
 import { UploadFile, isFollowingNamingConvention } from "../../../util/files";

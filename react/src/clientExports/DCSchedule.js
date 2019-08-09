@@ -3,7 +3,7 @@ import Workbook from "react-excel-workbook";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import BallotIcon from "@material-ui/icons/Ballot";
-import { getHeaders } from "../components/TestCatalog";
+import { getHeaders } from "../util/test-catalog";
 
 export default params => {
   const { selected } = params;
@@ -26,7 +26,7 @@ export default params => {
   console.log(headers);
   return (
     <Workbook
-      filename="example.xlsx"
+      filename="DCSchedule.xlsx"
       element={
         <Tooltip title="Create Data Collection Planner">
           <IconButton aria-label="Delete">

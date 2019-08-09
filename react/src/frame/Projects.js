@@ -1,9 +1,8 @@
 import React from "react";
 import Dashboard from "../components/Dashboard";
-import Search from "../components/Search";
+import Search from "../components/Search/Search";
 import Upload from "../components/Uploads/Upload";
 import Maps from "../components/Maps";
-import TestCatalog from "../components/TestCatalog";
 import SettingsUser from "../components/Settings.User";
 import SettingsProject from "../components/Settings.Project";
 
@@ -16,6 +15,7 @@ import PersonIcon from "@material-ui/icons/Person";
 import GroupIcon from "@material-ui/icons/Group";
 import WorkIcon from "@material-ui/icons/Work";
 import Tasks from "../components/Tasks/Tasks";
+import TestCatalog from "../components/TestCatalog/TestCatalog";
 
 function Component(name, route, component, projects, icon) {
   return { name, route, component, projects, icon };

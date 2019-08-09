@@ -4,6 +4,5 @@ import { useStyles } from "../styles/classes";
 
 export default props => {
   const classes = useStyles();
-
   return <Paper className={classes.contentPaper}>Maps</Paper>;
 };

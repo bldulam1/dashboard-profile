@@ -13,7 +13,7 @@ import LocationOnIcon from "@material-ui/icons/LocationOn";
 import ListAltIcon from "@material-ui/icons/ListAlt";
 import SettingsIcon from "@material-ui/icons/Settings";
 import Tooltip from "@material-ui/core/Tooltip";
-import { normalizeSize } from "../../Search";
+import { normalizeSize } from "../../../util/strings";
 import Axios from "axios";
 import { api_server } from "../../../environment/environment";
 import { ProjectContext } from "../../../context/Project.Context";

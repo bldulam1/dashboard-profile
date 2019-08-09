@@ -1,12 +1,12 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core";
-import { ProjectContext } from "../../../context/Project.Context";
+// import { ProjectContext } from "../../../context/Project.Context";
 import { fade } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
 
-var debounceTimer = null;
+// var debounceTimer = null;
 
 const useStyles = makeStyles(theme => ({
   search: {

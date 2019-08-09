@@ -19,8 +19,11 @@ router.get("/read-dir/:dir(*)", async (req, res) => {
   let totalSize = 0;
   let files = new Set();
 
-  if (cleanedDir === path.resolve(UPLOAD_ROOT)) {
-    return res.send({ filesCount, totalSize });
+  if (
+    cleanedDir === path.resolve(UPLOAD_ROOT) ||
+    !cleanedDir.includes(path.resolve(UPLOAD_ROOT))
+  ) {
+    return res.send({ files: [], totalSize });
   }
   readdirp(cleanedDir, { alwaysStat: true, type: "files" })
     .on("data", ({ basename, fullPath, stats: { size } }) => {
@@ -36,8 +39,8 @@ router.get("/read-dir/:dir(*)", async (req, res) => {
         comments: []
       });
     })
-    .on("warn", error => res.send({ error, filesCount, totalSize }))
-    .on("error", error => res.send({ error, filesCount, totalSize }))
+    .on("warn", error => res.send({ error, files: [...files] }))
+    .on("error", error => res.send({ error, files: [...files] }))
     .on("end", () => res.send({ files: [...files] }));
 });
 

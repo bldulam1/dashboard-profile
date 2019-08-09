@@ -44,6 +44,7 @@ export default () => {
     files,
     ncDetails,
     storageLocation,
+    sourceDirectory,
     tags,
     preUploadOperations,
     selectedDropFiles
@@ -56,7 +57,8 @@ export default () => {
 
     for (const key in preUploadOperations) {
       if (preUploadOperations[key].value) {
-        ops.push(key);
+        const {parameters} = preUploadOperations[key];
+        ops.push(`${key}  ${JSON.stringify(parameters)}`);
       }
     }
     return ops;
@@ -68,7 +70,7 @@ export default () => {
       .map(tag => `${tag.key}:${tag.value}`);
   };
 
-  const handleUpload = async () => {
+  const normalUpload = () => {
     const validFilesNames = validFiles.map(vf => vf.name);
     let formattedFiles = files;
     const batches = [0, 1, 2, 3, 4];
@@ -114,6 +116,38 @@ export default () => {
         }
       }
     });
+  };
+
+  const vdriveUpload = async () => {
+    const url = `${api_server}/upload/v-drive/${activeProject}`;
+
+    for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+      const file = files[fileIndex];
+      if (file.progress < 0) continue;
+      const {
+        data: { progress, issue }
+      } = await Axios.post(url, {
+        file,
+        storageLocation,
+        sourceDirectory
+      });
+
+      const newFiles = files;
+      newFiles[fileIndex] = { ...newFiles[fileIndex], progress, issue };
+      uploadDispatch({
+        type: "Files",
+        files: newFiles
+      });
+    }
+  };
+
+  const handleUpload = async () => {
+    switch (method) {
+      case 1:
+        return vdriveUpload();
+      default:
+        return normalUpload();
+    }
   };
 
   return (

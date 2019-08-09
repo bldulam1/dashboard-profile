@@ -95,23 +95,28 @@ export default props => {
     files: [],
     uploadMethods: ["Normal Upload", "V-Drive Upload"],
     method: 0,
-    sourceDirectory: "V:\\JP01\\DataLake\\Common_Write",
+    sourceDirectory: `V:\\JP01\\DataLake\\Common_Write\\${activeProject}`,
     isSourceDirectoryExists: true,
     namingConventions: [],
     selectedNC: "",
     ncDetails: {},
     rootPath: "V:\\JP01\\DataLake",
-    storageLocation: `V:\\JP01\\DataLake\\Valpro\\${activeProject}\\username\\`,
+    storageLocation: `V:\\JP01\\DataLake\\Valpro\\${activeProject}\\`,
     keyOptions,
     tags: [{ key: keyOptions[0], value: "" }],
     preUploadOperations: {
       ampCheck: {
         value: false,
-        disabled: false
+        disabled: false,
+        parameters: {
+          threshold: 99,
+          minimumFrame: 500
+        }
       },
       messieCheck: {
         value: false,
-        disabled: true
+        disabled: true,
+        parameters: {}
       }
     }
   });

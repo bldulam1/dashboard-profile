@@ -20,18 +20,13 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 import SearchIcon from "@material-ui/icons/Search";
 import FilterListIcon from "@material-ui/icons/FilterList";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
 import InputBase from "@material-ui/core/InputBase";
-
 import Axios from "axios";
 import { api_server } from "../environment/environment";
 import { ProjectContext } from "../context/Project.Context";
 import Download from "../clientExports/DCSchedule";
-import { debounce } from "../hooks/my-library";
 
+var debounceTimer = null;
 export function getHeaders(rows) {
   return rows
     .map(row =>
@@ -200,12 +195,12 @@ EnhancedTableToolbar.propTypes = {
 
 const useStyles = makeStyles(theme => ({
   root: {
-    width: '100%'
+    width: "100%"
     // marginTop: theme.spacing(3)
   },
   table: {
     // tableLayout: "fixed",
-    minWidth: '100%'
+    minWidth: "100%"
   },
   tableWrapper: {
     overflowX: "auto"
@@ -244,7 +239,6 @@ function SimpleSearch(props) {
   const { activeProject } = React.useContext(ProjectContext);
   const classes = useStyles();
   const [searchString, setSearchString] = React.useState("");
-  let inDebounce;
 
   function onSearchStringChange(search_string) {
     const regex = search_string.split(/[\s,]+/).join("|");
@@ -260,10 +254,10 @@ function SimpleSearch(props) {
     setSearchString(search_string);
     setSearchValue(query);
 
-    clearTimeout(inDebounce);
-    inDebounce = setTimeout(() => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
       fetchData(0, null, query);
-    }, 750);
+    }, 1000);
   }
 
   return (
@@ -304,8 +298,7 @@ export default () => {
   const [headCols, setHeadCols] = React.useState([]);
   const [searchValue, setSearchValue] = React.useState("");
 
-
-  const fetchData = (_page, _rowsPerPage, _query)=> {
+  const fetchData = (_page, _rowsPerPage, _query) => {
     const p = _page === null ? page : _page;
     const rpp = _rowsPerPage ? _rowsPerPage : rowsPerPage;
 
@@ -320,7 +313,7 @@ export default () => {
       setBodyRows(rows);
       setRowsLen(count);
     });
-  }
+  };
 
   React.useEffect(() => {
     Axios.get(`${api_server}/tc/${activeProject}/unique/sheetName`).then(res =>
@@ -366,7 +359,7 @@ export default () => {
 
   function handleChangePage(event, newPage) {
     setPage(newPage);
-    fetchData(newPage,null,searchValue);
+    fetchData(newPage, null, searchValue);
   }
 
   function handleChangeRowsPerPage(event) {
@@ -379,36 +372,36 @@ export default () => {
     setDense(event.target.checked);
   }
 
-  async function handleChangeFeature(event) {
-    const newFeature = event.target.value;
-    const newQuery = {
-      $and: [
-        { project: activeProject },
-        { sheetName: { $regex: newFeature, $options: "i" } }
-      ]
-    };
-    setQuery(newQuery);
-    fetchData(page, rowsPerPage, newQuery);
+  // async function handleChangeFeature(event) {
+  //   const newFeature = event.target.value;
+  //   const newQuery = {
+  //     $and: [
+  //       { project: activeProject },
+  //       { sheetName: { $regex: newFeature, $options: "i" } }
+  //     ]
+  //   };
+  //   setQuery(newQuery);
+  //   fetchData(page, rowsPerPage, newQuery);
 
-    setFeature(newFeature);
-    const { data } = await Axios.get(
-      `${api_server}/tc/${activeProject}/unique/feature/${newFeature}`
-    );
+  //   setFeature(newFeature);
+  //   const { data } = await Axios.get(
+  //     `${api_server}/tc/${activeProject}/unique/feature/${newFeature}`
+  //   );
 
-    setHeaderOptions(data);
-  }
+  //   setHeaderOptions(data);
+  // }
 
-  async function handleChangeSheet(event) {
-    const _selectedSheet = event.target.value;
+  // async function handleChangeSheet(event) {
+  //   const _selectedSheet = event.target.value;
 
-    setSelectedSheet(_selectedSheet);
+  //   setSelectedSheet(_selectedSheet);
 
-    const newQuery = {
-      $and: [{ project: activeProject }, { sheetName: _selectedSheet }]
-    };
-    setQuery(newQuery);
-    fetchData(page, rowsPerPage, newQuery);
-  }
+  //   const newQuery = {
+  //     $and: [{ project: activeProject }, { sheetName: _selectedSheet }]
+  //   };
+  //   setQuery(newQuery);
+  //   fetchData(page, rowsPerPage, newQuery);
+  // }
 
   const isSelected = name => selected.indexOf(name) !== -1;
 

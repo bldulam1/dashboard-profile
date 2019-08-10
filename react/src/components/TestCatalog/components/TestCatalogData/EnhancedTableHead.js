@@ -1,4 +1,5 @@
 import React from "react";
+import uuid from "uuid/v4";
 import TableHead from "@material-ui/core/TableHead";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import TableCell from "@material-ui/core/TableCell";
@@ -34,7 +35,7 @@ export default function(props) {
         </TableCell>
         {cols.map(col => (
           <TableCell
-            key={col.id}
+            key={uuid()}
             align={col.numeric ? "right" : "left"}
             padding={col.disablePadding ? "none" : "default"}
             sortDirection={orderBy === col.id ? order : false}

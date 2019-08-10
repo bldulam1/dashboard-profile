@@ -50,7 +50,7 @@ export default params => {
 
   const expansionPanels = [
     UploadExpansionPanelObject("File Selection", <FileSelection />, {
-      height: "50vh"
+      height: "45vh"
     }),
     UploadExpansionPanelObject("Naming Convention", <NamingConvention />),
     UploadExpansionPanelObject("Meta Data Label", <MetaData />),

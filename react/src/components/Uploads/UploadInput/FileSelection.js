@@ -39,6 +39,7 @@ const useStyles = makeStyles(theme => ({
   },
   dropZoneInner: {
     margin: "auto",
+    padding: '1%',
     width: "95%",
     height: "95%",
     border: "1px solid #E0C1CB",

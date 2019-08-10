@@ -27,11 +27,11 @@ router.get("/:project/unique/feature/:feature", async (req, res) => {
 });
 
 router.get("/:project/:page/:rowsPerPage/:queryString(*)", async (req, res) => {
-  const { page, rowsPerPage, queryString } = req.params;
+  const { project, page, rowsPerPage, queryString } = req.params;
   const skip = page * rowsPerPage;
   const limit = rowsPerPage * 1;
 
-  const query = JSON.parse(queryString);
+  const query = { $and: [{ project }, JSON.parse(queryString)] };
 
   const count_tc = await Promise.all([
     TestCatalog.countDocuments(query),

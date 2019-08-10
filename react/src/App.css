@@ -9,7 +9,9 @@ body {
   margin: 0;
 } */
 
-body,
+body{
+  overflow: auto
+},
 html {
   padding: 0;
   margin: 0;

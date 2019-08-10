@@ -7,7 +7,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
     flexDirection: "column",
-    minHeight: "100vh"
+    minHeight: "100vh",
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -92,22 +92,22 @@ const useStyles = makeStyles(theme => ({
     paddingLeft: drawerWidth,
     paddingTop: 64,
     display: "flex",
-    minHeight: '100vh',
-    minWidth: '100vh',
+    minHeight: "100vh",
+    minWidth: "100vh",
     backgroundColor: GRAY
   },
   contentDrawerClose: {
     paddingLeft: theme.spacing(9) + 1,
     paddingTop: 64,
     display: "flex",
-    minHeight: '100vh',
-    minWidth: '100vh',
+    minHeight: "100vh",
+    minWidth: "100vh",
     backgroundColor: GRAY
   },
   contentPaper: {
     margin: "1rem",
     padding: "1rem",
-    width: '100%'
+    width: "100%"
   },
   secondaryAvatar: {
     fontWeight: "bold",

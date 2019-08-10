@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/core";
-// import { ProjectContext } from "../../../context/Project.Context";
 import { fade } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
+import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
+import { fetchData } from "../../../../util/test-catalog";
 
-// var debounceTimer = null;
+var debounceTimer = null;
+const TIMER = 500;
 
 const useStyles = makeStyles(theme => ({
   search: {
@@ -27,32 +29,24 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default params => {
-  // const { activeProject } = React.useContext(ProjectContext);
   const classes = useStyles();
+  const { tcProps, tcDispatch } = useContext(TestCatalogContext);
+  // // const { query } = tcProps;
   const [searchString, setSearchString] = React.useState("");
 
-  // function onSearchStringChange(search_string) {
-  //   const regex = search_string.split(/[\s,]+/).join("|");
-  //   const query = {
-  //     $and: [
-  //       { project: activeProject },
-  //       {
-  //         "Record ID": { $regex: regex, $options: "i" }
-  //       }
-  //     ]
-  //   };
-
-  //   setSearchString(search_string);
-  //   setSearchValue(query);
-
-  //   clearTimeout(debounceTimer);
-  //   debounceTimer = setTimeout(() => {
-  //     fetchData(0, null, query);
-  //   }, 1000);
-  // }
-
   const handleSearchString = event => {
-    setSearchString(event.target.value);
+    const newSearchString = event.target.value;
+    const newQuery = {
+      "Record ID": { $regex: newSearchString, $options: "i" }
+    };
+    setSearchString(newSearchString);
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      fetchData({ ...tcProps, query: newQuery }, res =>
+        tcDispatch({ ...res, query: newQuery })
+      );
+    }, TIMER);
   };
 
   return (

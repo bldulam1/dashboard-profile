@@ -10,15 +10,15 @@ import Axios from "axios";
 import { api_server } from "../../environment/environment";
 
 const useStyles = makeStyles(theme => ({
+  contentPaper: {
+    margin: "1rem",
+    padding: "1rem",
+    width: "98%"
+  },
   container: {
     width: "100%",
     height: "100%",
     margin: "auto"
-  },
-  contentPaper: {
-    margin: "1rem",
-    padding: "1rem",
-    width: "100%"
   }
 }));
 
@@ -31,7 +31,6 @@ const group1 = [
 ].sort();
 const group2 = ["PLM", "PTC", "DOORS", "JIRA", "Sharepoint"].sort();
 const keyOptions = [...group1, ...group2];
-
 
 function reducer(state, action) {
   const {

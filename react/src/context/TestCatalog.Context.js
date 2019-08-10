@@ -10,7 +10,8 @@ export const TestCatalogContext = createContext({
     order: null,
     orderBy: null,
     page: null,
-    rowsPerPage: null
+    rowsPerPage: null,
+    count: 0
   },
   tcDispatch: null
 });

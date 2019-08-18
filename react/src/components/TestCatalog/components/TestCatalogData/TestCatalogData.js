@@ -6,8 +6,6 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
 import EnhancedTableHead from "./EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import {
@@ -74,6 +72,7 @@ export default () => {
     orderBy,
     page,
     rowsPerPage,
+    rowsPerPageOptions,
     count
   } = tcProps;
 
@@ -86,16 +85,17 @@ export default () => {
   }
 
   function handleSelectAllClick(event) {
-    const newSelecteds = event.target.checked ? rows.map(n => n._id) : [];
+    const newSelecteds = event.target.checked ? rows : [];
     tcDispatch({ selected: newSelecteds });
   }
 
   function handleClick(event, _id) {
-    const selectedIndex = selected.indexOf(_id);
+    const selectedIndex = selected.findIndex(s => s._id === _id);
+    const selectedRow = rows.filter(row => row._id === _id);
     let newSelected = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, _id);
+      newSelected = newSelected.concat(selected, ...selectedRow);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -127,19 +127,13 @@ export default () => {
     });
   }
 
-  function handleChangeDense(event) {
-    tcDispatch({
-      dense: event.target.checked
-    });
-  }
-
-  const isSelected = _id => selected.indexOf(_id) !== -1;
+  const isSelected = _id => selected.findIndex(s => s._id === _id) !== -1;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length);
 
   return (
     <div className={classes.root}>
-      <EnhancedTableToolbar numSelected={selected.length} />
+      <EnhancedTableToolbar numSelected={selected.length} count={count} />
       <div className={classes.tableWrapper}>
         <Table
           className={classes.table}
@@ -175,7 +169,7 @@ export default () => {
         </Table>
       </div>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 15, 20, 30, 40, 50]}
+        rowsPerPageOptions={rowsPerPageOptions}
         component="div"
         count={count}
         rowsPerPage={rowsPerPage}
@@ -188,10 +182,6 @@ export default () => {
         }}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
-      <FormControlLabel
-        control={<Switch value={dense} onChange={handleChangeDense} />}
-        label="Dense padding"
       />
     </div>
   );

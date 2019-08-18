@@ -27,16 +27,17 @@ export default function(props) {
         <TableCell padding="checkbox">
           <Checkbox
             color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={numSelected === rowCount}
+            indeterminate={numSelected > 0 && numSelected !== rowCount}
+            checked={numSelected > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
             inputProps={{ "aria-label": "select all desserts" }}
           />
         </TableCell>
-        {cols.map(col => (
+        {cols.map((col, index) => (
           <TableCell
             key={uuid()}
-            align={col.numeric ? "right" : "left"}
+            align={index ? "right" : "left"}
+            // align={col.numeric ? "right" : "left"}
             padding={col.disablePadding ? "none" : "default"}
             sortDirection={orderBy === col.id ? order : false}
           >

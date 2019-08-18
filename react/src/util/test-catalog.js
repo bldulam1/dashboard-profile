@@ -54,13 +54,30 @@ export function fetchData({ project, page, rowsPerPage, query }, callback) {
   const qs = JSON.stringify(query);
   const url = `${api_server}/tc/${project}/${page}/${rowsPerPage}/${qs}`;
   Axios.get(url).then(res => {
-    const { rows, count } = res.data;
-
-    // const nRows = rows.map(row =>
-    //   Object.keys(row).reduce((nRow, key) => ({ ...nRow, [key]: row[key] }), {})
-    // );
-
+    const { rows, count, subFeatures } = res.data;
     callback({
+      rows,
+      count,
+      subFeatures,
+      cols: fetchColumns(rows, "Record ID"),
+      isLoading: false
+    });
+  });
+}
+
+export function initializeTCProps(
+  { project, page, rowsPerPage, query },
+  callback
+) {
+  const sheetsAPI = `${api_server}/tc/${project}/unique/sheetName`;
+  const qs = JSON.stringify(query);
+  const dataAPI = `${api_server}/tc/${project}/${page}/${rowsPerPage}/${qs}`;
+  Promise.all([Axios.get(sheetsAPI), Axios.get(dataAPI)]).then(values => {
+    const { features } = values[0].data;
+    const { rows, count, subFeatures } = values[1].data;
+    callback({
+      features,
+      subFeatures,
       rows,
       count,
       cols: fetchColumns(rows, "Record ID"),

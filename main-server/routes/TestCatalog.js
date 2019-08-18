@@ -26,6 +26,19 @@ router.get("/:project/unique/feature/:feature", async (req, res) => {
   res.send(sheetNames);
 });
 
+router.get("/:project/labels-description/:labels(*)", async (req, res) => {
+  const renaultNissanLabels = require("../testCatalogLabels/renaultNissan");
+  const labels = JSON.stringify(req.params.labels);
+  let descriptions = [];
+
+  renaultNissanLabels.forEach(
+    description =>
+      labels.includes(description.parameter) && descriptions.push(description)
+  );
+
+  res.send({ labels, descriptions });
+});
+
 router.get("/:project/:page/:rowsPerPage/:queryString(*)", async (req, res) => {
   const { project, page, rowsPerPage, queryString } = req.params;
   const skip = page * rowsPerPage;
@@ -35,11 +48,18 @@ router.get("/:project/:page/:rowsPerPage/:queryString(*)", async (req, res) => {
 
   const count_tc = await Promise.all([
     TestCatalog.countDocuments(query),
-    TestCatalog.find(query, null, { skip, limit })
+    TestCatalog.find(query, null, { skip, limit }),
+    TestCatalog.distinct("sheetName", query)
     // TestCatalog.find(query, null, { skip, limit, sort: {'Record ID': 1} })
   ]);
 
-  res.send({ skip, limit, count: count_tc[0], rows: count_tc[1] });
+  res.send({
+    skip,
+    limit,
+    count: count_tc[0],
+    rows: count_tc[1],
+    subFeatures: count_tc[2]
+  });
 });
 
 router.get("/:project/unique/sheetName", async (req, res) => {
@@ -48,7 +68,7 @@ router.get("/:project/unique/sheetName", async (req, res) => {
   const features = sheetNames.map(name => name.slice(0, name.indexOf("_")));
   const sortedUniqeFeatures = [...new Set(features)].sort();
 
-  res.send(sortedUniqeFeatures);
+  res.send({ features: sortedUniqeFeatures });
 });
 
 module.exports = router;

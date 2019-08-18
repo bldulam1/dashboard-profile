@@ -6,12 +6,16 @@ export const TestCatalogContext = createContext({
     cols: [],
     rows: [],
     selected: [],
-    dense: false,
+    dense: true,
     order: null,
     orderBy: null,
     page: null,
     rowsPerPage: null,
-    count: 0
+    count: 0,
+    features: [],
+    selectedFeatures: [],
+    subFeatures: [],
+    selectedSubFeatures: []
   },
   tcDispatch: null
 });

@@ -12,6 +12,7 @@
     "react-dom": "^16.8.6",
     "react-dropzone": "^10.1.6",
     "react-excel-workbook": "0.0.4",
+    "react-list-drag-and-drop": "^0.9.1",
     "react-router": "^5.0.1",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",

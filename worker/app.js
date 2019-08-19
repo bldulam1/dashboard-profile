@@ -4,8 +4,8 @@ const app = express();
 // const mongoose = require("mongoose");
 const logger = require("morgan");
 const bodyParser = require("body-parser");
+const axios = require("axios");
 
-const port = 8001;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(logger("dev"));
@@ -16,7 +16,8 @@ app.use(
   })
 );
 app.set("view options", { pretty: true });
-app.use("/task", require("./routes/task"));
+app.use("/tasks", require("./routes/tasks"));
+app.use("/fileSearch", require("./routes/fileSearch"));
 app.use("/", require("./routes/statistics"));
 
 // mongoose.connect(`mongodb://localhost:27017/clarity`, {
@@ -27,7 +28,18 @@ app.use("/", require("./routes/statistics"));
 // mongoose.connection.on("error", err => console.log(err));
 // mongoose.connection.on("open", () => {
 //   console.log(`${process.pid} database server connected`);
-app.listen(port, () => {
-  console.log(`Clarity is listening on port ${port}!`);
+const props = require("./config/processArgs");
+app.listen(props.port, async () => {
+  const { mainHost, mainPort } = props;
+  const mainURL = `http://${mainHost}:${mainPort}/service-workers/new`;
+  const { hostname, port, serverName, url } = props;
+  const { data } = await axios.post(mainURL, {
+    hostname,
+    port,
+    serverName,
+    url
+  });
+
+  console.log(`Service worker is listening on port ${port}!`, data);
 });
 // });

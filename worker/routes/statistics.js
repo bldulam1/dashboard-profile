@@ -2,8 +2,32 @@ const router = require("express").Router();
 const si = require("systeminformation");
 
 router.get("/", async (req, res) => {
-  const osInfo = await si.osInfo();
-  res.send(osInfo);
+  const values = await Promise.all([
+    si.osInfo(),
+    si.networkStats(),
+    si.cpu(),
+    si.mem()
+  ]);
+  res.send({
+    osInfo: values[0],
+    networkStats: values[1],
+    cpu: values[2],
+    mem: values[3]
+  });
+});
+
+router.get("/stats/:time", async (req, res) => {
+  const values = await Promise.all([
+    // si.networkStats(),
+    si.currentLoad(),
+    si.mem()
+  ]);
+  res.send({
+    // networkStats: values[0],
+    cpu: values[0],
+    mem: values[1],
+    time: req.params.time
+  });
 });
 
 router.get("/currentLoad", async (req, res) => {
@@ -16,7 +40,7 @@ router.get("/processes", async (req, res) => {
   res.send(processes);
 });
 
-router.get("/networkStatus", async (req, res) => {
+router.get("/networkStatus/:time", async (req, res) => {
   const networkStats = await si.networkStats();
   res.send(networkStats);
 });

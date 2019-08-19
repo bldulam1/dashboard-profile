@@ -3,6 +3,12 @@ var tasks = new Set();
 var allowedTasksLen = 1;
 var allowedTasks = [];
 
+var block = false;
+var BlockingMiddleware = (req, res, next) => {
+  if (block === true) return res.send(503); // 'Service Unavailable'
+  next();
+};
+
 function isServerAvailable() {}
 
 router.get("/", async (req, res) => {
@@ -22,10 +28,12 @@ router.post("/max", async (req, res) => {
   res.send({ allowedTasksLen });
 });
 
-router.post("/execute", async (req, res) => {
+router.post("/execute", BlockingMiddleware, async (req, res) => {
+  block = true;
   const newTask = req.body;
   tasks.add(newTask);
-  res.send([...tasks])
+  block = false;
+  res.send([...tasks]);
 });
 
 router.get("/allowed-tasks", async (req, res) => {

@@ -1,9 +1,10 @@
 const Worker = require("../schemas/worker");
 const axios = require("axios");
+const MAXLEN = 12;
 
 async function getCPU_MEM() {
   const time = new Date();
-  const workers = await Worker.find();
+  const workers = await Worker.find({}, { url: 1, cpu: 1, mem: 1 });
 
   workers.forEach(({ _id, url, cpu, mem }) => {
     axios
@@ -14,8 +15,8 @@ async function getCPU_MEM() {
         const { total, free, used } = res.data.mem;
         // console.log(res.data.mem);
         await Worker.findByIdAndUpdate(_id, {
-          cpu: [...cpu.slice(0, 59), { time, cpus, currentload }],
-          mem: [...mem.slice(0, 59), { time, total, free, used }],
+          cpu: [...cpu.slice(0, MAXLEN - 1), { time, cpus, currentload }],
+          mem: [...mem.slice(0, MAXLEN - 1), { time, total, free, used }],
           active: true
         });
       })
@@ -29,14 +30,14 @@ async function getCPU_MEM() {
 
 async function getNetworkStats() {
   const time = new Date();
-  const workers = await Worker.find();
+  const workers = await Worker.find({}, { url: 1, network: 1 });
 
   workers.forEach(({ _id, url, network }) => {
     axios
       .get(`${url}/networkStatus/${time.toLocaleString()}`)
       .then(async ({ data }) => {
         await Worker.findByIdAndUpdate(_id, {
-          network: [...network.slice(0, 59), { time, ifaces: data }],
+          network: [...network.slice(0, MAXLEN - 1), { time, ifaces: data }],
           active: true
         });
       })

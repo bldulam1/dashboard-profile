@@ -7,6 +7,7 @@ let workerSchema = mongoose.Schema({
   url: String,
   allowedTasks: [String],
   active: Boolean,
+  searching: Boolean,
   tasks: [],
   cpu: [],
   mem: [],

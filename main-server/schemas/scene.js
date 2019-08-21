@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const sceneSchema = mongoose.Schema({
   project: String,
   path: String,
-  parentFolder: String,
+  root: String,
   fileName: String,
   extension: String,
   size: Number,
@@ -15,6 +15,14 @@ const sceneSchema = mongoose.Schema({
   tags: []
 });
 
+const sfSchema = mongoose.Schema({
+  project: String,
+  root: String,
+  folder: String,
+  assignedServer: String
+});
+
 module.exports = {
-  Scene: mongoose.model("Scene", sceneSchema)
+  Scene: mongoose.model("Scene", sceneSchema),
+  SearchFolder: mongoose.model("SearchFolder", sfSchema)
 };

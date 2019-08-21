@@ -37,7 +37,7 @@ mongoose.connection.on("open", () => {
   console.log(`${process.pid} database server connected`);
   app.listen(port, () => {
     console.log(`Clarity is listening on port ${port}!`);
-    setInterval(getCPU_MEM, 1000);
-    setInterval(getNetworkStats, 10000);
+    // setInterval(getCPU_MEM, 1000);
+    // setInterval(getNetworkStats, 5000);
   });
 });

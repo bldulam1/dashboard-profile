@@ -1,36 +1,62 @@
 const router = require("express").Router();
 const { readdirSync, statSync } = require("fs");
+const readdirp = require("readdirp");
 const path = require("path");
 
 var block = false;
 
 var BlockingMiddleware = (req, res, next) => {
-  if (block === true) return res.send(503); // 'Service Unavailable'
+  if (block === true) return res.sendStatus(503); // 'Service Unavailable'
   next();
 };
 
-router.get("/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
+router.get("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
   block = true;
   const dir = path.resolve(req.params.dir);
+  const project = req.params.project;
   const files = [];
   const directories = [];
 
-  const items = readdirSync(dir);
-  items.forEach(item => {
-    const file = path.resolve(dir, item);
-    try {
-      const stat = statSync(file);
-      const { size, mtime, birthtime } = stat;
-      stat.isDirectory()
-        ? directories.push(file)
-        : files.push({ file, size, mtime, birthtime });
-    } catch (error) {
-      // console.error(error);
-    }
-  });
-
-  block = false;
-  res.send({ files, directories });
+  readdirp(dir, { alwaysStat: true, depth: 0, type: "files_directories" })
+    .on("data", entry => {
+      const { fullPath, stats } = entry;
+      const { size, mtime, birthtime } = stats;
+      if (stats.isDirectory()) {
+        directories.push(fullPath);
+      } else {
+        const { base, ext, dir } = path.parse(fullPath);
+        files.push({
+          project,
+          fileName: base,
+          extension: ext.replace(".", ""),
+          path: dir,
+          size: parseInt(size),
+          date: {
+            modified: mtime,
+            birth: birthtime,
+            mapped: new Date()
+          }
+        });
+      }
+    })
+    // Optionally call stream.destroy() in `warn()` in order to abort and cause 'close' to be emitted
+    .on("warn", error => {
+      block = false;
+      console.error("non-fatal error", error);
+    })
+    .on("error", error => {
+      block = false;
+      console.error("fatal error", error);
+    })
+    .on("end", () => {
+      block = false;
+      try {
+        // console.log({ files, directories });
+        res.send({ files, directories, project, root: dir });
+      } catch (error) {
+        res.send({ error });
+      }
+    });
 });
 
 module.exports = router;

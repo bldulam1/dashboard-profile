@@ -33,13 +33,13 @@ app.listen(props.port, async () => {
   const { mainHost, mainPort } = props;
   const mainURL = `http://${mainHost}:${mainPort}/service-workers/new`;
   const { hostname, port, serverName, url } = props;
-  const { data } = await axios.post(mainURL, {
+  await axios.post(mainURL, {
     hostname,
     port,
     serverName,
     url
   });
 
-  console.log(`Service worker is listening on port ${port}!`, data);
+  console.log(`Service worker is listening on port ${port}!`);
 });
 // });

@@ -90,21 +90,23 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
 
   let workersFlags = workers.map(() => false);
   let isLastChild = false;
-  console.log(workersFlags);
 
   do {
     for (let index = 0; index < workers.length; index++) {
       const { serverName, url } = workers[index];
       const pick = await pickFolder(serverName);
-      if (pick.folder && pick.folder.folder) {
+      if (pick.folder && pick.folder.folder && !workersFlags[index]) {
         const { folder, _id } = pick.folder;
-        Axios.get(`${url}/fileSearch/${project}/dir/${folder}`)
+        Axios.post(`${url}/fileSearch/${project}/dir/`, { dir: folder, root })
           .then(async results => {
             await removeFolder(_id);
             const { files, directories } = getFilesAndDirectories(results.data);
             if (files.length) {
               filesCount += files.length;
-              console.log(filesCount, serverName);
+              Scene.deleteMany({ path: folder }).then(() => {
+                Scene.insertMany(files);
+                // console.log(filesCount, serverName);
+              });
             }
             if (directories.length) {
               workersFlags = workers.map(() => false);
@@ -127,78 +129,6 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
   console.log(workersFlags);
   elapsedTime = new Date().getTime() - elapsedTime;
   res.send({ filesCount, elapsedTime });
-
-  // workers.forEach(({ serverName, url }, index) =>
-  //   setTimeout(async () => {
-  //     console.log('start', serverName)
-  //     let pick = { block, folder: {} };
-  //     do {
-  //       pick = await pickFolder(serverName);
-  //       console.log(pick)
-  //       if (pick.folder && pick.folder.folder) {
-  //         const { folder, _id } = pick.folder;
-  //         const results = await Axios.get(
-  //           `${url}/fileSearch/${project}/dir/${folder}`
-  //         ).catch(() => unPickFolder(_id));
-
-  //         if (results.data) await removeFolder(_id);
-  //         const { files, directories } = getFilesAndDirectories(results.data);
-  //         if (directories.length) {
-  //           filesCount += files.length;
-  //           // console.log(filesCount, serverName);
-  //           await Promise.all(
-  //             directories.map(directory => new SearchFolder(directory).save())
-  //           );
-  //         }
-  //       } else if (!pick.block && !pick.folder) {
-  //         console.log(finished, serverName);
-  //         finished = true;
-  //         elapsedTime = new Date().getTime() - elapsedTime;
-  //         res.send({ filesCount, elapsedTime });
-  //       }
-  //     } while (pick.block || !finished);
-  //     console.log("exit", serverName);
-  //   }, index * 5)
-  // );
-
-  // while (true) {
-  //   let [searchFolders, workers] = await Promise.all([
-  //     SearchFolder.find({ assignedServer: null }),
-  //     Worker.find({ active: true })
-  //   ]);
-
-  //   const minimumLength =
-  //     searchFolders.length < workers.length
-  //       ? searchFolders.length
-  //       : workers.length;
-
-  //   if (!minimumLength) break;
-
-  //   searchFolders = searchFolders.slice(0, minimumLength);
-  //   workers = workers.slice(0, minimumLength);
-
-  //   let values = await Promise.all([
-  //     ...searchFolders.map(({ folder, project }, index) =>
-  //       Axios.get(`${workers[index].url}/fileSearch/${project}/dir/${folder}`)
-  //     ),
-  //     ...searchFolders.map(({ _id }, index) =>
-  //       SearchFolder.findByIdAndUpdate(_id, {
-  //         assignedServer: workers[index].serverName
-  //       })
-  //     )
-  //   ]);
-  //   values = values.slice(0, values.length / 2);
-
-  //   let results = getFilesAndDirectories(values.map(v => v.data));
-  //   filesCount += results.files.length;
-
-  //   await Promise.all([
-  //     ...searchFolders.map(sf => sf.remove()),
-  //     ...results.directories.map(directory =>
-  //       new SearchFolder(directory).save()
-  //     )
-  //   ]);
-  // }
 });
 
 module.exports = router;

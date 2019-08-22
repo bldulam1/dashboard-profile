@@ -10,9 +10,10 @@ var BlockingMiddleware = (req, res, next) => {
   next();
 };
 
-router.get("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
+router.post("/:project/dir/", BlockingMiddleware, async (req, res) => {
   block = true;
-  const dir = path.resolve(req.params.dir);
+  const root = path.resolve(req.body.root);
+  const dir = path.resolve(req.body.dir);
   const project = req.params.project;
   const files = [];
   const directories = [];
@@ -29,6 +30,7 @@ router.get("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
           project,
           fileName: base,
           extension: ext.replace(".", ""),
+          root,
           path: dir,
           size: parseInt(size),
           date: {
@@ -39,7 +41,6 @@ router.get("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
         });
       }
     })
-    // Optionally call stream.destroy() in `warn()` in order to abort and cause 'close' to be emitted
     .on("warn", error => {
       block = false;
       console.error("non-fatal error", error);
@@ -51,7 +52,6 @@ router.get("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
     .on("end", () => {
       block = false;
       try {
-        // console.log({ files, directories });
         res.send({ files, directories, project, root: dir });
       } catch (error) {
         res.send({ error });

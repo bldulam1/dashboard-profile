@@ -18,6 +18,7 @@ app.use(
 );
 app.set("view options", { pretty: true });
 
+app.use("/overpass", require("./routes/Overpass"));
 app.use("/fs", require("./routes/File"));
 app.use("/upload", require("./routes/Upload"));
 app.use("/search", require("./routes/Search"));

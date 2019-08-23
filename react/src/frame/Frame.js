@@ -104,7 +104,7 @@ export default () => {
             <Route
               exact
               path="/"
-              render={() => <Redirect to={`/${activeProject}/dashboard`} />}
+              render={() => <Redirect to={`/${activeProject}/search`} />}
             />
           </ProjectContext.Provider>
         </main>

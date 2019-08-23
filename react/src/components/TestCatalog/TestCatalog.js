@@ -30,7 +30,7 @@ const _defaultProps = {
   rows: [],
   selected: [],
   order: "asc",
-  orderBy: "calories",
+  orderBy: "Record ID",
   page: 0,
   rowsPerPage: 25,
   rowsPerPageOptions: [5, 10, 25, 50, 100, 200, 300],

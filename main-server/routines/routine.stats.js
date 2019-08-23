@@ -8,7 +8,7 @@ async function getCPU_MEM() {
 
   workers.forEach(({ _id, url, cpu, mem }) => {
     axios
-      .get(`${url}/stats/${time.toLocaleString()}`)
+      .get(`${url}/stats/${time}`)
       .then(async res => {
         const cpus = res.data.cpu.cpus.map(cpu => cpu.load);
         const { currentload } = res.data.cpu;
@@ -34,7 +34,7 @@ async function getNetworkStats() {
 
   workers.forEach(({ _id, url, network }) => {
     axios
-      .get(`${url}/networkStatus/${time.toLocaleString()}`)
+      .get(`${url}/networkStatus/${time}`)
       .then(async ({ data }) => {
         await Worker.findByIdAndUpdate(_id, {
           network: [...network.slice(0, MAXLEN - 1), { time, ifaces: data }],

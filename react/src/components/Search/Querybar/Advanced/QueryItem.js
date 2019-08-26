@@ -11,7 +11,6 @@ import uuid from "uuid/v4";
 import Tooltip from "@material-ui/core/Tooltip";
 import { getRelationOptions } from "../../../../util/search";
 
-
 const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
@@ -26,21 +25,84 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+function getObjectFields(objects, id) {
+  for (let o of objects || []) {
+    if (o.id === id) return o;
+    const o_ = getObjectFields(o.items, id);
+    if (o_) return o_;
+  }
+}
 
-function QueryItem(props) {
+
+// function SelectTypeField() {
+//   const classes = useStyles();
+//   const { searchFileProps, searchFileDispatch } = useContext(FileSearchContext);
+//   const { advancedQuery } = searchFileProps;
+
+//   function handleChange(event, _field) {
+//     let _advancedQuery = advancedQuery;
+//     const newValue = event.target.value;
+//     const findDFS = (objects, id, field) => {
+//       for (let o of objects || []) {
+//         if (o.id === id) {
+//           o[field] = newValue;
+//           if (field === "_key") {
+//             o.relationOptions = getRelationOptions(newValue);
+//             o.relation = o.relationOptions[0].value;
+//           }
+//         }
+//         const o_ = findDFS(o.items, id, field);
+//         if (o_) {
+//           o_[field] = newValue;
+//           if (field === "_key") {
+//             o_.relationOptions = getRelationOptions(newValue);
+//             o_.relation = o_.relationOptions[0].value;
+//           }
+//         }
+//       }
+//     };
+
+//     findDFS([_advancedQuery], id, _field);
+//     searchFileDispatch({
+//       advancedQuery: _advancedQuery
+//     });
+//   }
+
+//   return (
+//     <FormControl className={classes.formControl}>
+//       <Tooltip title="Key">
+//         <Select
+//           value={_key}
+//           onChange={event => handleChange(event, "_key")}
+//           inputProps={{
+//             name: "key",
+//             id: "key-simple"
+//           }}
+//         >
+//           {keyOptions.map(keyOption => (
+//             <MenuItem key={uuid()} value={keyOption.dbName}>
+//               {keyOption.dispName}
+//             </MenuItem>
+//           ))}
+//         </Select>
+//       </Tooltip>
+//     </FormControl>
+//   );
+// }
+
+function QueryItem({ id }) {
   const classes = useStyles();
   const { searchFileProps, searchFileDispatch } = useContext(FileSearchContext);
   const { advancedQuery } = searchFileProps;
 
   const {
-    id,
     _key,
     keyOptions,
     value,
     valueOptions,
     relation,
     relationOptions
-  } = props;
+  } = getObjectFields([advancedQuery], id);
 
   function handleChange(event, _field) {
     let _advancedQuery = advancedQuery;

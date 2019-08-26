@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const { Scene, SearchFolder } = require("../schemas/scene");
 const Worker = require("../schemas/worker");
-const { readdirSync, existsSync, statSync } = require("fs");
+const { existsSync } = require("fs");
 const readdirp = require("readdirp");
 const path = require("path");
 const Axios = require("axios");
@@ -11,7 +11,7 @@ const UPLOAD_ROOT = path.resolve("V:\\JP01\\DataLake\\Common_Write");
 router.get("/is-directory-exist/:dir(*)", async (req, res) => {
   const { dir } = req.params;
   const cleanedDir = path.resolve(dir);
-  res.send(existsSync(dir));
+  res.send(existsSync(cleanedDir));
 });
 
 router.get("/read-dir/:dir(*)", async (req, res) => {
@@ -105,7 +105,6 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
               filesCount += files.length;
               Scene.deleteMany({ path: folder }).then(() => {
                 Scene.insertMany(files);
-                // console.log(filesCount, serverName);
               });
             }
             if (directories.length) {
@@ -126,9 +125,15 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
       }
     }
   } while (!isFinished(workersFlags));
-  console.log(workersFlags);
+  // console.log(workersFlags);
   elapsedTime = new Date().getTime() - elapsedTime;
   res.send({ filesCount, elapsedTime });
+});
+
+router.delete("/del-dir/:project/:dir(*)", async (req, res) => {
+  const { dir, project } = req.params;
+  const results = await Scene.deleteMany({ project, root: path.resolve(dir) });
+  res.send(results);
 });
 
 module.exports = router;

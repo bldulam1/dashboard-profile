@@ -6,9 +6,7 @@ export function isFollowingNamingConvention(file, namingConvention) {
     return { progress: -1, issue: { title: "Invalid File Type" } };
   }
 
-  const splits = name
-    .slice(0, name.length - type.length - 1)
-    .split(separator);
+  const splits = name.slice(0, name.length - type.length - 1).split(separator);
 
   if (elements.length !== splits.length) {
     return { progress: -1, issue: { title: "Non matching fields" } };

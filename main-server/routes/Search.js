@@ -47,19 +47,35 @@ router.get("/:project/unique/tag/:key", async (req, res) => {
   res.send(uniqueKeys);
 });
 
-router.get("/:project/:_skip/:_limit/:queryString(*)", async (req, res) => {
-  const { project, _skip, _limit, queryString } = req.params;
-  const skip = _skip * 1;
-  const limit = _limit * 1;
+router.get(
+  "/:project/ids-only/sort=:sortString(*)/query=:queryString(*)",
+  async (req, res) => {
+    const { sortString, queryString } = req.params;
+    const sort = JSON.parse(sortString);
+    const query = JSON.parse(queryString);
 
-  const query = JSON.parse(queryString);
+    let ids = await Scene.find(query, { _id: 1 });
+    res.send(ids.map(s=>s._id));
+  }
+);
 
-  const count_scenes = await Promise.all([
-    Scene.countDocuments(query),
-    Scene.find(query, null, { skip, limit })
-  ]);
+router.get(
+  "/:project/skip=:_skip/limit=:_limit/sort=:sortString(*)/query=:queryString(*)",
+  async (req, res) => {
+    const { _skip, _limit, sortString, queryString } = req.params;
+    const skip = _skip * 1;
+    const limit = _limit * 1;
+    const sort = JSON.parse(sortString);
+    const query = JSON.parse(queryString);
+    // console.log({ skip, limit, sort, query });
 
-  res.send({ skip, limit, count: count_scenes[0], scenes: count_scenes[1] });
-});
+    const count_scenes = await Promise.all([
+      Scene.countDocuments(query),
+      Scene.find(query, null, { skip, limit, sort })
+    ]);
+
+    res.send({ skip, limit, count: count_scenes[0], scenes: count_scenes[1] });
+  }
+);
 
 module.exports = router;

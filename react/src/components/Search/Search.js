@@ -6,13 +6,18 @@ import { FileSearchContext } from "../../context/Search.Context";
 import { ProjectContext } from "../../context/Project.Context";
 import Axios from "axios";
 import { api_server } from "../../environment/environment";
-import ContentsMain from "./Contents/Contents.Main";
+// import ContentsMain from "./Contents/Contents.Main";
 import Operations from "./Operations/Operations";
+import ToolbarMain from "./Toolbar/Toolbar.Main";
+import QuerybarMain from "./Querybar/Querybar.Main";
+import ContentsVirtualTable from "./Contents/Contents.VirtualTable";
 
 const useStyles = makeStyles(theme => ({
+  contentPaper: {
+    padding: "1rem",
+    width: "100%"
+  },
   mainGrid: {
-    flexGrow: 1,
-    margin: "1rem",
     width: "100%",
     height: "100%"
   },
@@ -20,8 +25,9 @@ const useStyles = makeStyles(theme => ({
     height: "100%"
   },
   paper: {
+    display: "flex",
+    flexDirection: "column",
     padding: theme.spacing(2),
-    textAlign: "center",
     height: "100%",
     color: theme.palette.text.secondary
   }
@@ -33,58 +39,43 @@ export default () => {
   const [searchFileProps, searchFileDispatch] = useReducer(
     (state, action) => ({ ...state, ...action }),
     {
-      query: { project: activeProject, extension: "cvw" },
+      project: activeProject,
+      query: { project: activeProject },
       scenes: [],
+      count: 0,
       focusScene: null,
       selected: [],
+      isAllSelected: false,
       rootPaths: [],
-      order: "asc",
-      orderBy: "_id",
-      page: 0,
-      rowsPerPage: 10
+      sort: { extension: 1, fileName: 1 },
+      skip: 0,
+      limit: 30
     }
   );
 
-  const { page, rowsPerPage, query } = searchFileProps;
-
   useEffect(() => {
-    const skip = page * rowsPerPage;
-    const searchValueString = JSON.stringify(query);
-    const scenesURL = `${api_server}/search/${activeProject}/${skip}/${rowsPerPage}/${searchValueString}`;
     const rootPathsURL = `${api_server}/search/${activeProject}/unique/roots`;
-    Axios.get(scenesURL).then(res => {
-      if (res.data.scenes.length) {
-        searchFileDispatch({
-          scenes: res.data.scenes,
-          focusScene: res.data.scenes[0]._id
-        });
-      }
-    });
     Axios.get(rootPathsURL).then(res => {
       searchFileDispatch({ rootPaths: res.data });
     });
-  }, [page, rowsPerPage, query, activeProject]);
+  }, [activeProject]);
 
   return (
-    <div className={classes.mainGrid}>
-      <FileSearchContext.Provider
-        value={{ searchFileProps, searchFileDispatch }}
-      >
+    <FileSearchContext.Provider value={{ searchFileProps, searchFileDispatch }}>
+      <div className={classes.contentPaper}>
         <Grid container spacing={2} className={classes.subGrid}>
           <Grid className={classes.subGrid} item xs={12} sm={9}>
             <Paper className={classes.paper}>
-              <div>Search Bar </div>
-              <div>ToolBar</div>
-              <ContentsMain />
+              <QuerybarMain />
+              <ToolbarMain />
+              <ContentsVirtualTable />
             </Paper>
           </Grid>
           <Grid className={classes.subGrid} item xs={12} sm={3}>
-            <Paper className={classes.paper}>
-              <Operations />
-            </Paper>
+            <Operations />
           </Grid>
         </Grid>
-      </FileSearchContext.Provider>
-    </div>
+      </div>
+    </FileSearchContext.Provider>
   );
 };

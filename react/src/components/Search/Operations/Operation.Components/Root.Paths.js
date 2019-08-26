@@ -8,7 +8,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Tooltip from "@material-ui/core/Tooltip";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import IconButton from "@material-ui/core/IconButton";
-import { normalizeSize, numberWithCommas } from "../../../../util/strings";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
@@ -17,10 +16,23 @@ import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/styles";
+import Axios from "axios";
+import { api_server } from "../../../../environment/environment";
+import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
+import SendIcon from "@material-ui/icons/Send";
+import { ProjectContext } from "../../../../context/Project.Context";
+import { useSnackbar } from "notistack";
+import {
+  normalizeSize,
+  numberWithCommas,
+  normalizeTime
+} from "../../../../util/strings";
+import { fetchScenesData } from "../../../../util/scenes-search";
+
+let newRootDebounceTimer = null;
 
 const useStyles = makeStyles(theme => ({
   expansionPanelDetails: {
-    paddingLeft: 0,
     display: "flex",
     flexDirection: "column"
   },
@@ -52,15 +64,27 @@ function reducer(state, action) {
 }
 
 export default params => {
-  const { searchFileProps } = useContext(FileSearchContext);
-  const { rootPaths } = searchFileProps;
+  const { searchFileProps, searchFileDispatch } = useContext(FileSearchContext);
+  const { rootPaths, skip, limit, sort, query } = searchFileProps;
+
+  const { activeProject } = useContext(ProjectContext);
+  const { enqueueSnackbar } = useSnackbar();
 
   const classes = useStyles();
   const [rootPath, rootPathDispatch] = useReducer(reducer, {
     anchorEl: null,
-    expanded: false
+    expanded: false,
+    newRoot: "",
+    isNewRootValid: false,
+    submittedValues: []
   });
-  const { anchorEl, expanded } = rootPath;
+  const {
+    anchorEl,
+    expanded,
+    newRoot,
+    isNewRootValid,
+    submittedValues
+  } = rootPath;
 
   function handleRootMenuClick(event) {
     rootPathDispatch({ anchorEl: event.currentTarget });
@@ -70,9 +94,81 @@ export default params => {
     rootPathDispatch({ anchorEl: null });
   }
 
+  function handleRootPathOperation(path, operation) {
+    if (operation === "remove") {
+      const url = `${api_server}/fs/del-dir/${activeProject}/${path}`;
+      Axios.delete(url)
+        .then(results => {
+          const { deletedCount, n } = results.data;
+          const deletedCountComma = numberWithCommas(deletedCount);
+          const nComma = numberWithCommas(n);
+          const displayText = `Removed ${deletedCountComma} out of ${nComma} files from ${path}`;
+          enqueueSnackbar(displayText, { variant: "success" });
+        })
+        .then(() => refreshRootPaths());
+    }
+    handleClose();
+  }
+
+  const isSubmitted = () => {
+    return submittedValues.includes(newRoot);
+  };
+
+  const refreshRootPaths = () => {
+    fetchScenesData(
+      { project: activeProject, skip, limit, sort, query },
+      results => {
+        searchFileDispatch({ ...results });
+      }
+    );
+
+    const rootPathsURL = `${api_server}/search/${activeProject}/unique/roots`;
+    Axios.get(rootPathsURL).then(res => {
+      searchFileDispatch({ rootPaths: res.data });
+    });
+  };
+
+  function handleNewRootPathSubmit(event) {
+    event && event.preventDefault();
+    if (isNewRootValid) {
+      rootPathDispatch({ submittedValues: [...submittedValues, newRoot] });
+      Axios.get(`${api_server}/fs/map-dir/${activeProject}/${newRoot}`)
+        .then(results => {
+          const { filesCount, elapsedTime } = results.data;
+          const filesWithComma = numberWithCommas(filesCount);
+          const normalTime = normalizeTime(elapsedTime);
+          const displayText = `Found ${filesWithComma} files from ${newRoot} in ${normalTime}`;
+          enqueueSnackbar(displayText, { variant: "success" });
+        })
+        .then(() => refreshRootPaths());
+    }
+  }
+
+  const handleNewRootChange = event => {
+    const path = event.target.value;
+    rootPathDispatch({ newRoot: path, isNewRootValid: false });
+    clearTimeout(newRootDebounceTimer);
+
+    newRootDebounceTimer = setTimeout(() => {
+      Axios.get(`${api_server}/fs/is-directory-exist/${path}`).then(results => {
+        rootPathDispatch({ isNewRootValid: results.data });
+      });
+    }, 750);
+  };
+
   const handleChange = panel => (event, isExpanded) => {
     rootPathDispatch({ expanded: isExpanded ? panel : false });
   };
+
+  const getHelperText = () => {
+    if (isSubmitted()) return "This root path has already been submitted";
+    else if (!isNewRootValid && newRoot.length)
+      return "This root path either does not exist or inaccessible by the server";
+    else if (!newRoot.length) {
+      return "Please provide a valid directory location";
+    }
+  };
+
   return (
     <ExpansionPanel
       style={{ padding: 0 }}
@@ -112,8 +208,17 @@ export default params => {
                       open={Boolean(anchorEl)}
                       onClose={handleClose}
                     >
-                      <MenuItem onClick={handleClose} dense>
+                      <MenuItem
+                        onClick={() => handleRootPathOperation(_id, "reload")}
+                        dense
+                      >
                         Reload
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleRootPathOperation(_id, "remove")}
+                        dense
+                      >
+                        Remove
                       </MenuItem>
                     </Menu>
                   </div>
@@ -154,25 +259,30 @@ export default params => {
           })}
         </List>
 
-        <form
-          noValidate
-          autoComplete="off"
-          onSubmit={event => {
-            event.preventDefault();
-            console.log(event.target.value);
-          }}
-        >
+        <form noValidate autoComplete="off" onSubmit={handleNewRootPathSubmit}>
           <TextField
+            error={!isNewRootValid}
             fullWidth
+            required
             id="new-root-path"
             label="New Root Path"
-            // value={values.name}
-            // onChange={handleChange("name")}
+            value={newRoot}
+            onChange={handleNewRootChange}
             margin="normal"
-            style={{ width: "90%" }}
+            helperText={getHelperText()}
           />
         </form>
       </ExpansionPanelDetails>
+      <ExpansionPanelActions>
+        <IconButton
+          disabled={!isNewRootValid || isSubmitted()}
+          onClick={handleNewRootPathSubmit}
+        >
+          <SendIcon
+            color={!isNewRootValid || isSubmitted() ? "disabled" : "primary"}
+          />
+        </IconButton>
+      </ExpansionPanelActions>
     </ExpansionPanel>
   );
 };

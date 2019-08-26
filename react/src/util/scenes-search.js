@@ -1,5 +1,5 @@
 import { api_server } from "../environment/environment";
-import Axios from "../../../worker/node_modules/axios";
+import Axios from "axios";
 
 export function fetchScenesData(
   { project, skip, limit, query, sort },

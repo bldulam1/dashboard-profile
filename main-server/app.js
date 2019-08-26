@@ -13,7 +13,14 @@ app.use(logger("dev"));
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000"]
+    origin: [
+      "http://localhost:3000",
+      "http://jp01-clarity01:3000",
+      "http://jp01-clarity01.corp.int:3000",
+      "http://localhost:80",
+      "http://jp01-clarity01:80",
+      "http://jp01-clarity01.corp.int:80"
+    ]
   })
 );
 app.set("view options", { pretty: true });

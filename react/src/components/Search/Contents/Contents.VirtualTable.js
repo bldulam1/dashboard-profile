@@ -179,8 +179,7 @@ export default () => {
     skip,
     query,
     sort,
-    selected,
-    isAllSelected
+    selected
   } = searchFileProps;
 
   useEffect(() => {
@@ -223,29 +222,36 @@ export default () => {
 
     return {
       ...scene,
-      isSelected: isAllSelected || Boolean(selected.length && selected.includes(scene._id)),
+      isSelected: Boolean(selected.length && selected.includes(scene._id)),
       size: scene.size ? normalizeSize(scene.size) : 0
     };
   };
 
   const evaluateSelections = () => {
     const selectedLen = selected.length;
-    if (isAllSelected) {
-      return 1;
-    } else if (!selectedLen) {
+    if (!selectedLen) {
       return -1;
+    } else if (selectedLen < count) {
+      return 0;
+    } else if (selectedLen === count) {
+      return 1;
     }
-    return 0;
   };
 
   const toggleAllSelection = () => {
     const allSelectionState = evaluateSelections();
     if (allSelectionState === -1) {
       // if selection is empty
-      searchFileDispatch({ isAllSelected: true });
+      const sortString = JSON.stringify(sort);
+      const queryString = JSON.stringify(query);
+
+      const selectAllURL = `${api_server}/search/${project}/ids-only/sort=${sortString}/query=${queryString}`;
+      Axios.get(selectAllURL).then(results =>
+        searchFileDispatch({ selected: results.data })
+      );
     } else {
       // if selection is not empty
-      searchFileDispatch({ selected: [], isAllSelected: false });
+      searchFileDispatch({ selected: [] });
     }
   };
 

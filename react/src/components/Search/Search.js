@@ -11,6 +11,7 @@ import Operations from "./Operations/Operations";
 import ToolbarMain from "./Toolbar/Toolbar.Main";
 import QuerybarMain from "./Querybar/Querybar.Main";
 import ContentsVirtualTable from "./Contents/Contents.VirtualTable";
+import { QueryGroupObject, QueryItemObject } from "../../util/search";
 
 const useStyles = makeStyles(theme => ({
   contentPaper: {
@@ -41,6 +42,10 @@ export default () => {
     {
       project: activeProject,
       query: { project: activeProject },
+      advancedQuery: QueryGroupObject("and", [
+        QueryItemObject("fileName", "", "w"),
+        QueryItemObject("size", "", "w")
+      ]),
       scenes: [],
       count: 0,
       focusScene: null,

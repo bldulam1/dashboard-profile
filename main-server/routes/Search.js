@@ -55,7 +55,7 @@ router.get(
     const query = JSON.parse(queryString);
 
     let ids = await Scene.find(query, { _id: 1 });
-    res.send(ids.map(s=>s._id));
+    res.send(ids.map(s => s._id));
   }
 );
 

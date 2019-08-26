@@ -1,4 +1,4 @@
-import React, { useContext, useReducer } from "react";
+import React, { useContext, useReducer, useEffect } from "react";
 import { FileSearchContext } from "../../../../context/Search.Context";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -75,7 +75,12 @@ export default params => {
     anchorEl: null,
     expanded: false,
     newRoot: "",
+    searchStatus: {
+      isSearching: false,
+      unMappedRoots: []
+    },
     isNewRootValid: false,
+    newRootInvalidMsg: "",
     submittedValues: []
   });
   const {
@@ -83,7 +88,9 @@ export default params => {
     expanded,
     newRoot,
     isNewRootValid,
-    submittedValues
+    newRootInvalidMsg,
+    submittedValues,
+    searchStatus
   } = rootPath;
 
   function handleRootMenuClick(event) {
@@ -119,6 +126,11 @@ export default params => {
       { project: activeProject, skip, limit, sort, query },
       results => {
         searchFileDispatch({ ...results });
+        rootPathDispatch({
+          searchStatus: {
+            isSearching: false
+          }
+        });
       }
     );
 
@@ -128,10 +140,27 @@ export default params => {
     });
   };
 
+  const rootPathSearchStatus = () => {
+    const url = `${api_server}/fs/${activeProject}/unmapped-dirs`;
+    Axios.get(url).then(results => {
+      rootPathDispatch({
+        searchStatus: {
+          unMappedRoots: results.data
+        }
+      });
+    });
+  };
+
   function handleNewRootPathSubmit(event) {
     event && event.preventDefault();
     if (isNewRootValid) {
-      rootPathDispatch({ submittedValues: [...submittedValues, newRoot] });
+      rootPathDispatch({
+        newRoot: "",
+        submittedValues: [...submittedValues, newRoot],
+        searchStatus: {
+          isSearching: true
+        }
+      });
       Axios.get(`${api_server}/fs/map-dir/${activeProject}/${newRoot}`)
         .then(results => {
           const { filesCount, elapsedTime } = results.data;
@@ -140,7 +169,9 @@ export default params => {
           const displayText = `Found ${filesWithComma} files from ${newRoot} in ${normalTime}`;
           enqueueSnackbar(displayText, { variant: "success" });
         })
-        .then(() => refreshRootPaths());
+        .then(() => {
+          refreshRootPaths();
+        });
     }
   }
 
@@ -151,7 +182,12 @@ export default params => {
 
     newRootDebounceTimer = setTimeout(() => {
       Axios.get(`${api_server}/fs/is-directory-exist/${path}`).then(results => {
-        rootPathDispatch({ isNewRootValid: results.data });
+        rootPathDispatch({
+          isNewRootValid: results.data,
+          newRootInvalidMsg: !results.data
+            ? "This root path either does not exist or inaccessible by the server"
+            : ""
+        });
       });
     }, 750);
   };
@@ -160,15 +196,23 @@ export default params => {
     rootPathDispatch({ expanded: isExpanded ? panel : false });
   };
 
+  useEffect(() => {
+    rootPathSearchStatus();
+  }, []);
+
   const getHelperText = () => {
-    if (isSubmitted()) return "This root path has already been submitted";
-    else if (!isNewRootValid && newRoot.length)
-      return "This root path either does not exist or inaccessible by the server";
-    else if (!newRoot.length) {
+    if (isSubmitted()) {
+      return "This root path has already been submitted";
+    } else if (!isNewRootValid && newRoot.length) {
+      return newRootInvalidMsg;
+    } else if (!newRoot.length) {
       return "Please provide a valid directory location";
+    } else if (searchStatus.isSearching) {
+      return "Currently searching";
     }
   };
 
+  // rootPathSearchStatus();
   return (
     <ExpansionPanel
       style={{ padding: 0 }}
@@ -183,6 +227,7 @@ export default params => {
         <Typography className={classes.heading}>Root Paths</Typography>
       </ExpansionPanelSummary>
       <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+        <Typography variant="caption">Mapped Directories</Typography>
         <List className={classes.root}>
           {rootPaths.map(({ _id, totalSize, count, date }, index) => {
             const labelId = `checkbox-list-label-${index}`;
@@ -227,29 +272,24 @@ export default params => {
                   disableTypography
                   id={labelId}
                   primary={
-                    <Tooltip title={_id} placement="top">
-                      <Typography
-                        component="div"
-                        variant="caption"
-                        className={classes.breakWord}
-                      >
-                        <b style={{ marginRight: "0.5rem" }}>{_id}</b>
-                      </Typography>
-                    </Tooltip>
+                    <Typography
+                      component="div"
+                      variant="body2"
+                      className={classes.breakWord}
+                    >
+                      {_id}
+                    </Typography>
                   }
                   secondary={
                     <div>
                       <Info
-                        keyName="Total Size"
-                        content={normalizeSize(totalSize)}
+                        keyName={normalizeSize(totalSize)}
+                        content="total size"
                       />
+                      <Info keyName={numberWithCommas(count)} content="files" />
                       <Info
-                        keyName="Count"
-                        content={`${numberWithCommas(count)} files`}
-                      />
-                      <Info
-                        keyName="Mapped"
-                        content={new Date(date).toLocaleString()}
+                        keyName={new Date(date).toLocaleString()}
+                        content="last mapped"
                       />
                     </div>
                   }
@@ -258,6 +298,45 @@ export default params => {
             );
           })}
         </List>
+
+        {/* <Typography variant="caption">Mapping In Progress</Typography>
+        <List>
+          {Boolean(searchStatus.unMappedRoots.length) &&
+            searchStatus.unMappedRoots.map(
+              ({ root, unmappedSubDirs, foundFiles }, index) => {
+                const labelId = `lableID-${index}`;
+                return (
+                  <ListItem key={root} role={undefined} style={{ padding: 0 }}>
+                    <ListItemText
+                      disableTypography
+                      id={labelId}
+                      primary={
+                        <Typography
+                          component="div"
+                          variant="body2"
+                          className={classes.breakWord}
+                        >
+                          {root}
+                        </Typography>
+                      }
+                      secondary={
+                        <div>
+                          <Info
+                            keyName={numberWithCommas(unmappedSubDirs)}
+                            content="unmapped subdirectories"
+                          />
+                          <Info
+                            keyName={numberWithCommas(foundFiles)}
+                            content="files found"
+                          />
+                        </div>
+                      }
+                    />
+                  </ListItem>
+                );
+              }
+            )}
+        </List> */}
 
         <form noValidate autoComplete="off" onSubmit={handleNewRootPathSubmit}>
           <TextField

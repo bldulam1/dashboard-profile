@@ -87,7 +87,6 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
   };
 
   const workers = await Worker.find({ active: true });
-
   let workersFlags = workers.map(() => false);
   let isLastChild = false;
 
@@ -100,7 +99,10 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
         Axios.post(`${url}/fileSearch/${project}/dir/`, { dir: folder, root })
           .then(async results => {
             await removeFolder(_id);
-            const { files, directories } = getFilesAndDirectories(results.data);
+            const { files, directories } = getFilesAndDirectories({
+              ...results.data,
+              root
+            });
             if (files.length) {
               filesCount += files.length;
               Scene.deleteMany({ path: folder }).then(() => {
@@ -125,9 +127,41 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
       }
     }
   } while (!isFinished(workersFlags));
+
   // console.log(workersFlags);
   elapsedTime = new Date().getTime() - elapsedTime;
   res.send({ filesCount, elapsedTime });
+});
+
+router.get("/:project/unmapped-dirs", async (req, res) => {
+  const { project } = req.params;
+  SearchFolder.aggregate([
+    { $match: { project } },
+    {
+      $group: {
+        _id: "$root",
+        count: { $sum: 1 }
+      }
+    }
+  ]).then(results => {
+    if (results.length) {
+      let directories = results.map(res => ({
+        root: res._id,
+        unmappedSubDirs: res.count,
+        foundFiles: 0
+      }));
+      Promise.all(
+        directories.map(({ root }) => Scene.countDocuments({ project, root }))
+      ).then(values => {
+        values.forEach((val, index) => {
+          directories[index].foundFiles = val;
+          res.send(directories);
+        });
+      });
+    } else {
+      res.send([]);
+    }
+  });
 });
 
 router.delete("/del-dir/:project/:dir(*)", async (req, res) => {

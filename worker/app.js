@@ -6,8 +6,8 @@ const logger = require("morgan");
 const bodyParser = require("body-parser");
 const axios = require("axios");
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false, limit: "1000mb" }));
+app.use(bodyParser.json({ limit: "1000mb" }));
 app.use(logger("dev"));
 app.use(
   cors({

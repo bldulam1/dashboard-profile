@@ -14,4 +14,17 @@ router.get(
   }
 );
 
+router.post("/new", async (req, res) => {
+  const task = new Task(req.body);
+  task.save(error => {
+    res.send({ error, _id: task._id, success: error ? false : true });
+  });
+});
+
+router.put("/update/:id", async (req, res) => {
+  Task.findByIdAndUpdate(req.params.id, req.body)
+    .then(results => res.send({ results }))
+    .catch(error => res.send({ error }));
+});
+
 module.exports = router;

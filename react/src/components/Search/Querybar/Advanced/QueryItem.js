@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { FileSearchContext } from "../../../../context/Search.Context";
 import { makeStyles } from "@material-ui/styles";
 import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import IconButton from "@material-ui/core/IconButton";
@@ -98,8 +97,8 @@ function QueryItem({ id }) {
   const {
     _key,
     keyOptions,
-    value,
-    valueOptions,
+    // value,
+    // valueOptions,
     relation,
     relationOptions
   } = getObjectFields([advancedQuery], id);

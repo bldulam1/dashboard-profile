@@ -5,7 +5,6 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import Typography from "@material-ui/core/Typography";
 import ListItemText from "@material-ui/core/ListItemText";
-import Tooltip from "@material-ui/core/Tooltip";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import IconButton from "@material-ui/core/IconButton";
 import Menu from "@material-ui/core/Menu";
@@ -140,16 +139,16 @@ export default params => {
     });
   };
 
-  const rootPathSearchStatus = () => {
-    const url = `${api_server}/fs/${activeProject}/unmapped-dirs`;
-    Axios.get(url).then(results => {
-      rootPathDispatch({
-        searchStatus: {
-          unMappedRoots: results.data
-        }
-      });
-    });
-  };
+  // const rootPathSearchStatus = () => {
+  //   const url = `${api_server}/fs/${activeProject}/unmapped-dirs`;
+  //   Axios.get(url).then(results => {
+  //     rootPathDispatch({
+  //       searchStatus: {
+  //         unMappedRoots: results.data
+  //       }
+  //     });
+  //   });
+  // };
 
   function handleNewRootPathSubmit(event) {
     event && event.preventDefault();
@@ -197,8 +196,15 @@ export default params => {
   };
 
   useEffect(() => {
-    rootPathSearchStatus();
-  }, []);
+    const url = `${api_server}/fs/${activeProject}/unmapped-dirs`;
+    Axios.get(url).then(results => {
+      rootPathDispatch({
+        searchStatus: {
+          unMappedRoots: results.data
+        }
+      });
+    });
+  }, [activeProject]);
 
   const getHelperText = () => {
     if (isSubmitted()) {

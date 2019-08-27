@@ -1,26 +1,36 @@
 const router = require("express").Router();
-var tasks = new Set();
+const { spawn } = require("child_process");
+const props = require("../config/processArgs");
+const Axios = require("axios");
+const { serverName, mainHostURL } = props;
+const PENDING = "Pending",
+  INPROGRESS = "In Progress",
+  COMPLETED = "Completed",
+  ABORTED = "Aborted";
+var tasks = new Map();
 var allowedTasksLen = 1;
 var allowedTasks = [];
 
-var block = false;
-var BlockingMiddleware = (req, res, next) => {
-  if (block === true) return res.send(503); // 'Service Unavailable'
+const isServerAvailable = () => {
+  let nonCompletedTasks = 0;
+  tasks.forEach(task => {
+    if (!task.status || !task.status.value || task.status.value < 2) {
+      nonCompletedTasks++;
+    }
+  });
+  return nonCompletedTasks < allowedTasksLen;
+};
+const BlockingMiddleware = (req, res, next) => {
+  if (!isServerAvailable()) return res.sendStatus(503); // 'Service Unavailable'
   next();
 };
 
-function isServerAvailable() {}
-
 router.get("/", async (req, res) => {
-  res.send(tasks);
+  res.send(Array.from(tasks));
 });
 
 router.get("/is-available", async (req, res) => {
-  let length = 0;
-  for (const _id in tasks) {
-    length++;
-  }
-  res.send(!length);
+  res.send(isServerAvailable());
 });
 
 router.post("/max", async (req, res) => {
@@ -29,11 +39,15 @@ router.post("/max", async (req, res) => {
 });
 
 router.post("/execute", BlockingMiddleware, async (req, res) => {
-  block = true;
-  const newTask = req.body;
-  tasks.add(newTask);
-  block = false;
-  res.send([...tasks]);
+  let { task } = req.body;
+  const child = spawn("powershell.exe", [task.script]);
+  child.stdout.on("data", buff => handleNewLog(buff, task._id));
+  child.stderr.on("data", buff => handleNewLog(buff, task._id));
+  child.on("exit", (code, signal) => {
+    handleTaskFinish(code, signal, task._id);
+    res.send(tasks.get(task._id));
+  });
+  createNewTask(task, child.pid);
 });
 
 router.get("/allowed-tasks", async (req, res) => {
@@ -46,3 +60,41 @@ router.post("/update/allowed-tasks", async (req, res) => {
 });
 
 module.exports = router;
+
+function createNewTask(task, pid) {
+  task.process_id = pid;
+  task.start_time = new Date();
+  task.assigned_worker = serverName;
+  tasks.set(task._id, task);
+}
+
+function updateTask(taskID, updateData) {
+  const taskDetails = tasks.get(taskID);
+  tasks.set(taskID, { ...taskDetails, ...updateData });
+
+  // Update the main server
+
+  // const newTaskURL = `${mainHostURL}/tasks/new`;
+  // Axios.post(newTaskURL, tasks.get(taskID)).then(results => {
+  //   console.log(results.data);
+  // });
+}
+
+function handleNewLog(buff, taskID) {
+  const logData = String(buff).trim();
+  const oldLogs = tasks.get(taskID).logs;
+  const logs = [...oldLogs, { time: new Date(), logData }];
+  updateTask(taskID, { logs });
+}
+
+function handleTaskFinish(code, signal, taskID) {
+  const end_time = new Date();
+  const status = createStatus(COMPLETED);
+  updateTask(taskID, { code, signal, end_time, status });
+}
+
+function createStatus(text) {
+  const values = [PENDING, INPROGRESS, COMPLETED, ABORTED];
+  const value = values.findIndex(v => v === text);
+  return { text, value };
+}

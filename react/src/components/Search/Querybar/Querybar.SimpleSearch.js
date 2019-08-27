@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import IconButton from "@material-ui/core/IconButton";
 import SearchIcon from "@material-ui/icons/Search";
 import InputBase from "@material-ui/core/InputBase";
-import { ProjectContext } from "../../../context/Project.Context";
 import { makeStyles } from "@material-ui/styles";
 import { fade } from "@material-ui/core/styles";
 import { FileSearchContext } from "../../../context/Search.Context";

@@ -14,12 +14,12 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-async function fetchWorkerStatus() {
-  const { data } = await Axios.get(
-    `${api_server}/service-workers/stats-on/all`
-  );
-  return { ...data };
-}
+// async function fetchWorkerStatus() {
+//   const { data } = await Axios.get(
+//     `${api_server}/service-workers/stats-on/all`
+//   );
+//   return { ...data };
+// }
 
 function reducer(state, action) {
   return { ...state, ...action };

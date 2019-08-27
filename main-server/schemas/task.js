@@ -1,5 +1,6 @@
 let mongoose = require('mongoose');
 
+
 let taskSchema = mongoose.Schema({
   operation: String,
   executed_by: String,
@@ -15,6 +16,7 @@ let taskSchema = mongoose.Schema({
   output_files: [String],
   output_location: String,
   start_time: Date,
+  end_time: Date,
   elapsed_time: Number,
   project: String,
   logs: [{ time: Date, logData: String }],

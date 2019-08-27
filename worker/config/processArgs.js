@@ -23,7 +23,7 @@ args.forEach(arg => {
 });
 
 let url = `http://${hostname}:${port}`;
-
+let mainHostURL = `http://${mainHost}:${mainPort}`;
 
 module.exports = {
   url,
@@ -31,5 +31,6 @@ module.exports = {
   hostname,
   serverName,
   mainPort,
-  mainHost
+  mainHost,
+  mainHostURL
 };

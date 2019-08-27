@@ -7,8 +7,8 @@ const bodyParser = require("body-parser");
 const { getCPU_MEM, getNetworkStats } = require("./routines/routine.stats");
 
 const port = 8000;
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false, limit: "1000mb" }));
+app.use(bodyParser.json({ limit: "1000mb" }));
 app.use(logger("dev"));
 app.use(
   cors({
@@ -29,7 +29,7 @@ app.use("/overpass", require("./routes/Overpass"));
 app.use("/fs", require("./routes/File"));
 app.use("/upload", require("./routes/Upload"));
 app.use("/search", require("./routes/Search"));
-app.use("/task", require("./routes/Task"));
+app.use("/tasks", require("./routes/Task"));
 app.use("/tc", require("./routes/TestCatalog"));
 app.use("/naming-convention", require("./routes/NamingConventions"));
 app.use("/service-workers", require("./routes/ServiceWorkers"));
@@ -45,7 +45,7 @@ mongoose.connection.on("open", () => {
   console.log(`${process.pid} database server connected`);
   app.listen(port, () => {
     console.log(`Clarity is listening on port ${port}!`);
-    setInterval(getCPU_MEM, 1000);
-    setInterval(getNetworkStats, 5000);
+    // setInterval(getCPU_MEM, 1000);
+    // setInterval(getNetworkStats, 5000);
   });
 });

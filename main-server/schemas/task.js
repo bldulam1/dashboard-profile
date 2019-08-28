@@ -1,5 +1,4 @@
-let mongoose = require('mongoose');
-
+let mongoose = require("mongoose");
 
 let taskSchema = mongoose.Schema({
   operation: String,
@@ -11,7 +10,7 @@ let taskSchema = mongoose.Schema({
   script: String,
   expiryDate: Date,
   requestDate: Date,
-  priority: Number,
+
   assignedWorker: String,
   processID: Number,
   outputFiles: [String],
@@ -19,11 +18,16 @@ let taskSchema = mongoose.Schema({
   startTime: Date,
   endTime: Date,
   logs: [{ time: Date, logData: String }],
-  progress_log: { time: Date, step: String, status: String, percentage: Number },
+  progress_log: {
+    time: Date,
+    step: String,
+    status: String,
+    percentage: Number
+  },
   status: {
     value: Number,
     text: String
   }
 });
 
-module.exports = mongoose.model('Task', taskSchema);
+module.exports = mongoose.model("Task", taskSchema);

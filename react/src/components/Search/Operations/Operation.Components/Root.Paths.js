@@ -65,6 +65,7 @@ function reducer(state, action) {
 export default params => {
   const { searchFileProps, searchFileDispatch } = useContext(FileSearchContext);
   const { rootPaths, skip, limit, sort, query } = searchFileProps;
+  const { expanded, handleExpanChange } = params;
 
   const { activeProject } = useContext(ProjectContext);
   const { enqueueSnackbar } = useSnackbar();
@@ -72,7 +73,6 @@ export default params => {
   const classes = useStyles();
   const [rootPath, rootPathDispatch] = useReducer(reducer, {
     anchorEl: null,
-    expanded: false,
     newRoot: "",
     searchStatus: {
       isSearching: false,
@@ -84,7 +84,6 @@ export default params => {
   });
   const {
     anchorEl,
-    expanded,
     newRoot,
     isNewRootValid,
     newRootInvalidMsg,
@@ -222,8 +221,8 @@ export default params => {
   return (
     <ExpansionPanel
       style={{ padding: 0 }}
-      expanded={expanded === "root-path-panel"}
-      onChange={handleChange("root-path-panel")}
+      expanded={expanded === "Root Paths"}
+      onChange={handleExpanChange("Root Paths")}
     >
       <ExpansionPanelSummary
         expandIcon={<ExpandMoreIcon />}
@@ -304,45 +303,6 @@ export default params => {
             );
           })}
         </List>
-
-        {/* <Typography variant="caption">Mapping In Progress</Typography>
-        <List>
-          {Boolean(searchStatus.unMappedRoots.length) &&
-            searchStatus.unMappedRoots.map(
-              ({ root, unmappedSubDirs, foundFiles }, index) => {
-                const labelId = `lableID-${index}`;
-                return (
-                  <ListItem key={root} role={undefined} style={{ padding: 0 }}>
-                    <ListItemText
-                      disableTypography
-                      id={labelId}
-                      primary={
-                        <Typography
-                          component="div"
-                          variant="body2"
-                          className={classes.breakWord}
-                        >
-                          {root}
-                        </Typography>
-                      }
-                      secondary={
-                        <div>
-                          <Info
-                            keyName={numberWithCommas(unmappedSubDirs)}
-                            content="unmapped subdirectories"
-                          />
-                          <Info
-                            keyName={numberWithCommas(foundFiles)}
-                            content="files found"
-                          />
-                        </div>
-                      }
-                    />
-                  </ListItem>
-                );
-              }
-            )}
-        </List> */}
 
         <form noValidate autoComplete="off" onSubmit={handleNewRootPathSubmit}>
           <TextField

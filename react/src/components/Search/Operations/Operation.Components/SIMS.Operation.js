@@ -23,6 +23,7 @@ import {
 } from "@material-ui/pickers";
 import Axios from "axios";
 import { api_server } from "../../../../environment/environment";
+import { UserContext } from "../../../../context/User.Context";
 
 // let newRootDebounceTimer = null;
 
@@ -50,7 +51,9 @@ function OutputOption(extension, disabled, selected) {
 
 export default params => {
   const { searchFileProps } = useContext(FileSearchContext);
+  const { name } = useContext(UserContext);
   const { selected, project } = searchFileProps;
+  const { expanded, handleExpanChange } = params;
 
   const [options, setOptions] = useState({
     version: "SIMS_GEN12",
@@ -107,11 +110,15 @@ export default params => {
   };
 
   return (
-    <ExpansionPanel>
+    <ExpansionPanel
+      expanded={expanded === "SIMS"}
+      onChange={handleExpanChange("SIMS")}
+    >
       <ExpansionPanelSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls="root-path-panelbh-content"
         id="root-path-panelbh-header"
+        onChange={false}
       >
         <Typography className={classes.heading}>SIMS</Typography>
       </ExpansionPanelSummary>
@@ -186,13 +193,20 @@ export default params => {
           disabled={!isRequestValid()}
           onClick={() => {
             const url = `${api_server}/tasks/new/SIMS`;
-            const { simsLocation, version, commandLineArgs } = options;
+            const {
+              simsLocation,
+              version,
+              commandLineArgs,
+              expiryDate
+            } = options;
             Axios.post(url, {
               project,
               fileIDs: selected,
               simsLocation,
               version,
-              commandLineArgs
+              commandLineArgs,
+              requestedBy: name,
+              expiryDate: options.autoClean ? expiryDate : null
             }).then(results => {
               console.log(results.data);
             });
@@ -224,4 +238,3 @@ export default params => {
 //   const ss = padZero(newDate.getSeconds());
 //   return `${yy}${mo}${dd}_${hh}${mn}${ss}`;
 // }
-

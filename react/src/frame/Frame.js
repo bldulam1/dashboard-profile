@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import clsx from "clsx";
 import Drawer from "@material-ui/core/Drawer";
 import AppBar from "@material-ui/core/AppBar";
@@ -9,7 +9,8 @@ import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import Avatar from "@material-ui/core/Avatar";
 import Tooltip from "@material-ui/core/Tooltip";
-
+// import MenuItem from "@material-ui/core/MenuItem";
+// import Menu from "@material-ui/core/Menu";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
@@ -27,11 +28,14 @@ import {
 
 import { useStyles } from "../styles/classes";
 import { ProjectContext } from "../context/Project.Context";
+import { UserContext } from "../context/User.Context";
+import { getInitials } from "../util/strings";
 
 export default () => {
   const [open, toggleDrawer] = useToggle(false);
   const [activeProject, setActiveProject] = React.useState(projects[0]);
   const classes = useStyles();
+  const { name } = useContext(UserContext);
 
   return (
     <div className={classes.root}>
@@ -42,19 +46,31 @@ export default () => {
           [classes.appBarShift]: open
         })}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="Open drawer"
-            onClick={toggleDrawer}
-            edge="start"
-            className={clsx(classes.menuButton)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <div className={classes.toolbar}>
-            <img src={logo} alt="Clarity" style={{ height: "3rem" }} />
+        <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", flexDirection: "row" }}>
+            <IconButton
+              color="inherit"
+              aria-label="Open drawer"
+              onClick={toggleDrawer}
+              edge="start"
+              className={clsx(classes.menuButton)}
+            >
+              <MenuIcon />
+            </IconButton>
+            <div className={classes.toolbar}>
+              <img src={logo} alt="Clarity" style={{ height: "3rem" }} />
+            </div>
           </div>
+          <IconButton
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            // onClick={handleMenu}
+          >
+            <Avatar className={classes.colorSecondary}>
+              {getInitials(name)}
+            </Avatar>
+          </IconButton>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -113,12 +129,6 @@ export default () => {
   );
 };
 
-function getInitials(name) {
-  return name
-    .split(/[\s,-]+/)
-    .map(p => p[0])
-    .join("");
-}
 function ProjectNavItem(props) {
   const {
     open,

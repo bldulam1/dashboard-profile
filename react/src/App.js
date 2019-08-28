@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import theme from "./themes/Main";
 import "./App.css";
 import ThemeProvider from "@material-ui/styles/ThemeProvider";
 import { BrowserRouter } from "react-router-dom";
 import MainFrame from "./frame/Frame";
 import { AzureAD, MsalAuthProviderFactory, LoginType } from "react-aad-msal";
+import { UserContext } from "./context/User.Context";
 
 export default () => {
+  const [user, setUser] = useState({
+    name: null,
+    email: null
+  });
+
   const config = {
     auth: {
       authority: "https://login.microsoftonline.com/organizations",
@@ -23,27 +29,34 @@ export default () => {
     scopes: ["user.read"]
   };
 
+  const provider = new MsalAuthProviderFactory(
+    config,
+    authenticationParameters,
+    LoginType.Redirect
+  );
+
   const unauthenticatedFunction = loginFunction => {
     return <button>login</button>;
   };
 
+  const handleUserInfo = userInfo => {
+    const { name, userName } = userInfo.account;
+    setUser({ name, email: userName });
+  };
+
   return (
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <AzureAD
-          provider={
-            new MsalAuthProviderFactory(
-              config,
-              authenticationParameters,
-              LoginType.Redirect
-            )
-          }
-          forceLogin={true}
-          unauthenticatedFunction={unauthenticatedFunction}
-          accountInfoCallback={userInfo => console.log(userInfo)}
-          authenticatedFunction={() => <MainFrame />}
-        />
-      </BrowserRouter>
+      <UserContext.Provider value={{ ...user }}>
+        <BrowserRouter>
+          <AzureAD
+            provider={provider}
+            forceLogin={true}
+            unauthenticatedFunction={unauthenticatedFunction}
+            accountInfoCallback={handleUserInfo}
+            authenticatedFunction={() => <MainFrame />}
+          />
+        </BrowserRouter>
+      </UserContext.Provider>
     </ThemeProvider>
   );
 };

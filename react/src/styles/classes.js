@@ -124,6 +124,10 @@ const useStyles = makeStyles(theme => ({
     height: 24,
     width: 24,
     fontSize: 12
+  },
+  colorSecondary: {
+    color: theme.palette.secondary.contrastText,
+    backgroundColor: theme.palette.secondary.light,
   }
 }));
 

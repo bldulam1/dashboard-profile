@@ -38,3 +38,10 @@ export function normalizeTime(milliSec) {
     return `${ms} ${ms > 1 ? "milliseconds" : "millisecond"}`;
   }
 }
+
+export function getInitials(name) {
+  return name
+    .split(/[\s,-]+/)
+    .map(p => p[0])
+    .join("");
+}

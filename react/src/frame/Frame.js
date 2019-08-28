@@ -67,9 +67,11 @@ export default () => {
             aria-haspopup="true"
             // onClick={handleMenu}
           >
-            <Avatar className={classes.colorSecondary}>
-              {getInitials(name)}
-            </Avatar>
+            <Tooltip title={name}>
+              <Avatar className={classes.colorSecondary}>
+                {getInitials(name)}
+              </Avatar>
+            </Tooltip>
           </IconButton>
         </Toolbar>
       </AppBar>

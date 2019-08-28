@@ -1,7 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
-import VirtualizedList from "./VirtualList/VirtualList";
+import TaskTable from "./TaskTable/TaskTable";
 
 const useStyles = makeStyles(theme => ({
   contentPaper: {
@@ -15,7 +15,7 @@ export default props => {
   const classes = useStyles();
   return (
     <Paper className={classes.contentPaper}>
-      <VirtualizedList />
+      <TaskTable />
     </Paper>
   );
 };

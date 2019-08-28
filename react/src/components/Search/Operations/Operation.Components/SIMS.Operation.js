@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { FileSearchContext } from "../../../../context/Search.Context";
 import { makeStyles } from "@material-ui/styles";
 import Typography from "@material-ui/core/Typography";
@@ -17,6 +17,8 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import Tooltip from "@material-ui/core/Tooltip";
+
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker
@@ -24,6 +26,7 @@ import {
 import Axios from "axios";
 import { api_server } from "../../../../environment/environment";
 import { UserContext } from "../../../../context/User.Context";
+import { useSnackbar } from "notistack";
 
 // let newRootDebounceTimer = null;
 
@@ -74,8 +77,10 @@ export default params => {
     autoClean: false,
     expiryDate: new Date().setTime(
       new Date().getTime() + 7 * 24 * 60 * 60 * 1000
-    )
+    ),
+    invalidFiles: []
   });
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleChange = (key, value) => {
     setOptions({
@@ -100,14 +105,36 @@ export default params => {
     handleChange("expiryDate", new Date(ndate));
   };
 
-  // const { rootPaths, skip, limit, sort, query } = searchFileProps;
-  // const { activeProject } = useContext(ProjectContext);
-  // const { enqueueSnackbar } = useSnackbar();
+  const handleSubmitTasks = () => {
+    const url = `${api_server}/tasks/SIMS/new`;
+    const { simsLocation, version, commandLineArgs, expiryDate } = options;
+    Axios.post(url, {
+      project,
+      fileIDs: selected,
+      simsLocation,
+      version,
+      commandLineArgs,
+      requestedBy: name,
+      expiryDate: options.autoClean ? expiryDate : null
+    }).then(results => {
+      const displayText = `${results.data.length} SIMS tasks submitted`;
+      enqueueSnackbar(displayText, { variant: "success" });
+    });
+  };
 
   const classes = useStyles();
   const isRequestValid = () => {
-    return Boolean(selected.length);
+    return Boolean(selected.length && !options.invalidFiles.length);
   };
+
+  useEffect(() => {
+    const url = `${api_server}/tasks/${project}/SIMS/check-validity`;
+    Axios.post(url, {
+      fileIDs: selected
+    }).then(results => {
+      handleChange("invalidFiles", results.data.map(rd => rd.fileName));
+    });
+  }, [selected, project]);
 
   return (
     <ExpansionPanel
@@ -118,9 +145,14 @@ export default params => {
         expandIcon={<ExpandMoreIcon />}
         aria-controls="root-path-panelbh-content"
         id="root-path-panelbh-header"
-        onChange={false}
+        // onChange={false}
       >
-        <Typography className={classes.heading}>SIMS</Typography>
+        <Tooltip
+          title={`${options.invalidFiles.length} invalid, ${selected.length -
+            options.invalidFiles.length} files`}
+        >
+          <Typography className={classes.heading}>SIMS</Typography>
+        </Tooltip>
       </ExpansionPanelSummary>
       <ExpansionPanelDetails className={classes.expansionPanelDetails}>
         <form noValidate autoComplete="off">
@@ -189,52 +221,10 @@ export default params => {
         )}
       </ExpansionPanelDetails>
       <ExpansionPanelActions>
-        <IconButton
-          disabled={!isRequestValid()}
-          onClick={() => {
-            const url = `${api_server}/tasks/new/SIMS`;
-            const {
-              simsLocation,
-              version,
-              commandLineArgs,
-              expiryDate
-            } = options;
-            Axios.post(url, {
-              project,
-              fileIDs: selected,
-              simsLocation,
-              version,
-              commandLineArgs,
-              requestedBy: name,
-              expiryDate: options.autoClean ? expiryDate : null
-            }).then(results => {
-              console.log(results.data);
-            });
-          }}
-        >
+        <IconButton disabled={!isRequestValid()} onClick={handleSubmitTasks}>
           <SendIcon color={isRequestValid() ? "primary" : "disabled"} />
         </IconButton>
       </ExpansionPanelActions>
     </ExpansionPanel>
   );
 };
-
-// function createOutputLocation(project, taskName, username, date, container) {
-//   const output_base = "V:/JP01/DataLake/Common_Write/CLARITY_OUTPUT_FILES";
-//   const timeStamp = dateToTextLabel(date);
-//   return `${output_base}/${project}/${taskName}/${username}/${timeStamp}/${container}`;
-// }
-
-// function padZero(num) {
-//   return num < 10 ? `0${num}` : String(num);
-// }
-
-// function dateToTextLabel(newDate) {
-//   const yy = padZero(newDate.getFullYear());
-//   const mo = padZero(newDate.getMonth() + 1);
-//   const dd = padZero(newDate.getDate());
-//   const hh = padZero(newDate.getHours());
-//   const mn = padZero(newDate.getMinutes());
-//   const ss = padZero(newDate.getSeconds());
-//   return `${yy}${mo}${dd}_${hh}${mn}${ss}`;
-// }

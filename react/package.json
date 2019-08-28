@@ -13,6 +13,7 @@
     "material-ui-pickers": "^2.2.4",
     "notistack": "^0.8.9",
     "react": "^16.8.6",
+    "react-aad-msal": "^0.4.12",
     "react-dom": "^16.8.6",
     "react-dropzone": "^10.1.6",
     "react-excel-workbook": "0.0.4",
@@ -25,10 +26,11 @@
     "uuid": "^3.3.2"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=development react-scripts start",
+    "start": "cross-env NODE_ENV=development HTTPS=true react-scripts start",
     "build": "cross-env NODE_ENV=production react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "powershell ./scripts/link-certificate.sh"
   },
   "eslintConfig": {
     "extends": "react-app"

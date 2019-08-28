@@ -190,10 +190,6 @@ export default params => {
     }, 750);
   };
 
-  const handleChange = panel => (event, isExpanded) => {
-    rootPathDispatch({ expanded: isExpanded ? panel : false });
-  };
-
   useEffect(() => {
     const url = `${api_server}/fs/${activeProject}/unmapped-dirs`;
     Axios.get(url).then(results => {

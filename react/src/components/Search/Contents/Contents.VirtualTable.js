@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import clsx from "clsx";
 import { withStyles } from "@material-ui/core/styles";
@@ -7,9 +7,12 @@ import { AutoSizer, Column, Table } from "react-virtualized";
 import { FileSearchContext } from "../../../context/Search.Context";
 import { fetchScenesData } from "../../../util/scenes-search";
 import { normalizeSize } from "../../../util/strings";
-import { Checkbox } from "@material-ui/core";
+import Checkbox from "@material-ui/core/Checkbox";
+import Tooltip from "@material-ui/core/Tooltip";
 import Axios from "axios";
 import { api_server } from "../../../environment/environment";
+import useToggle from "../../../hooks/useToggle";
+import ContentsDialog from "./Contents.Dialog";
 
 const styles = theme => ({
   flexContainer: {
@@ -51,21 +54,23 @@ class MuiVirtualizedTable extends React.PureComponent {
     const { columns, classes, rowHeight, onRowClick } = this.props;
 
     return (
-      <TableCell
-        component="div"
-        className={clsx(classes.tableCell, classes.flexContainer, {
-          [classes.noClick]: onRowClick == null
-        })}
-        variant="body"
-        style={{ height: rowHeight }}
-        align={
-          (columnIndex != null && columns[columnIndex].numeric) || false
-            ? "right"
-            : "left"
-        }
-      >
-        {columnIndex ? cellData : <Checkbox checked={cellData} />}
-      </TableCell>
+      <Tooltip title={columnIndex ? "Ctrl + click to view file details" : ""}>
+        <TableCell
+          component="div"
+          className={clsx(classes.tableCell, classes.flexContainer, {
+            [classes.noClick]: onRowClick == null
+          })}
+          variant="body"
+          style={{ height: rowHeight }}
+          align={
+            (columnIndex != null && columns[columnIndex].numeric) || false
+              ? "right"
+              : "left"
+          }
+        >
+          {columnIndex ? cellData : <Checkbox checked={cellData} />}
+        </TableCell>
+      </Tooltip>
     );
   };
 
@@ -182,20 +187,29 @@ export default () => {
     selected
   } = searchFileProps;
 
+  const [dialogOpen, toggleDialogOpen] = useToggle(false);
+  const [viewScene, setViewScene] = useState({});
+
   useEffect(() => {
     fetchScenesData({ project, skip, limit, query, sort }, results =>
       searchFileDispatch({ ...results })
     );
   }, [selected, skip, limit, project, searchFileDispatch, query, sort]);
 
-  const handleRowClick = ({ index }) => {
+  const handleRowClick = ({ index, event }) => {
     const _index = index - skip;
     if (_index < scenes.length && _index >= 0) {
-      const sceneID = scenes[_index]._id;
-      const newSelected = selected.includes(sceneID)
-        ? selected.filter(s => s !== sceneID)
-        : [...selected, sceneID];
-      searchFileDispatch({ selected: newSelected });
+      const scene = scenes[_index];
+      const sceneID = scene._id;
+      if (event.ctrlKey) {
+        setViewScene(scene);
+        toggleDialogOpen();
+      } else {
+        const newSelected = selected.includes(sceneID)
+          ? selected.filter(s => s !== sceneID)
+          : [...selected, sceneID];
+        searchFileDispatch({ selected: newSelected });
+      }
     }
   };
 
@@ -289,6 +303,12 @@ export default () => {
             numeric: true
           }
         ]}
+      />
+
+      <ContentsDialog
+        open={dialogOpen}
+        toggleDialog={toggleDialogOpen}
+        fileDetails={viewScene}
       />
     </div>
   );

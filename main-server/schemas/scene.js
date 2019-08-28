@@ -12,7 +12,15 @@ const sceneSchema = mongoose.Schema({
     birth: Date,
     mapped: Date
   },
-  tags: []
+  tags: [],
+  operations: [
+    {
+      operationName: String,
+      requestDate: String,
+      status: String,
+      taskID: String
+    }
+  ]
 });
 
 const sfSchema = mongoose.Schema({

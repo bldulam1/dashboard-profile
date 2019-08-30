@@ -116,10 +116,14 @@ export default params => {
       commandLineArgs,
       requestedBy: name,
       expiryDate: options.autoClean ? expiryDate : null
-    }).then(results => {
-      const displayText = `${results.data.length} SIMS tasks submitted`;
-      enqueueSnackbar(displayText, { variant: "success" });
-    });
+    })
+      .then(results => {
+        const displayText = `${results.data.length} SIMS tasks submitted`;
+        enqueueSnackbar(displayText, { variant: "success" });
+      })
+      .catch(results => {
+        enqueueSnackbar("Request not sent due to bad connection. Please try again", { variant: "error" });
+      });
   };
 
   const classes = useStyles();

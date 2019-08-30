@@ -6,6 +6,8 @@ import { BrowserRouter } from "react-router-dom";
 import MainFrame from "./frame/Frame";
 import { AzureAD, MsalAuthProviderFactory, LoginType } from "react-aad-msal";
 import { UserContext } from "./context/User.Context";
+import Axios from "../../main-server/node_modules/axios";
+import { api_server } from "./environment/environment";
 
 export default () => {
   const [user, setUser] = useState({
@@ -39,9 +41,15 @@ export default () => {
     return <button>login</button>;
   };
 
-  const handleUserInfo = userInfo => {
+  const handleUserInfo = async userInfo => {
     const { name, userName } = userInfo.account;
     setUser({ name, email: userName });
+    Axios.post(`${api_server}/user/login/${name}`, {
+      name,
+      email: userName
+    }).then(results => {
+      console.log(results.data);
+    });
   };
 
   return (

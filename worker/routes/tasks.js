@@ -39,12 +39,21 @@ router.post("/max", async (req, res) => {
 });
 
 router.post("/execute", BlockingMiddleware, async (req, res) => {
-  let { task } = req.body;
-  const child = spawn("powershell.exe", [task.script]);
+  const { task } = req.body;
+  console.log("start", task._id);
+
+  // const child = spawn("powershell.exe", [task.script]);
+  const child = spawn("powershell.exe", [
+    `Start-Sleep -s ${4 *
+      Math.random()}; Write-Host "Log Date"; Start-Sleep -s ${6 *
+      Math.random()};`
+  ]);
+
   child.stdout.on("data", buff => handleNewLog(buff, task._id));
   child.stderr.on("data", buff => handleNewLog(buff, task._id));
   child.on("exit", (code, signal) => {
     handleTaskFinish(code, signal, task._id);
+    console.log("end", task._id);
     res.send(tasks.get(task._id));
   });
   createNewTask(task, child.pid);
@@ -74,17 +83,21 @@ function updateTask(taskID, updateData) {
 
   // Update the main server
 
-  // const newTaskURL = `${mainHostURL}/tasks/new`;
-  // Axios.post(newTaskURL, tasks.get(taskID)).then(results => {
-  //   console.log(results.data);
-  // });
+  const newTaskURL = `${mainHostURL}/tasks/update/${taskID}`;
+  Axios.put(newTaskURL, tasks.get(taskID)).then(results => {
+    console.log(results.data);
+  });
 }
 
 function handleNewLog(buff, taskID) {
   const logData = String(buff).trim();
-  const oldLogs = tasks.get(taskID).logs;
-  const logs = [...oldLogs, { time: new Date(), logData }];
-  updateTask(taskID, { logs });
+  if (logData.length) {
+    const oldLogs = Boolean(tasks.get(taskID) && tasks.get(taskID).logs)
+      ? tasks.get(taskID).logs
+      : [];
+    const logs = [...oldLogs, { time: new Date(), logData }];
+    updateTask(taskID, { logs });
+  }
 }
 
 function handleTaskFinish(code, signal, taskID) {

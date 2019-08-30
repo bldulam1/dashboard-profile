@@ -5,6 +5,7 @@ const app = express();
 const logger = require("morgan");
 const bodyParser = require("body-parser");
 const axios = require("axios");
+const props = require("./config/processArgs");
 
 app.use(bodyParser.urlencoded({ extended: false, limit: "1000mb" }));
 app.use(bodyParser.json({ limit: "1000mb" }));
@@ -28,16 +29,17 @@ app.use("/", require("./routes/statistics"));
 // mongoose.connection.on("error", err => console.log(err));
 // mongoose.connection.on("open", () => {
 //   console.log(`${process.pid} database server connected`);
-const props = require("./config/processArgs");
 app.listen(props.port, async () => {
-  const { mainHost, mainPort } = props;
+  const { mainHost, mainPort, allowedTasks } = props;
   const mainURL = `http://${mainHost}:${mainPort}/service-workers/new`;
   const { hostname, port, serverName, url } = props;
   await axios.post(mainURL, {
     hostname,
     port,
     serverName,
-    url
+    url,
+    allowedTasks,
+    taskID: null
   });
 
   console.log(`Service worker is listening on port ${port}!`);

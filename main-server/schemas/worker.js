@@ -9,6 +9,8 @@ let workerSchema = mongoose.Schema({
   active: Boolean,
   searching: Boolean,
   tasks: [],
+  type: String,
+  taskID: String,
   cpu: [],
   mem: [],
   network: []

@@ -241,16 +241,13 @@ export default params => {
                       className={classes.button}
                       aria-label="Root path operation"
                       component="span"
-                      aria-controls="root-path-menu"
                       aria-haspopup="true"
                       onClick={handleRootMenuClick}
                     >
                       <MoreVertIcon />
                     </IconButton>
                     <Menu
-                      id="root-path-menu"
                       anchorEl={anchorEl}
-                      keepMounted
                       open={Boolean(anchorEl)}
                       onClose={handleClose}
                     >

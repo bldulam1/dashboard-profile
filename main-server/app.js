@@ -26,12 +26,14 @@ app.use(
 );
 app.set("view options", { pretty: true });
 
-app.use("/overpass", require("./routes/Overpass"));
 app.use("/fs", require("./routes/File"));
+app.use("/overpass", require("./routes/Overpass"));
+app.use("/project", require("./routes/Project"));
 app.use("/upload", require("./routes/Upload"));
 app.use("/search", require("./routes/Search"));
 app.use("/tasks", require("./routes/Task"));
 app.use("/tc", require("./routes/TestCatalog"));
+app.use("/user", require("./routes/User"));
 app.use("/naming-convention", require("./routes/NamingConventions"));
 app.use("/service-workers", require("./routes/ServiceWorkers"));
 app.get("/", (req, res) => res.send("Hello World!2"));
@@ -46,7 +48,7 @@ mongoose.connection.on("open", () => {
   console.log(`${process.pid} database server connected`);
   app.listen(port, () => {
     console.log(`Clarity is listening on port ${port}!`);
-    setInterval(getCPU_MEM, 1000);
-    setInterval(getNetworkStats, 5000);
+    // setInterval(getCPU_MEM, 1000);
+    // setInterval(getNetworkStats, 5000);
   });
 });

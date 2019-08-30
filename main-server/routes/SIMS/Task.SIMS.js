@@ -1,4 +1,4 @@
-const Task = require("../schemas/task");
+const Task = require("../../schemas/task");
 
 function createSimsScript({
   version,

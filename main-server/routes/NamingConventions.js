@@ -1,5 +1,6 @@
 const router = require("express").Router();
-const { Project, NamingConvention } = require("../schemas/naming");
+const NamingConvention = require("../schemas/naming");
+const Project = require("../schemas/project");
 
 router.get("/distinct/projects", async (req, res) => {
   const { key } = req.params;

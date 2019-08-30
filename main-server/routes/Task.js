@@ -23,6 +23,7 @@ router.post("/:operation/new", async (req, res) => {
 
 router.put("/update/:id", async (req, res) => {
   const newData = await Task.findByIdAndUpdate(req.params.id, { ...req.body });
+  console.log(req.body);
   res.send(newData);
 });
 

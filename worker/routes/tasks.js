@@ -74,6 +74,7 @@ function createNewTask(task, pid) {
   task.process_id = pid;
   task.start_time = new Date();
   task.assigned_worker = serverName;
+  task.status = createStatus(INPROGRESS);
   tasks.set(task._id, task);
 }
 
@@ -85,7 +86,7 @@ function updateTask(taskID, updateData) {
 
   const newTaskURL = `${mainHostURL}/tasks/update/${taskID}`;
   Axios.put(newTaskURL, tasks.get(taskID)).then(results => {
-    console.log(results.data);
+    console.log("task updated");
   });
 }
 

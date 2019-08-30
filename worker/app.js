@@ -39,7 +39,8 @@ app.listen(props.port, async () => {
     serverName,
     url,
     allowedTasks,
-    taskID: null
+    taskID: null,
+    searchID: null
   });
 
   console.log(`Service worker is listening on port ${port}!`);

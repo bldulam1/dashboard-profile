@@ -59,25 +59,12 @@ export default params => {
   const { expanded, handleExpanChange } = params;
 
   const [options, setOptions] = useState({
-    version: "SIMS_GEN12",
-    versionOptions: ["SIMS_GEN12", "SIMS_GEN12_D"],
-    simsLocation:
-      "V:/JP01/DataLake/Common_Write/ClarityResources/SIMSapp_FCR_R7_31_70D5_9",
-    simsLocationValid: true,
-    simsLocationHelperText: "",
-    commandLineArgs:
-      "-ECU 10 -ReplayDetect -VehicleData AMP -CAN1 1 -CAN2 4 -CanReDir 1 -OutVss",
-    outputs: ["log", "mat"],
-    outputOptions: [
-      OutputOption("asc", false, false),
-      OutputOption("log", false, true),
-      OutputOption("mat", false, true)
-    ],
-    outputLocation: "",
-    autoClean: false,
-    expiryDate: new Date().setTime(
-      new Date().getTime() + 7 * 24 * 60 * 60 * 1000
-    ),
+    memoPoolPath: "V:/JP01/DataLake/SVS350_DC/DC_Data/input/memo",
+    ibeoPoolPath: "V:/JP01/DataLake/SVS350_DC/DC_Data/input/IBEO",
+    sensor: "R",
+    sensorOptions: ["R", "L"],
+    outputFolder: "V:/JP01/DataLake/SVS350_DC/DC_Data/MasterFiles",
+    logFilePath: "V:/JP01/DataLake/SVS350_DC/DC_Data/Log_MasterGen",
     invalidFiles: []
   });
   const { enqueueSnackbar } = useSnackbar();
@@ -89,40 +76,34 @@ export default params => {
     });
   };
 
-  const handleVersionChange = event =>
-    handleChange("version", event.target.value);
-
-  const handleSimsLocationChange = event =>
-    handleChange("simsLocation", event.target.value);
-
-  const handleAutoCleanCheckbox = event =>
-    handleChange("autoClean", !options.autoClean);
-
-  const handleCommandLineArgsChange = event =>
-    handleChange("commandLineArgs", event.target.value);
-
-  const handleDateChange = ndate => {
-    handleChange("expiryDate", new Date(ndate));
-  };
-
   const handleSubmitTasks = () => {
-    const url = `${api_server}/tasks/SIMS/new`;
-    const { simsLocation, version, commandLineArgs, expiryDate } = options;
+    const url = `${api_server}/tasks/IDW4 Conversion/new`;
+    const {
+      memoPoolPath,
+      ibeoPoolPath,
+      sensor,
+      outputFolder,
+      logFilePath
+    } = options;
     Axios.post(url, {
       project,
       fileIDs: selected,
-      simsLocation,
-      version,
-      commandLineArgs,
-      requestedBy: name,
-      expiryDate: options.autoClean ? expiryDate : null
+      memoPoolPath,
+      ibeoPoolPath,
+      sensor,
+      outputFolder,
+      logFilePath,
+      requestedBy: name
     })
       .then(results => {
-        const displayText = `${results.data.length} SIMS tasks submitted`;
+        const displayText = `${results.data.length} IDW4 Conversion tasks submitted`;
         enqueueSnackbar(displayText, { variant: "success" });
       })
       .catch(results => {
-        enqueueSnackbar("Request not sent due to bad connection. Please try again", { variant: "error" });
+        enqueueSnackbar(
+          "Request not sent due to bad connection. Please try again",
+          { variant: "error" }
+        );
       });
   };
 
@@ -132,7 +113,7 @@ export default params => {
   };
 
   useEffect(() => {
-    const url = `${api_server}/tasks/${project}/SIMS/check-validity`;
+    const url = `${api_server}/tasks/${project}/IDW4 Conversion/check-validity`;
     Axios.post(url, {
       fileIDs: selected
     }).then(results => {
@@ -142,8 +123,8 @@ export default params => {
 
   return (
     <ExpansionPanel
-      expanded={expanded === "SIMS"}
-      onChange={handleExpanChange("SIMS")}
+      expanded={expanded === "IDW4 Conversion"}
+      onChange={handleExpanChange("IDW4 Conversion")}
     >
       <ExpansionPanelSummary
         expandIcon={<ExpandMoreIcon />}
@@ -155,74 +136,69 @@ export default params => {
           title={`${options.invalidFiles.length} invalid, ${selected.length -
             options.invalidFiles.length} files`}
         >
-          <Typography className={classes.heading}>SIMS</Typography>
+          <Typography className={classes.heading}>IDW4 Conversion</Typography>
         </Tooltip>
       </ExpansionPanelSummary>
       <ExpansionPanelDetails className={classes.expansionPanelDetails}>
         <form noValidate autoComplete="off">
           <FormControl fullWidth className={classes.formControl}>
-            <InputLabel htmlFor="version-select">SIMS Version</InputLabel>
+            <InputLabel htmlFor="sensor-select">Sensor R/L</InputLabel>
             <Select
-              value={options.version}
-              onChange={handleVersionChange}
+              value={options.sensor}
+              onChange={event => handleChange("version", event.target.value)}
               inputProps={{
-                name: "version",
-                id: "version-select"
+                name: "sensor",
+                id: "sensor-select"
               }}
             >
-              {options.versionOptions.map(version => (
+              {options.sensorOptions.map(version => (
                 <MenuItem key={`sv-${version}`} value={version}>
                   {version}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+
           <TextField
-            error={!options.simsLocationValid}
             fullWidth
             required
-            id="new-root-path"
-            label="SIMS Location"
-            value={options.simsLocation}
-            onChange={handleSimsLocationChange}
+            id="memoPoolPath"
+            label="Memo Pool Path"
+            value={options.memoPoolPath}
+            onChange={event => handleChange("memoPoolPath", event.target.value)}
             margin="dense"
-            helperText={options.simsLocationHelperText}
           />
+
           <TextField
-            label="Command Line Input"
             fullWidth
-            multiline
-            rowsMax="4"
-            value={options.commandLineArgs}
-            onChange={handleCommandLineArgsChange}
+            required
+            id="ibeoPoolPath"
+            label="IBEO Pool Path"
+            value={options.ibeoPoolPath}
+            onChange={event => handleChange("ibeoPoolPath", event.target.value)}
             margin="dense"
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                color="primary"
-                checked={options.autoClean}
-                onChange={handleAutoCleanCheckbox}
-              />
-            }
-            label="Auto-clean output folder"
+
+          <TextField
+            fullWidth
+            required
+            id="outputFolder"
+            label="Output Folder"
+            value={options.outputFolder}
+            onChange={event => handleChange("outputFolder", event.target.value)}
+            margin="dense"
+          />
+
+          <TextField
+            fullWidth
+            required
+            id="logFilePath"
+            label="Log File Output Location"
+            value={options.logFilePath}
+            onChange={event => handleChange("logFilePath", event.target.value)}
+            margin="dense"
           />
         </form>
-        {options.autoClean && (
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <KeyboardDatePicker
-              margin="dense"
-              id="date-picker-dialog"
-              label="Remove output files on"
-              format="MM/dd/yyyy"
-              value={options.expiryDate}
-              onChange={handleDateChange}
-              KeyboardButtonProps={{
-                "aria-label": "change date"
-              }}
-            />
-          </MuiPickersUtilsProvider>
-        )}
       </ExpansionPanelDetails>
       <ExpansionPanelActions>
         <IconButton disabled={!isRequestValid()} onClick={handleSubmitTasks}>

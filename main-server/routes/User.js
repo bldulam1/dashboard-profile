@@ -9,7 +9,7 @@ const Axios = require("axios");
 
 router.post("/login/:name", async (req, res) => {
   const { email, name } = req.body;
-  const projects = await Project.find();
+  const projects = [];
 
   const user = await User.findOneAndUpdate(
     { email, name },

@@ -122,7 +122,10 @@ export default params => {
         enqueueSnackbar(displayText, { variant: "success" });
       })
       .catch(results => {
-        enqueueSnackbar("Request not sent due to bad connection. Please try again", { variant: "error" });
+        enqueueSnackbar(
+          "Request not sent due to bad connection. Please try again",
+          { variant: "error" }
+        );
       });
   };
 
@@ -132,7 +135,7 @@ export default params => {
   };
 
   useEffect(() => {
-    const url = `${api_server}/tasks/${project}/SIMS/check-validity`;
+    const url = `${api_server}/tasks/check-extensions/${project}/SIMS/ext=cvw`;
     Axios.post(url, {
       fileIDs: selected
     }).then(results => {

@@ -11,72 +11,46 @@ import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
-import Paper from "@material-ui/core/Paper";
 import Checkbox from "@material-ui/core/Checkbox";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
-// import DeleteIcon from "@material-ui/icons/Delete";
 import FilterListIcon from "@material-ui/icons/FilterList";
+import { fetchTasksData } from "../Tasks";
+import { api_server } from "../../../environment/environment";
+import Axios from "axios";
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData("Cupcake", 305, 3.7, 67, 4.3),
-  createData("Donut", 452, 25.0, 51, 4.9),
-  createData("Eclair", 262, 16.0, 24, 6.0),
-  createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-  createData("Gingerbread", 356, 16.0, 49, 3.9),
-  createData("Honeycomb", 408, 3.2, 87, 6.5),
-  createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-  createData("Jelly Bean", 375, 0.0, 94, 0.0),
-  createData("KitKat", 518, 26.0, 65, 7.0),
-  createData("Lollipop", 392, 0.2, 98, 0.0),
-  createData("Marshmallow", 318, 0, 81, 2.0),
-  createData("Nougat", 360, 19.0, 9, 37.0),
-  createData("Oreo", 437, 18.0, 63, 4.0)
-];
-
-function desc(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function stableSort(array, cmp) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = cmp(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map(el => el[0]);
-}
-
-function getSorting(order, orderBy) {
-  return order === "desc"
-    ? (a, b) => desc(a, b, orderBy)
-    : (a, b) => -desc(a, b, orderBy);
-}
-
-const headRows = [
+const headCols = [
   {
-    id: "name",
+    id: "inputFile",
     numeric: false,
     disablePadding: true,
-    label: "Dessert (100g serving)"
+    label: "Input File"
   },
-  { id: "calories", numeric: true, disablePadding: false, label: "Calories" },
-  { id: "fat", numeric: true, disablePadding: false, label: "Fat (g)" },
-  { id: "carbs", numeric: true, disablePadding: false, label: "Carbs (g)" },
-  { id: "protein", numeric: true, disablePadding: false, label: "Protein (g)" }
+  { id: "operation", numeric: true, disablePadding: false, label: "Operation" },
+  {
+    id: "requestedBy",
+    numeric: true,
+    disablePadding: false,
+    label: "Requester"
+  },
+  {
+    id: "requestDate",
+    numeric: true,
+    disablePadding: false,
+    label: "Request Date"
+  },
+  {
+    id: "assignedWorker",
+    numeric: true,
+    disablePadding: false,
+    label: "Server"
+  },
+  {
+    id: "status",
+    numeric: true,
+    disablePadding: false,
+    label: "Status"
+  }
 ];
 
 function EnhancedTableHead(props) {
@@ -104,20 +78,20 @@ function EnhancedTableHead(props) {
             inputProps={{ "aria-label": "select all desserts" }}
           />
         </TableCell>
-        {headRows.map(row => (
+        {headCols.map(col => (
           <TableCell
-            key={row.id}
-            align={row.numeric ? "right" : "left"}
-            padding={row.disablePadding ? "none" : "default"}
-            sortDirection={orderBy === row.id ? order : false}
+            key={col.id}
+            align={col.numeric ? "right" : "left"}
+            padding={col.disablePadding ? "none" : "default"}
+            sortDirection={orderBy === col.id ? order : false}
           >
             <TableSortLabel
-              active={orderBy === row.id}
+              active={orderBy === col.id}
               direction={order}
-              onClick={createSortHandler(row.id)}
+              onClick={createSortHandler(col.id)}
             >
-              {row.label}
-              {orderBy === row.id ? (
+              {col.label}
+              {orderBy === col.id ? (
                 <span className={classes.visuallyHidden}>
                   {order === "desc" ? "sorted descending" : "sorted ascending"}
                 </span>
@@ -183,7 +157,7 @@ const EnhancedTableToolbar = props => {
           </Typography>
         ) : (
           <Typography variant="h6" id="tableTitle">
-            Nutrition
+            Tasks
           </Typography>
         )}
       </div>
@@ -231,36 +205,68 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function EnhancedTable() {
+export default params => {
   const classes = useStyles();
-  const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState("calories");
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const { tasksState, setTaskState } = params;
+  const {
+    project,
+    tasks,
+    sort,
+    count,
+    rowsPerPage,
+    page,
+    query,
+    selected,
+    order,
+    orderBy
+  } = tasksState;
+
+  // const [order, setOrder] = React.useState("asc");
+  // const [orderBy, setOrderBy] = React.useState("inputFile");
 
   function handleRequestSort(event, property) {
     const isDesc = orderBy === property && order === "desc";
-    setOrder(isDesc ? "asc" : "desc");
-    setOrderBy(property);
+    const newSort = { [property]: isDesc ? 1 : -1 };
+
+    fetchTasksData(
+      project,
+      page * rowsPerPage,
+      rowsPerPage,
+      newSort,
+      query,
+      ({ tasks }) => {
+        setTaskState({
+          ...tasksState,
+          tasks,
+          order: isDesc ? "asc" : "desc",
+          orderBy: property,
+          sort: newSort
+        });
+      }
+    );
+    // setOrder(isDesc ? "asc" : "desc");
+    // setOrderBy(property);
   }
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
-      const newSelecteds = rows.map(n => n.name);
-      setSelected(newSelecteds);
-      return;
+      const queryString = JSON.stringify(query);
+      Axios.get(
+        `${api_server}/tasks/${project}/get-ids/query=${queryString}`
+      ).then(results => {
+        setTaskState({ ...tasksState, selected: results.data });
+      });
+    } else {
+      setTaskState({ ...tasksState, selected: [] });
     }
-    setSelected([]);
   }
 
-  function handleClick(event, name) {
-    const selectedIndex = selected.indexOf(name);
+  function handleClick(event, taskID) {
+    const selectedIndex = selected.indexOf(taskID);
     let newSelected = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, taskID);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -272,36 +278,65 @@ export default function EnhancedTable() {
       );
     }
 
-    setSelected(newSelected);
+    setTaskState({
+      ...tasksState,
+      selected: newSelected
+    });
   }
 
   function handleChangePage(event, newPage) {
-    setPage(newPage);
+    fetchTasksData(
+      project,
+      newPage * rowsPerPage,
+      rowsPerPage,
+      sort,
+      query,
+      ({ tasks, count }) => {
+        setTaskState({
+          ...tasksState,
+          page: newPage,
+          tasks,
+          count
+        });
+      }
+    );
   }
 
   function handleChangeRowsPerPage(event) {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+    const newRowsPerPage = +event.target.value;
+    const newPage = 0;
+
+    fetchTasksData(
+      project,
+      newPage,
+      newRowsPerPage,
+      sort,
+      query,
+      ({ tasks, count }) => {
+        setTaskState({
+          ...tasksState,
+          page: newPage,
+          rowsPerPage: newRowsPerPage,
+          tasks,
+          count
+        });
+      }
+    );
   }
 
-  function handleChangeDense(event) {
-    setDense(event.target.checked);
-  }
+  const isSelected = id => selected.indexOf(id) !== -1;
 
-  const isSelected = name => selected.indexOf(name) !== -1;
-
-  const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+  const emptyRows = rowsPerPage - tasks.length;
 
   return (
     <div className={classes.root}>
-      <Paper className={classes.paper}>
+      <div className={classes.paper}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <div className={classes.tableWrapper}>
           <Table
             className={classes.table}
             aria-labelledby="tableTitle"
-            size={dense ? "small" : "medium"}
+            size="small"
           >
             <EnhancedTableHead
               classes={classes}
@@ -310,58 +345,61 @@ export default function EnhancedTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={count}
             />
             <TableBody>
-              {stableSort(rows, getSorting(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
-                  const labelId = `enhanced-table-checkbox-${index}`;
+              {tasks.map((task, index) => {
+                const isItemSelected = isSelected(task._id);
+                const labelId = `enhanced-table-checkbox-${index}`;
 
-                  return (
-                    <TableRow
-                      hover
-                      onClick={event => handleClick(event, row.name)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.name}
-                      selected={isItemSelected}
+                return (
+                  <TableRow
+                    hover
+                    onClick={event => handleClick(event, task._id)}
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={task._id}
+                    selected={isItemSelected}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={isItemSelected}
+                        inputProps={{ "aria-labelledby": labelId }}
+                      />
+                    </TableCell>
+                    <TableCell
+                      component="th"
+                      id={labelId}
+                      scope="row"
+                      padding="none"
                     >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={isItemSelected}
-                          inputProps={{ "aria-labelledby": labelId }}
-                        />
-                      </TableCell>
-                      <TableCell
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        padding="none"
-                      >
-                        {row.name}
-                      </TableCell>
-                      <TableCell align="right">{row.calories}</TableCell>
-                      <TableCell align="right">{row.fat}</TableCell>
-                      <TableCell align="right">{row.carbs}</TableCell>
-                      <TableCell align="right">{row.protein}</TableCell>
-                    </TableRow>
-                  );
-                })}
+                      {task.inputFile}
+                    </TableCell>
+                    <TableCell align="right">{task.operation}</TableCell>
+                    <TableCell align="right">{task.requestedBy}</TableCell>
+                    <TableCell align="right">
+                      {new Date(task.requestDate).toLocaleString()}
+                    </TableCell>
+                    <TableCell align="right">{task.assignedWorker}</TableCell>
+                    <TableCell align="right">
+                      {task.status && task.status.text}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {emptyRows > 0 && (
-                <TableRow style={{ height: 49 * emptyRows }}>
-                  <TableCell colSpan={6} />
+                <TableRow style={{ height: 33 * emptyRows }}>
+                  <TableCell colSpan={7} />
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[10, 25]}
           component="div"
-          count={rows.length}
+          count={count}
           rowsPerPage={rowsPerPage}
           page={page}
           backIconButtonProps={{
@@ -373,11 +411,7 @@ export default function EnhancedTable() {
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
-      </Paper>
-      <FormControlLabel
-        control={<Switch checked={dense} onChange={handleChangeDense} />}
-        label="Dense padding"
-      />
+      </div>
     </div>
   );
-}
+};

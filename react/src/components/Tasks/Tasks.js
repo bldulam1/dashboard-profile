@@ -14,28 +14,55 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+export function fetchTasksData(project, skip, limit, sort, query, callback) {
+  const sortString = JSON.stringify(sort);
+  const queryString = JSON.stringify(query);
+  const rootPathsURL = `${api_server}/tasks/${project}/skip=${skip}/limit=${limit}/sort=${sortString}/query=${queryString}`;
+  Axios.get(rootPathsURL).then(res => {
+    const { tasks, count } = res.data;
+    callback({ tasks, count });
+  });
+}
+
+const defaultState = {
+  page: 0,
+  rowsPerPage: 10,
+  tasks: [],
+  selected: [],
+  sort: {},
+  count: 0,
+  order: "asc",
+  orderBy: "inputFile"
+};
+
 export default props => {
   const classes = useStyles();
   const { activeProject } = useContext(ProjectContext);
-  const [taskState, setTaskState] = useState({
-    page: 0,
-    query: { project: activeProject },
-    tasks: [],
-    selected: [],
-    count: 0
-  });
+  const [taskState, setTaskState] = useState(defaultState);
 
   useEffect(() => {
-    const rootPathsURL = `${api_server}/tasks/${activeProject}/skip=0/limit=0/sort={}/query={}`;
-    Axios.get(rootPathsURL).then(res => {
-      const { tasks, count } = res.data;
-      console.log({ tasks, count });
-    });
+    const skip = defaultState.page * defaultState.rowsPerPage;
+    const defaultQuery = { project: activeProject };
+    fetchTasksData(
+      activeProject,
+      skip,
+      defaultState.rowsPerPage,
+      defaultState.sort,
+      defaultQuery,
+      ({ tasks, count }) => {
+        setTaskState({
+          ...defaultState,
+          query: defaultQuery,
+          tasks,
+          count
+        });
+      }
+    );
   }, [activeProject]);
 
   return (
     <Paper className={classes.contentPaper}>
-      <TaskTable />
+      <TaskTable tasksState={taskState} setTaskState={setTaskState} />
     </Paper>
   );
 };

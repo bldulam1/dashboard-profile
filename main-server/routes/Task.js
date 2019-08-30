@@ -14,7 +14,7 @@ router.post("/:operation/new", async (req, res) => {
   switch (operation) {
     case "SIMS":
       const tasks = await createSimsTasks(req.body, files);
-      // const 
+      // const
       executeTasks();
       return res.send(tasks);
     default:
@@ -28,17 +28,21 @@ router.put("/update/:id", async (req, res) => {
   res.send(newData);
 });
 
-router.post("/:project/SIMS/check-validity", async (req, res) => {
-  const { fileIDs } = req.body;
-  const inValidFiles = await Scene.find(
-    {
-      _id: { $in: fileIDs },
-      extension: { $ne: "cvw" }
-    },
-    { fileName: 1 }
-  );
-  res.send(inValidFiles);
-});
+router.post(
+  "/check-extensions/:project/:operation/ext=:extension",
+  async (req, res) => {
+    const { extension } = req.params;
+    const { fileIDs } = req.body;
+    const inValidFiles = await Scene.find(
+      {
+        _id: { $in: fileIDs },
+        extension: { $ne: extension }
+      },
+      { fileName: 1 }
+    );
+    res.send(inValidFiles);
+  }
+);
 
 router.get(
   "/:project/skip=:_skip/limit=:_limit/sort=:sortString(*)/query=:queryString(*)",
@@ -48,16 +52,21 @@ router.get(
     const limit = _limit * 1;
     const sort = JSON.parse(sortString);
     const query = JSON.parse(queryString);
-    // console.log({ skip, limit, sort, query });
 
     const count_tasks = await Promise.all([
       Task.countDocuments(query),
-      Task.find(query, null, { skip, limit })
+      Task.find(query, null, { skip, limit, sort })
     ]);
 
     res.send({ skip, limit, count: count_tasks[0], tasks: count_tasks[1] });
   }
 );
+
+router.get("/:project/get-ids/query=:queryString(*)", async (req, res) => {
+  const query = JSON.parse(req.params.queryString);
+  const tasks = await Task.find(query, { _id: 1 });
+  res.send(tasks.map(({ _id }) => _id));
+});
 
 module.exports = router;
 

@@ -14,11 +14,17 @@ router.post("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
   block = true;
   const root = path.resolve(req.body.root);
   const dir = path.resolve(req.params.dir);
+  const dir_level = dir.split(/\\|\//).length - root.split(/\\|\//).length;
   const project = req.params.project;
   const files = [];
   const directories = [];
 
-  readdirp(dir, { alwaysStat: true, depth: 0, type: "files_directories" })
+  const options =
+    dir_level < 10
+      ? { alwaysStat: true, depth: 0, type: "files_directories" }
+      : { alwaysStat: true };
+
+  readdirp(dir, options)
     .on("data", entry => {
       const { fullPath, stats } = entry;
       const { size, mtime, birthtime } = stats;

@@ -48,7 +48,7 @@ export default () => {
       name,
       email: userName
     }).then(results => {
-      console.log(results.data);
+      // console.log(results.data);
     });
   };
 

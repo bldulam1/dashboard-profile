@@ -9,7 +9,6 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
 import IconButton from "@material-ui/core/IconButton";
 import SendIcon from "@material-ui/icons/Send";
-import TextField from "@material-ui/core/TextField";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
@@ -20,6 +19,8 @@ import Axios from "axios";
 import { api_server } from "../../../../environment/environment";
 import { UserContext } from "../../../../context/User.Context";
 import { useSnackbar } from "notistack";
+
+// let newRootDebounceTimer = null;
 
 const useStyles = makeStyles(theme => ({
   expansionPanelDetails: {
@@ -42,12 +43,8 @@ export default params => {
   const { expanded, handleExpanChange } = params;
 
   const [options, setOptions] = useState({
-    memoPoolPath: "V:/JP01/DataLake/SVS350_DC/DC_Data/input/memo",
-    ibeoPoolPath: "V:/JP01/DataLake/SVS350_DC/DC_Data/input/IBEO",
-    sensor: "R",
-    sensorOptions: ["R", "L"],
-    outputFolder: "V:/JP01/DataLake/SVS350_DC/DC_Data/MasterFiles",
-    logFilePath: "V:/JP01/DataLake/SVS350_DC/DC_Data/Log_MasterGen",
+    splitFileFor: 1,
+    splitFileForOptions: ["OD and WL", "TSR"],
     invalidFiles: []
   });
   const { enqueueSnackbar } = useSnackbar();
@@ -60,7 +57,7 @@ export default params => {
   };
 
   const handleSubmitTasks = () => {
-    const url = `${api_server}/tasks/IDW4 Conversion/new`;
+    const url = `${api_server}/tasks/File Splitting/new`;
     const {
       memoPoolPath,
       ibeoPoolPath,
@@ -79,7 +76,7 @@ export default params => {
       requestedBy: name
     })
       .then(results => {
-        const displayText = `${results.data.length} IDW4 Conversion tasks submitted`;
+        const displayText = `${results.data.length} File Splitting tasks submitted`;
         enqueueSnackbar(displayText, { variant: "success" });
       })
       .catch(results => {
@@ -96,7 +93,7 @@ export default params => {
   };
 
   useEffect(() => {
-    const url = `${api_server}/tasks/${project}/IDW4 Conversion/check-validity`;
+    const url = `${api_server}/tasks/${project}/File Splitting/check-validity`;
     Axios.post(url, {
       fileIDs: selected
     }).then(results => {
@@ -106,81 +103,44 @@ export default params => {
 
   return (
     <ExpansionPanel
-      expanded={expanded === "IDW4 Conversion"}
-      onChange={handleExpanChange("IDW4 Conversion")}
+      expanded={expanded === "File Splitting"}
+      onChange={handleExpanChange("File Splitting")}
     >
       <ExpansionPanelSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls="root-path-panelbh-content"
         id="root-path-panelbh-header"
-        // onChange={false}
       >
         <Tooltip
           title={`${options.invalidFiles.length} invalid, ${selected.length -
             options.invalidFiles.length} files`}
         >
-          <Typography className={classes.heading}>IDW4 Conversion</Typography>
+          <Typography className={classes.heading}>File Splitting</Typography>
         </Tooltip>
       </ExpansionPanelSummary>
       <ExpansionPanelDetails className={classes.expansionPanelDetails}>
         <form noValidate autoComplete="off">
           <FormControl fullWidth className={classes.formControl}>
-            <InputLabel htmlFor="sensor-select">Sensor R/L</InputLabel>
+            <InputLabel htmlFor="splitFileFor-select">
+              Split file for
+            </InputLabel>
             <Select
-              value={options.sensor}
-              onChange={event => handleChange("version", event.target.value)}
+              value={options.splitFileFor}
+              onChange={event =>
+                handleChange("splitFileFor", event.target.value)
+              }
               inputProps={{
-                name: "sensor",
-                id: "sensor-select"
+                name: "splitFileFor",
+                id: "splitFileFor-select"
               }}
             >
-              {options.sensorOptions.map(version => (
-                <MenuItem key={`sv-${version}`} value={version}>
-                  {version}
+              {options.splitFileForOptions.map((option, index) => (
+                <MenuItem key={`sv-${option}`} value={index + 1}>
+                  {option}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-
-          <TextField
-            fullWidth
-            required
-            id="memoPoolPath"
-            label="Memo Pool Path"
-            value={options.memoPoolPath}
-            onChange={event => handleChange("memoPoolPath", event.target.value)}
-            margin="dense"
-          />
-
-          <TextField
-            fullWidth
-            required
-            id="ibeoPoolPath"
-            label="IBEO Pool Path"
-            value={options.ibeoPoolPath}
-            onChange={event => handleChange("ibeoPoolPath", event.target.value)}
-            margin="dense"
-          />
-
-          <TextField
-            fullWidth
-            required
-            id="outputFolder"
-            label="Output Folder"
-            value={options.outputFolder}
-            onChange={event => handleChange("outputFolder", event.target.value)}
-            margin="dense"
-          />
-
-          <TextField
-            fullWidth
-            required
-            id="logFilePath"
-            label="Log File Output Location"
-            value={options.logFilePath}
-            onChange={event => handleChange("logFilePath", event.target.value)}
-            margin="dense"
-          />
         </form>
       </ExpansionPanelDetails>
       <ExpansionPanelActions>

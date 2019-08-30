@@ -10,10 +10,10 @@ var BlockingMiddleware = (req, res, next) => {
   next();
 };
 
-router.post("/:project/dir/", BlockingMiddleware, async (req, res) => {
+router.post("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
   block = true;
   const root = path.resolve(req.body.root);
-  const dir = path.resolve(req.body.dir);
+  const dir = path.resolve(req.params.dir);
   const project = req.params.project;
   const files = [];
   const directories = [];

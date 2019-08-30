@@ -64,7 +64,6 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
       { assignedServer: null },
       { assignedServer: serverName }
     );
-    // console.log("pick folder", folder);
 
     block = false;
     return { block, folder };
@@ -96,7 +95,7 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
       const pick = await pickFolder(serverName);
       if (pick.folder && pick.folder.folder && !workersFlags[index]) {
         const { folder, _id } = pick.folder;
-        Axios.post(`${url}/fileSearch/${project}/dir/`, { dir: folder, root })
+        Axios.post(`${url}/fileSearch/${project}/dir/${folder}`, {root })
           .then(async results => {
             await removeFolder(_id);
             const { files, directories } = getFilesAndDirectories({

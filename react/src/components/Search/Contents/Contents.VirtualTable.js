@@ -202,7 +202,7 @@ export default () => {
       const scene = scenes[_index];
       const sceneID = scene._id;
       if (event.ctrlKey) {
-        setViewScene(scene);
+        setViewScene({ ...scene, project });
         toggleDialogOpen();
       } else {
         const newSelected = selected.includes(sceneID)

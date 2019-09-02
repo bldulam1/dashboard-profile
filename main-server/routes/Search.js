@@ -1,5 +1,8 @@
 const router = require("express").Router();
-const { Scene, SearchFolder } = require("../schemas/scene");
+const { Scene } = require("../schemas/scene");
+const Path = require("path");
+const Task = require("../schemas/task");
+const Tag = require("../schemas/tag");
 
 router.get("/:project/count", async (req, res) => {
   const count = await Scene.countDocuments({});
@@ -56,6 +59,34 @@ router.get(
 
     let ids = await Scene.find(query, { _id: 1 });
     res.send(ids.map(s => s._id));
+  }
+);
+
+router.get(
+  "/:project/get-ops/file=:inputFile/path=:inputLocation(*)",
+  async (req, res) => {
+    const { inputFile, project } = req.params;
+    const inputLocation = Path.resolve(req.params.inputLocation);
+    const [operations, tags] = await Promise.all([
+      Task.find(
+        {
+          inputFile,
+          inputLocation,
+          project
+        },
+        { status: 1, operation: 1, requestedBy: 1, assignedWorker: 1, requestDate: 1 }
+      ),
+      Tag.find(
+        {
+          fileName: inputFile,
+          path: inputLocation,
+          project
+        },
+        { key: 1, value: 1 }
+      )
+    ]);
+
+    res.send({ operations, tags });
   }
 );
 

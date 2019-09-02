@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -19,6 +19,15 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import DateRange from "@material-ui/icons/DateRange";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+
+import Axios from "axios";
+import { api_server } from "../../../environment/environment";
+
 const useStyles = makeStyles(theme => ({
   root: {
     width: "100%",
@@ -56,17 +65,58 @@ function EnhancedListItem(params) {
   );
 }
 
+function OperationListItem(params) {
+  const { icon, task, nested } = params;
+  console.log(task);
+  const { operation, status, requestedBy, assignedWorker } = task;
+  const classes = useStyles();
+
+  return (
+    <ListItem className={`${nested && classes.nested}`}>
+      <ListItemIcon>{icon}</ListItemIcon>
+      <ListItemText
+        primary={operation}
+        secondary={
+          <Fragment>
+            <Typography
+              component="div"
+              variant="caption"
+              color="textPrimary"
+              className={classes.breakWord}
+            >
+              {status.text}
+            </Typography>
+            <Typography
+              component="div"
+              variant="caption"
+              color="textPrimary"
+              className={classes.breakWord}
+            >
+              {requestedBy}
+            </Typography>
+            <Typography
+              component="div"
+              variant="caption"
+              color="textPrimary"
+              className={classes.breakWord}
+            >
+              {assignedWorker}
+            </Typography>
+          </Fragment>
+        }
+      />
+    </ListItem>
+  );
+}
+
 export default params => {
   const classes = useStyles();
   const { open, toggleDialog, fileDetails } = params;
-  // const [datesOpen, toggleDatesOpen] = useToggle(false);
-  // const [operationsOpen, toggleOperationsOpen] = useToggle(false);
-  // const [tagsOpen, toggleOpen] = useToggle(false);
 
   const [propsOpen, setPropsOpen] = useState({
     dates: false,
-    operations: false,
-    tags: false
+    operations: true,
+    tags: true
   });
 
   const togglePropsOpen = prop => {
@@ -76,10 +126,30 @@ export default params => {
     });
   };
 
-  const { fileName, path, date, operations, tags } = fileDetails;
+  const { fileName, path, date, project } = fileDetails;
   const modified = date && date.modified;
   const birth = date && date.birth;
   const mapped = date && date.mapped;
+
+  const [fileInfo, setFileInfo] = useState({
+    operations: [],
+    tags: []
+  });
+
+  useEffect(() => {
+    // let unmounted = false;
+    // let source = Axios.CancelToken.source();
+    const url = `${api_server}/search/${project}/get-ops/file=${fileName}/path=${path}`;
+    Axios.get(url).then(results => {
+      const { operations, tags } = results.data;
+      console.log(results.data);
+      setFileInfo({ operations, tags });
+    });
+
+    return () => {
+      // cleanup
+    };
+  }, [fileName, project, path]);
 
   return (
     <Dialog
@@ -97,13 +167,13 @@ export default params => {
           className={classes.root}
         >
           <EnhancedListItem
-            icon={<MyLocation />}
+            icon={<MyLocation color="primary" />}
             primaryText={fileName}
             secondaryText={path}
           />
           <ListItem button onClick={() => togglePropsOpen("dates")}>
             <ListItemIcon>
-              <CalendarToday />
+              <CalendarToday color="primary" />
             </ListItemIcon>
             <ListItemText primary="Dates" />
             {propsOpen.dates ? <ExpandLess /> : <ExpandMore />}
@@ -133,7 +203,7 @@ export default params => {
 
           <ListItem button onClick={() => togglePropsOpen("tags")}>
             <ListItemIcon>
-              <LabelIcon />
+              <LabelIcon color="primary" />
             </ListItemIcon>
             <ListItemText primary="Tags" />
             {propsOpen.tags ? <ExpandLess /> : <ExpandMore />}
@@ -151,20 +221,13 @@ export default params => {
 
           <ListItem button onClick={() => togglePropsOpen("operations")}>
             <ListItemIcon>
-              <AssignmentIcon />
+              <AssignmentIcon color="primary" />
             </ListItemIcon>
             <ListItemText primary="Operations" />
             {propsOpen.operations ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
           <Collapse in={propsOpen.operations} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              <EnhancedListItem
-                icon={<AssignmentIcon />}
-                primaryText="Test"
-                secondaryText="Value"
-                nested={true}
-              />
-            </List>
+            <OperationsTable operations={fileInfo.operations} />
           </Collapse>
         </List>
       </DialogContent>
@@ -176,3 +239,34 @@ export default params => {
     </Dialog>
   );
 };
+
+function OperationsTable(params) {
+  const { operations } = params;
+
+  return (
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>Date</TableCell>
+          <TableCell align="right">Operation</TableCell>
+          <TableCell align="right">Requester</TableCell>
+          <TableCell align="right">Server</TableCell>
+          <TableCell align="right">Status</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {operations.map(row => (
+          <TableRow key={row._id}>
+            <TableCell component="th" scope="row">
+              {new Date(row.requestDate).toLocaleString()}
+            </TableCell>
+            <TableCell align="right">{row.operation}</TableCell>
+            <TableCell align="right">{row.requestedBy}</TableCell>
+            <TableCell align="right">{row.assignedWorker}</TableCell>
+            <TableCell align="right">{row.status && row.status.text}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}

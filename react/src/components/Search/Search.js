@@ -6,7 +6,6 @@ import { FileSearchContext } from "../../context/Search.Context";
 import { ProjectContext } from "../../context/Project.Context";
 import Axios from "axios";
 import { api_server } from "../../environment/environment";
-// import ContentsMain from "./Contents/Contents.Main";
 import Operations from "./Operations/Operations";
 import ToolbarMain from "./Toolbar/Toolbar.Main";
 import QuerybarMain from "./Querybar/Querybar.Main";

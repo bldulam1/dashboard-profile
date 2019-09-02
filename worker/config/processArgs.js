@@ -32,7 +32,7 @@ args.forEach(arg => {
 });
 
 let url = `http://${hostname}:${port}`;
-let mainHostURL = `http://${mainHost}:${mainPort}`;
+let mainHostURL = `https://${mainHost}:${mainPort}`;
 
 module.exports = {
   url,

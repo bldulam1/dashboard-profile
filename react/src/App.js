@@ -7,7 +7,7 @@ import MainFrame from "./frame/Frame";
 import { AzureAD, MsalAuthProviderFactory, LoginType } from "react-aad-msal";
 import { UserContext } from "./context/User.Context";
 import Axios from "../../main-server/node_modules/axios";
-import { api_server } from "./environment/environment";
+import { api_server, front_end_server } from "./environment/environment";
 
 export default () => {
   const [user, setUser] = useState({
@@ -19,7 +19,7 @@ export default () => {
     auth: {
       authority: "https://login.microsoftonline.com/organizations",
       clientId: "8d328dfa-6f5f-442e-baf0-f7cc55bb9ba1",
-      redirectUri: "https://jp01-clarity01:3000"
+      redirectUri: front_end_server
     },
     cache: {
       cacheLocation: "localStorage",

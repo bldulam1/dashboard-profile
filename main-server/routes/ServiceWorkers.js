@@ -4,7 +4,9 @@ const Worker = require("../schemas/worker");
 // root: /service-workers
 
 router.get("/stats-on/all", async (req, res) => {
-  const workers = await Worker.find({});
+  const workers = await Worker.find({}, null, {
+    sort: { active: 1, serverName: 1}
+  });
   res.send(workers);
 });
 

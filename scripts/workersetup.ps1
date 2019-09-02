@@ -1,9 +1,6 @@
-Set-Location ~
-git clone http://bldulam1:tha3nohk!@de01-gitlab01.corp.int/clarity/clarity2.0.git
-Set-Location ./clarity2.0/worker;
-npm install;
-Set-Location ~/clarity2.0/worker; npm run prod;
-
+Stop-Process -ProcessName node;
+Set-Location ~/clarity2.0/worker; npm run start-prod;
+npm config set proxy http://10.1.9.51:80;
 
 $start = 1
 $end = 40

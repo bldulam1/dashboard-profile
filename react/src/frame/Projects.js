@@ -1,5 +1,5 @@
 import React from "react";
-import Dashboard from "../components/Dashboard";
+import Dashboard from "../components/Dashboard/Dashboard";
 import Search from "../components/Search/Search";
 import Upload from "../components/Uploads/Upload";
 import Maps from "../components/Maps";

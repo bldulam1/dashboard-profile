@@ -53,11 +53,7 @@ router.post("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
     })
     .on("end", () => {
       block = false;
-      try {
-        res.send({ files, directories, project, root: dir });
-      } catch (error) {
-        res.send({ error });
-      }
+      res.send({ files, directories, project, root: dir });
     });
 });
 

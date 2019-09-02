@@ -5,8 +5,11 @@
   "main": "app.js",
   "scripts": {
     "prod": "node ./node_modules/pm2/bin/pm2 start ecosystem.config.js",
-    "prod-stop": "node ./node_modules/pm2/bin/pm2 stop clarity",
+    "prod-stop": "node ./node_modules/pm2/bin/pm2 stop worker",
     "start": "node ./node_modules/nodemon/bin/nodemon.js app.js mainHost:localhost",
+    "start-prod": "node ./node_modules/nodemon/bin/nodemon.js app.js mainHost:jp01-clarity01",
+    "log": "node ./node_modules/pm2/bin/pm2 log",
+    "list": "node ./node_modules/pm2/bin/pm2 list",
     "gen-certificates": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certificates/selfsigned.key -out ./certificates/selfsigned.crt",
     "test": "mocha"
   },

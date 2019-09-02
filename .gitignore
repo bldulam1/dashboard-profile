@@ -5,3 +5,6 @@
 /worker/node_modules
 /main-server/tmp
 /main-server/%HOMEDRIVE%%HOMEPATH%
+/main-server/certificates/selfsigned.crt
+/main-server/certificates/selfsigned.key
+react/src/environment/environment.js

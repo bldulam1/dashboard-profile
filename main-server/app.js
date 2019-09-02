@@ -4,6 +4,8 @@ const app = express();
 const mongoose = require("mongoose");
 const logger = require("morgan");
 const bodyParser = require("body-parser");
+const fs = require("fs");
+const https = require("https");
 const { getCPU_MEM, getNetworkStats } = require("./routines/routine.stats");
 
 const port = 8000;
@@ -14,14 +16,9 @@ app.use(
   cors({
     credentials: true,
     origin: [
-      "https://jp01-of-wl8197:3000",
-      "https://localhost:3000",
-      "https://jp01-clarity01:3000",
-      "https://jp01-clarity01.corp.int:3000",
-
-      "http://localhost",
-      "http://jp01-clarity01",
-      "http://jp01-clarity01.corp.int"
+      "https://jp01-of-wl8197",
+      "https://jp01-clarity01",
+      "https://jp01-clarity01.corp.int",
     ]
   })
 );
@@ -39,6 +36,10 @@ app.use("/naming-convention", require("./routes/NamingConventions"));
 app.use("/service-workers", require("./routes/ServiceWorkers"));
 app.get("/", (req, res) => res.send("Hello World!2"));
 
+var key = fs.readFileSync("./certificates/selfsigned.key");
+var cert = fs.readFileSync("./certificates/selfsigned.crt");
+var options = { key, cert };
+
 mongoose.connect(`mongodb://localhost:27017/clarity`, {
   useNewUrlParser: true,
   useFindAndModify: false,
@@ -47,7 +48,8 @@ mongoose.connect(`mongodb://localhost:27017/clarity`, {
 mongoose.connection.on("error", err => console.log(err));
 mongoose.connection.on("open", () => {
   console.log(`${process.pid} database server connected`);
-  app.listen(port, () => {
+  var server = https.createServer(options, app);
+  server.listen(port, () => {
     console.log(`Clarity is listening on port ${port}!`);
     setInterval(getCPU_MEM, 1000);
     setInterval(getNetworkStats, 5000);

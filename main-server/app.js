@@ -8,7 +8,7 @@ const fs = require("fs");
 const https = require("https");
 const { getCPU_MEM, getNetworkStats } = require("./routines/routine.stats");
 
-const httpsPort = 8000;
+const httpsPort = 4444;
 const httpPort = 8080;
 
 app.use(bodyParser.urlencoded({ extended: false, limit: "1000mb" }));

@@ -7,6 +7,7 @@
     "prod": "node ./node_modules/pm2/bin/pm2 start ecosystem.config.js",
     "prod-stop": "node ./node_modules/pm2/bin/pm2 stop clarity",
     "start": "node ./node_modules/nodemon/bin/nodemon.js app.js mainHost:localhost",
+    "gen-certificates": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certificates/selfsigned.key -out ./certificates/selfsigned.crt",
     "test": "mocha"
   },
   "author": "Clarity",

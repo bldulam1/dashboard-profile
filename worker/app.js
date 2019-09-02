@@ -21,28 +21,23 @@ app.use("/tasks", require("./routes/tasks"));
 app.use("/fileSearch", require("./routes/fileSearch"));
 app.use("/", require("./routes/statistics"));
 
-// mongoose.connect(`mongodb://localhost:27017/clarity`, {
-//   useNewUrlParser: true,
-//   useFindAndModify: false,
-//   useCreateIndex: true
-// });
-// mongoose.connection.on("error", err => console.log(err));
-// mongoose.connection.on("open", () => {
-//   console.log(`${process.pid} database server connected`);
 app.listen(props.port, async () => {
-  const { mainHost, mainPort, allowedTasks } = props;
-  const mainURL = `http://${mainHost}:${mainPort}/service-workers/new`;
+  const { mainHostURL, allowedTasks } = props;
+  const mainURL = `${mainHostURL}/service-workers/new`;
   const { hostname, port, serverName, url } = props;
-  await axios.post(mainURL, {
-    hostname,
-    port,
-    serverName,
-    url,
-    allowedTasks,
-    taskID: null,
-    searchID: null
-  });
+
+  axios
+    .post(mainURL, {
+      hostname,
+      port,
+      serverName,
+      url,
+      allowedTasks,
+      taskID: null,
+      searchID: null
+    })
+    .then(() => console.log("success"))
+    .catch(() => console.log("failed", mainURL));
 
   console.log(`Service worker is listening on port ${port}!`);
 });
-// });

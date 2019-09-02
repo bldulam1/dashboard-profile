@@ -15,12 +15,13 @@ app.use(
     credentials: true,
     origin: [
       "https://jp01-of-wl8197:3000",
-      "http://localhost:3000",
-      "http://jp01-clarity01:3000",
-      "http://jp01-clarity01.corp.int:3000",
-      "http://localhost:80",
-      "http://jp01-clarity01:80",
-      "http://jp01-clarity01.corp.int:80"
+      "https://localhost:3000",
+      "https://jp01-clarity01:3000",
+      "https://jp01-clarity01.corp.int:3000",
+
+      "http://localhost",
+      "http://jp01-clarity01",
+      "http://jp01-clarity01.corp.int"
     ]
   })
 );

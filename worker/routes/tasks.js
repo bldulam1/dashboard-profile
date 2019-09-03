@@ -44,7 +44,7 @@ router.post("/execute", BlockingMiddleware, async (req, res) => {
 
   // const child = spawn("powershell.exe", [task.script]);
   const child = spawn("powershell.exe", [
-    `Start-Sleep -s ${1 *
+    `Start-Sleep -s ${10 *
       Math.random()}; Write-Host "Log Date"; Start-Sleep -s ${2 *
       Math.random()};`
   ]);

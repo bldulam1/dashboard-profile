@@ -15,6 +15,11 @@ import Checkbox from "@material-ui/core/Checkbox";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import FilterListIcon from "@material-ui/icons/FilterList";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import ErrorIcon from "@material-ui/icons/Error";
+import ScheduleIcon from "@material-ui/icons/Schedule";
+
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { fetchTasksData } from "../Tasks";
 import { api_server } from "../../../environment/environment";
 import Axios from "axios";
@@ -383,7 +388,7 @@ export default params => {
                     </TableCell>
                     <TableCell align="right">{task.assignedWorker}</TableCell>
                     <TableCell align="right">
-                      {task.status && task.status.text}
+                      {task.status ? <RenderStatus status={task.status} /> : ""}
                     </TableCell>
                   </TableRow>
                 );
@@ -415,3 +420,20 @@ export default params => {
     </div>
   );
 };
+
+function RenderStatus(params) {
+  const { status } = params;
+
+  return (
+    <Tooltip title={status.text}>
+      <div>
+        {status.text === "Completed" && <CheckCircleIcon color="primary" />}
+        {status.text === "In Progress" && (
+          <CircularProgress size={20} color="secondary" />
+        )}
+        {status.text === "Pending" && <ScheduleIcon color="default" />}
+        {status.text === "Aborted" && <ErrorIcon color="error" />}
+      </div>
+    </Tooltip>
+  );
+}

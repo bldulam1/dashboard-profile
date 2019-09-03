@@ -1,7 +1,7 @@
 const args = process.argv;
 const os = require("os");
 
-let port = 8001;
+let port = 8000;
 let hostname = os.hostname().toLowerCase();
 // let hostname = "localhost";
 let serverName = hostname;

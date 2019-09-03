@@ -20,13 +20,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-// async function fetchWorkerStatus() {
-//   const { data } = await Axios.get(
-//     `${api_server}/service-workers/stats-on/all`
-//   );
-//   return { ...data };
-// }
-
 function reducer(state, action) {
   return { ...state, ...action };
 }
@@ -62,35 +55,53 @@ export default props => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {servers.map(({ _id, serverName, mem, cpu, active, taskID }) => (
-              <TableRow key={_id}>
-                <TableCell component="th" scope="row">
-                  {serverName}
-                </TableCell>
-                <TableCell align="right">
-                  <MemCPUProgressBar
-                    value={
-                      cpu.reduce((acc, c) => acc + c.currentload, 0) /
-                      cpu.length
-                    }
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  <MemCPUProgressBar
-                    value={
-                      100 -
-                      (100 * mem[mem.length - 1].free) /
-                        mem[mem.length - 1].total
-                    }
-                  />
-                </TableCell>
+            {servers.map(server => {
+              const { _id, serverName, mem, cpu, active, taskID } = server;
+              const netAve = server.network.map(s =>
+                s.ifaces
+                  .map(({ rx_bytes, tx_bytes }) => ({
+                    rx_bytes,
+                    tx_bytes
+                  }))
+                  .reduce(
+                    (acc, curr) => ({
+                      rx_bytes: acc.rx_bytes + curr.rx_bytes,
+                      tx_bytes: acc.tx_bytes + curr.tx_bytes
+                    }),
+                    { rx_bytes: 0, tx_bytes: 0 }
+                  )
+              );
+              console.log(netAve);
+              return (
+                <TableRow key={_id}>
+                  <TableCell component="th" scope="row">
+                    {serverName}
+                  </TableCell>
+                  <TableCell align="right">
+                    <MemCPUProgressBar
+                      value={
+                        cpu.reduce((acc, c) => acc + c.currentload, 0) /
+                        cpu.length
+                      }
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <MemCPUProgressBar
+                      value={
+                        100 -
+                        (100 * mem[mem.length - 1].free) /
+                          mem[mem.length - 1].total
+                      }
+                    />
+                  </TableCell>
 
-                <TableCell align="right">
-                  {active ? "Online" : "Offline"}
-                </TableCell>
-                <TableCell align="right">{taskID}</TableCell>
-              </TableRow>
-            ))}
+                  <TableCell align="right">
+                    {active ? "Online" : "Offline"}
+                  </TableCell>
+                  <TableCell align="right">{taskID}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </DashboardContext.Provider>

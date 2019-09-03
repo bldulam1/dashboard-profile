@@ -17,6 +17,7 @@ app.use(
   })
 );
 app.set("view options", { pretty: true });
+app.use("/api/overpass", require("./routes/Overpass"));
 app.use("/tasks", require("./routes/tasks"));
 app.use("/fileSearch", require("./routes/fileSearch"));
 app.use("/", require("./routes/statistics"));

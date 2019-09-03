@@ -5,8 +5,9 @@ let port = 8000;
 let hostname = os.hostname().toLowerCase();
 // let hostname = "localhost";
 let serverName = hostname;
-let mainPort = 8080;
-let mainHost = "jp01-clarity01";
+let mainPort = process.env.NODE_ENV === "development" ? 8080 : 80;
+let mainHost =
+  process.env.NODE_ENV === "development" ? "localhost" : "jp01-clarity01";
 let allowedTasks = [];
 
 const serverTypes = {
@@ -30,7 +31,7 @@ args.forEach(arg => {
 });
 
 let url = `http://${hostname}:${port}`;
-let mainHostURL = `http://${mainHost}:${mainPort}`;
+let mainHostURL = `http://${mainHost}:${mainPort}/api`;
 
 module.exports = {
   url,

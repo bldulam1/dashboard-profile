@@ -3,9 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "prod": "node ./node_modules/pm2/bin/pm2 start ecosystem.config.js",
+    "list": "node ./node_modules/pm2/bin/pm2 list",
+    "log": "node ./node_modules/pm2/bin/pm2 log",
+    "prod": "cross-env NODE_ENV=production node ./node_modules/pm2/bin/pm2 start ecosystem.config.js",
     "prod-stop": "node ./node_modules/pm2/bin/pm2 stop clarity",
-    "start": "node ./node_modules/nodemon/bin/nodemon.js --ignore './tmp/' app.js",
+    "start": "cross-env NODE_ENV=development node ./node_modules/nodemon/bin/nodemon.js --ignore './tmp/' app.js",
     "test": "mocha"
   },
   "dependencies": {
@@ -39,10 +41,11 @@
     "socket.io-client": "^2.2.0"
   },
   "devDependencies": {
-    "nodemon": "~1.18.10",
+    "cross-env": "^5.2.1",
     "eslint": "^5.12.1",
     "eslint-config-google": "^0.11.0",
     "mocha": "^5.1.1",
+    "nodemon": "~1.18.10",
     "supertest": "^3.0.0"
   }
 }

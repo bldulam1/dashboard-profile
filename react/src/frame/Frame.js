@@ -20,11 +20,8 @@ import { Route, Link, Redirect } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import logo from "../logo.svg";
 
-import {
-  projects,
-  getProjectComponents,
-  settingsComponents
-} from "../frame/Projects";
+import { getProjectComponents, settingsComponents } from "../frame/Projects";
+import { projects } from "../environment/config";
 
 import { useStyles } from "../styles/classes";
 import { ProjectContext } from "../context/Project.Context";

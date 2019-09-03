@@ -11,6 +11,7 @@ let workerSchema = mongoose.Schema({
   tasks: [],
   type: String,
   taskID: String,
+  activeTask: String,
   cpu: [],
   mem: [],
   network: []

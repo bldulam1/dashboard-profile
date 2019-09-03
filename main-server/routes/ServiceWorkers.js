@@ -17,7 +17,7 @@ router.get("/stats-on/current-only", async (req, res) => {
 
   res.send(
     workers.map(worker => {
-      const { _id, serverName, active } = worker;
+      const { _id, serverName, active, allowedTasks } = worker;
       const cpu = active ? worker.cpu[worker.cpu.length - 1].currentload : 0;
       const { used, total } = worker.mem[worker.mem.length - 1];
       const { ifaces } = worker.network[worker.network.length - 1];
@@ -35,7 +35,8 @@ router.get("/stats-on/current-only", async (req, res) => {
         cpu,
         mem: active ? (100 * used) / total : 0,
         rx_bytes,
-        tx_bytes
+        tx_bytes,
+        allowedTasks
       };
     })
   );
@@ -46,9 +47,10 @@ router.get("/stats-off/all", async (req, res) => {
   res.send(workers);
 });
 
-router.get("/one/id", async (req, res) => {
-  const workers = await Worker.find({});
-  res.send(workers);
+router.put("/update/:id", async (req, res) => {
+  Worker.findByIdAndUpdate(req.params.id, req.body)
+    .then(() => res.send(req.body))
+    .catch(error => res.send(error));
 });
 
 router.post("/new", async (req, res) => {

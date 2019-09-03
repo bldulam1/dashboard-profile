@@ -16,6 +16,7 @@ import GroupIcon from "@material-ui/icons/Group";
 import WorkIcon from "@material-ui/icons/Work";
 import Tasks from "../components/Tasks/Tasks";
 import TestCatalog from "../components/TestCatalog/TestCatalog";
+import { projects } from "../environment/config";
 
 function Component(name, route, component, projects, icon) {
   return { name, route, component, projects, icon };
@@ -30,15 +31,6 @@ function getProjectComponents(projectName) {
   });
   return ret_components;
 }
-
-const projects = [
-  "Nissan L53H",
-  "Renault Nissan",
-  "Subaru SVS",
-  "Subaru 77GHz",
-  "Honda",
-  "Toyota",
-].sort();
 
 const projectComponents = new Set([
   Component("search", "/:project/search", Search, projects, <SearchIcon />),
@@ -87,7 +79,7 @@ const settingsComponents = [
     SettingsProject,
     projects,
     <GroupIcon />
-  ),
+  )
 ];
 
-export { projects, getProjectComponents, settingsComponents };
+export { getProjectComponents, settingsComponents };

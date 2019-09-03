@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
 export const DashboardContext = createContext({
-  dashboardProps: {},
+  dashboard: { servers: [] },
   dashboardDispatch: null
 });

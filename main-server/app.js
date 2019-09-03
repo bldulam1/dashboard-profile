@@ -60,8 +60,8 @@ mongoose.connection.on("open", () => {
   var server = https.createServer(options, app);
   server.listen(httpsPort, () => {
     console.log(`Clarity HTTPS server is listening on port ${httpsPort}!`);
-    setInterval(getCPU_MEM, 1000);
-    setInterval(getNetworkStats, 5000);
+    // setInterval(getCPU_MEM, 10000);
+    // setInterval(getNetworkStats, 10000);
   });
   app.listen(httpPort, () => {
     console.log(`Clarity HTTP server is listening on port ${httpPort}`);

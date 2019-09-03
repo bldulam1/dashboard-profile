@@ -29,10 +29,10 @@ const defaultState = {
   rowsPerPage: 10,
   tasks: [],
   selected: [],
-  sort: {},
+  sort: { requestDate: -1 },
   count: 0,
-  order: "asc",
-  orderBy: "inputFile"
+  order: "desc",
+  orderBy: "requestDate"
 };
 
 export default props => {

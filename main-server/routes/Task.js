@@ -68,33 +68,32 @@ router.get("/:project/get-ids/query=:queryString(*)", async (req, res) => {
   res.send(tasks.map(({ _id }) => _id));
 });
 
-
 module.exports = router;
 
 async function executeTasks() {
   console.log("Task Scheduling");
   const workers = await Worker.find(
-    { taskID: null },
+    { taskID: null, active: true },
     { url: 1, allowedTasks: 1, serverName: 1 }
   );
 
   console.log(workers.length);
   for (let index = 0; index < workers.length; index++) {
     const worker = workers[index];
-    const task = Boolean(worker)
-      ? await Task.findOne(
-          {
-            assignedWorker: null,
-            operation: { $in: worker.allowedTasks }
-          },
-          { script: 1 },
-          { sort: { priority: -1, requestDate: 1 } }
-        )
-      : null;
+    const task = await Task.findOne(
+      {
+        assignedServer: null,
+        operation: { $in: worker.allowedTasks }
+      },
+      { script: 1 },
+      { sort: { priority: -1, requestDate: 1 } }
+    );
+    console.log({ worker, task });
 
     if (worker && !task) {
       // await Worker.findByIdAndUpdate(worker._id, { skipped: true });
-    } else if (worker && task) {
+    }
+    if (worker && task) {
       // assign task
       await Promise.all([
         Worker.findByIdAndUpdate(worker._id, {
@@ -104,6 +103,7 @@ async function executeTasks() {
           assignedWorker: worker.serverName
         })
       ]);
+      console.log(worker.url);
 
       Axios.post(`${worker.url}/tasks/execute`, { task }).then(() => {
         Worker.findByIdAndUpdate(worker._id, {

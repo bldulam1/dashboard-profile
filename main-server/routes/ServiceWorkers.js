@@ -17,17 +17,23 @@ router.get("/stats-on/current-only", async (req, res) => {
 
   res.send(
     workers.map(worker => {
-      const cpu = worker.cpu[worker.cpu.length - 1].currentload;
+      const { _id, serverName, active } = worker;
+      const cpu = active ? worker.cpu[worker.cpu.length - 1].currentload : 0;
       const { used, total } = worker.mem[worker.mem.length - 1];
       const { ifaces } = worker.network[worker.network.length - 1];
-      const rx_bytes = ifaces.reduce((acc, { rx_bytes }) => acc + rx_bytes, 0);
-      const tx_bytes = ifaces.reduce((acc, { tx_bytes }) => acc + tx_bytes, 0);
-      const { serverName } = worker;
+      const rx_bytes = active
+        ? ifaces.reduce((acc, { rx_bytes }) => acc + rx_bytes, 0)
+        : 0;
+      const tx_bytes = active
+        ? ifaces.reduce((acc, { tx_bytes }) => acc + tx_bytes, 0)
+        : 0;
 
       return {
+        _id,
         serverName,
+        active,
         cpu,
-        mem: used / total,
+        mem: active ? (100 * used) / total : 0,
         rx_bytes,
         tx_bytes
       };

@@ -18,11 +18,11 @@ export default params => {
       <TableHead>
         <TableRow>
           <TableCell>Server</TableCell>
+          <TableCell align="right">Status</TableCell>
           <TableCell align="right">CPU</TableCell>
           <TableCell align="right">RAM</TableCell>
           <TableCell align="right">Receive</TableCell>
           <TableCell align="right">Transmit</TableCell>
-          <TableCell align="right">Status</TableCell>
           <TableCell align="right">Task</TableCell>
         </TableRow>
       </TableHead>
@@ -36,6 +36,13 @@ export default params => {
                 {serverName}
               </TableCell>
               <TableCell align="right">
+                {active ? (
+                  <WifiIcon color="primary" />
+                ) : (
+                  <WifiOffIcon color="secondary" />
+                )}
+              </TableCell>
+              <TableCell align="right">
                 <MemCPUProgressBar value={active ? cpu : 0} />
               </TableCell>
               <TableCell align="right">
@@ -47,13 +54,6 @@ export default params => {
               <TableCell align="right">{`${normalizeSize(
                 server.tx_bytes
               )}/s`}</TableCell>
-              <TableCell align="right">
-                {active ? (
-                  <WifiIcon color="primary" />
-                ) : (
-                  <WifiOffIcon color="secondary" />
-                )}
-              </TableCell>
               <TableCell align="right">{taskID}</TableCell>
             </TableRow>
           );

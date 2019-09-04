@@ -41,7 +41,11 @@ function createSimsTasks(props, files) {
       size,
       script,
       expiryDate,
-      requestDate
+      requestDate,
+      status: {
+        text: "Pending",
+        value: 0
+      }
     }).save();
   });
 

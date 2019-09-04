@@ -2,6 +2,9 @@ const router = require("express").Router();
 const { Scene } = require("../schemas/scene");
 const Task = require("../schemas/task");
 const { createSimsTasks } = require("./Operations/Operation.SIMS");
+const {
+  createIDW4ConvTasks
+} = require("./Operations/Operation.IDW4Conversion");
 const Worker = require("../schemas/worker");
 const Axios = require("axios");
 const {
@@ -13,16 +16,16 @@ router.post("/:operation/new", async (req, res) => {
   const { operation } = req.params;
   const files = await Scene.find(
     { _id: { $in: req.body.fileIDs } },
-    { operations: 1, fileName: 1, path: 1, size: 1 }
+    { fileName: 1, path: 1, size: 1 }
   );
+  let tasks = [];
   switch (operation) {
     case "CVW Conversion":
       return res.send("Hello");
 
     case "Export List":
       const { fileIDs, selectedFileInfo } = req.body;
-      let fileInfo = await fetchFileInfo(fileIDs);
-
+      const fileInfo = await fetchFileInfo(fileIDs);
       return res.send(await alignFileInfo(fileInfo, selectedFileInfo));
 
     case "File Splitting":
@@ -32,10 +35,12 @@ router.post("/:operation/new", async (req, res) => {
       return res.send("Hello");
 
     case "IDW4 Conversion":
-      return res.send("Hello");
+      tasks = await createIDW4ConvTasks(req.body, files);
+      executeTasks();
+      return res.send(tasks);
 
     case "SIMS":
-      const tasks = await createSimsTasks(req.body, files);
+      tasks = await createSimsTasks(req.body, files);
       executeTasks();
       return res.send(tasks);
 
@@ -92,7 +97,10 @@ router.get("/:project/get-ids/query=:queryString(*)", async (req, res) => {
 
 module.exports = router;
 
+let blockTaskExecution = false;
 async function executeTasks() {
+  if (blockTaskExecution) return;
+  blockTaskExecution = true;
   const workers = await Worker.find(
     { taskID: null, active: true },
     { url: 1, allowedTasks: 1, serverName: 1 }
@@ -126,4 +134,6 @@ async function executeTasks() {
       });
     }
   }
+  blockTaskExecution = false;
+  console.log('Task execution Finished')
 }

@@ -137,17 +137,27 @@ export default params => {
   });
 
   useEffect(() => {
-    // let unmounted = false;
-    // let source = Axios.CancelToken.source();
+    let unmounted = false;
+    let source = Axios.CancelToken.source();
     const url = `${api_server}/search/${project}/get-ops/file=${fileName}/path=${path}`;
-    Axios.get(url).then(results => {
-      const { operations, tags } = results.data;
-      console.log(results.data);
-      setFileInfo({ operations, tags });
-    });
+    Axios.get(url)
+      .then(results => {
+        if (!unmounted) {
+          const { operations, tags } = results.data;
+          setFileInfo({ operations, tags });
+        }
+      })
+      .catch(e => {
+        if (!unmounted) {
+          Axios.isCancel(e)
+            ? console.log(`Request cancelled:${e.message}`)
+            : console.log("Another error happened:" + e.message);
+        }
+      });
 
     return () => {
-      // cleanup
+      unmounted = true;
+      source.cancel("Cancelling in cleanup");
     };
   }, [fileName, project, path]);
 

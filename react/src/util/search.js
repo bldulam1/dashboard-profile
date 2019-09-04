@@ -77,7 +77,5 @@ export function getSubHeadingText(invalidFiles, selected) {
     return "";
   } else if (invalidLen && selectedLen) {
     return `${invalidLen} Invalid file${invalidLen > 1 ? "s" : ""}`;
-  } else if (!invalidLen) {
-    return `${selectedLen} Valid file${selectedLen > 1 ? "s" : ""}`;
   }
 }

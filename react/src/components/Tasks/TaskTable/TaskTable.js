@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import clsx from "clsx";
 import { lighten, makeStyles } from "@material-ui/core/styles";
@@ -23,6 +23,8 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { fetchTasksData } from "../Tasks";
 import { api_server } from "../../../environment/environment";
 import Axios from "axios";
+
+let intervalTimer = null;
 
 const headCols = [
   {
@@ -226,9 +228,6 @@ export default params => {
     orderBy
   } = tasksState;
 
-  // const [order, setOrder] = React.useState("asc");
-  // const [orderBy, setOrderBy] = React.useState("inputFile");
-
   function handleRequestSort(event, property) {
     const isDesc = orderBy === property && order === "desc";
     const newSort = { [property]: isDesc ? 1 : -1 };
@@ -331,7 +330,44 @@ export default params => {
 
   const isSelected = id => selected.indexOf(id) !== -1;
 
-  const emptyRows = rowsPerPage - tasks.length;
+  useEffect(() => {
+    clearInterval(intervalTimer);
+
+    const hasUnFinishedTasks = () => {
+      for (let taskIndex = 0; taskIndex < tasks.length; taskIndex++) {
+        if (!tasks[taskIndex].status || tasks[taskIndex].status.value < 2) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    if (hasUnFinishedTasks()) {
+      console.log('is looping')
+      intervalTimer = setInterval(() => {
+        if (hasUnFinishedTasks()) {
+          fetchTasksData(
+            project,
+            page,
+            rowsPerPage,
+            sort,
+            query,
+            ({ tasks, count }) => {
+              setTaskState({
+                ...tasksState,
+                page,
+                rowsPerPage,
+                tasks,
+                count
+              });
+            }
+          );
+        }
+      }, 1000);
+    }
+
+    return () => clearInterval(intervalTimer);
+  });
 
   return (
     <div className={classes.root}>
@@ -393,8 +429,8 @@ export default params => {
                   </TableRow>
                 );
               })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 33 * emptyRows }}>
+              {rowsPerPage > tasks.length && (
+                <TableRow style={{ height: 33 * (rowsPerPage - tasks.length) }}>
                   <TableCell colSpan={7} />
                 </TableRow>
               )}

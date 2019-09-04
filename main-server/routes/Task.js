@@ -1,9 +1,13 @@
 const router = require("express").Router();
 const { Scene } = require("../schemas/scene");
 const Task = require("../schemas/task");
-const { createSimsTasks } = require("./SIMS/Task.SIMS");
+const { createSimsTasks } = require("./Operations/Operation.SIMS");
 const Worker = require("../schemas/worker");
 const Axios = require("axios");
+const {
+  fetchFileInfo,
+  alignFileInfo
+} = require("./Operations/Operation.ExportList");
 
 router.post("/:operation/new", async (req, res) => {
   const { operation } = req.params;
@@ -12,11 +16,29 @@ router.post("/:operation/new", async (req, res) => {
     { operations: 1, fileName: 1, path: 1, size: 1 }
   );
   switch (operation) {
+    case "CVW Conversion":
+      return res.send("Hello");
+
+    case "Export List":
+      const { fileIDs, selectedFileInfo } = req.body;
+      let fileInfo = await fetchFileInfo(fileIDs);
+
+      return res.send(await alignFileInfo(fileInfo, selectedFileInfo));
+
+    case "File Splitting":
+      return res.send("Hello");
+
+    case "HIL":
+      return res.send("Hello");
+
+    case "IDW4 Conversion":
+      return res.send("Hello");
+
     case "SIMS":
       const tasks = await createSimsTasks(req.body, files);
-      // const
       executeTasks();
       return res.send(tasks);
+
     default:
       break;
   }

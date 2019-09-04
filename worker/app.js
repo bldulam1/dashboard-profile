@@ -23,7 +23,7 @@ app.use("/fileSearch", require("./routes/fileSearch"));
 app.use("/", require("./routes/statistics"));
 
 app.listen(props.port, async () => {
-  const { mainHostURL, allowedTasks } = props;
+  const { mainHostURL } = props;
   const mainURL = `${mainHostURL}/service-workers/new`;
   const { hostname, port, serverName, url } = props;
 
@@ -33,7 +33,6 @@ app.listen(props.port, async () => {
       port,
       serverName,
       url,
-      allowedTasks,
       taskID: null,
       searchID: null
     })

@@ -1,9 +1,17 @@
-export const debounce = (func, delay) => {
-  let inDebounce
-  return function() {
-    const context = this
-    const args = arguments
-    clearTimeout(inDebounce)
-    inDebounce = setTimeout(() => func.apply(context, args), delay)
+export function json2csv(objArray) {
+  var array = typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
+  var str = "";
+
+  for (var i = 0; i < array.length; i++) {
+    var line = "";
+    for (var index in array[i]) {
+      if (line !== "") line += ",";
+
+      line += array[i][index];
+    }
+
+    str += line + "\r\n";
   }
+
+  return str;
 }

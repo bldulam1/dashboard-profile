@@ -4,6 +4,7 @@ import SIMSOperation from "./Operation.Components/SIMS.Operation";
 import IDW4ConversionOperation from "./Operation.Components/IDW4Conversion.Operation";
 import FileSplittingOperation from "./Operation.Components/FileSplitting.Operation";
 import { ProjectContext } from "../../../context/Project.Context";
+import ExportOperation from "./Operation.Components/Export.Operation";
 
 export default () => {
   const [expanded, setExpanded] = React.useState(null);
@@ -16,6 +17,7 @@ export default () => {
   return (
     <Fragment>
       <RootPaths handleExpanChange={handleChange} expanded={expanded} />
+      <ExportOperation handleExpanChange={handleChange} expanded={expanded} />
 
       {["Subaru 77GHz", "Renault Nissan", "Nissan L53H"].includes(
         activeProject

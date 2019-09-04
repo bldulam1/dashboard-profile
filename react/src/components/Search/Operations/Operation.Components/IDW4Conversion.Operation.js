@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
 import { FileSearchContext } from "../../../../context/Search.Context";
-import { makeStyles } from "@material-ui/styles";
 import Typography from "@material-ui/core/Typography";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
@@ -14,28 +13,17 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import Tooltip from "@material-ui/core/Tooltip";
 
 import Axios from "axios";
 import { api_server } from "../../../../environment/environment";
 import { UserContext } from "../../../../context/User.Context";
 import { useSnackbar } from "notistack";
-
-const useStyles = makeStyles(theme => ({
-  expansionPanelDetails: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  root: {
-    width: "100%",
-    backgroundColor: theme.palette.background.paper
-  },
-  breakWord: {
-    wordWrap: "break-word"
-  }
-}));
+import { getSubHeadingText } from "../../../../util/search";
+import { useOperationStyles } from "../../../../styles/operationsClasses";
 
 export default params => {
+  const taskName = "IDW4 Conversion";
+  const validExtension = "idw4";
   const { searchFileProps } = useContext(FileSearchContext);
   const { name } = useContext(UserContext);
   const { selected, project } = searchFileProps;
@@ -60,7 +48,7 @@ export default params => {
   };
 
   const handleSubmitTasks = () => {
-    const url = `${api_server}/tasks/IDW4 Conversion/new`;
+    const url = `${api_server}/tasks/${taskName}/new`;
     const {
       memoPoolPath,
       ibeoPoolPath,
@@ -79,7 +67,7 @@ export default params => {
       requestedBy: name
     })
       .then(results => {
-        const displayText = `${results.data.length} IDW4 Conversion tasks submitted`;
+        const displayText = `${results.data.length} ${taskName} tasks submitted`;
         enqueueSnackbar(displayText, { variant: "success" });
       })
       .catch(results => {
@@ -90,13 +78,13 @@ export default params => {
       });
   };
 
-  const classes = useStyles();
+  const classes = useOperationStyles();
   const isRequestValid = () => {
     return Boolean(selected.length && !options.invalidFiles.length);
   };
 
   useEffect(() => {
-    const url = `${api_server}/tasks/${project}/IDW4 Conversion/check-validity`;
+    const url = `${api_server}/tasks/check-extensions/${project}/${taskName}/ext=${validExtension}`;
     Axios.post(url, {
       fileIDs: selected
     }).then(results => {
@@ -106,21 +94,18 @@ export default params => {
 
   return (
     <ExpansionPanel
-      expanded={expanded === "IDW4 Conversion"}
-      onChange={handleExpanChange("IDW4 Conversion")}
+      expanded={expanded === taskName}
+      onChange={handleExpanChange(taskName)}
     >
       <ExpansionPanelSummary
         expandIcon={<ExpandMoreIcon />}
-        aria-controls="root-path-panelbh-content"
-        id="root-path-panelbh-header"
-        // onChange={false}
+        aria-controls="idw4-conv-panelbh-content"
+        id="idw4-conv-panelbh-header"
       >
-        <Tooltip
-          title={`${options.invalidFiles.length} invalid, ${selected.length -
-            options.invalidFiles.length} files`}
-        >
-          <Typography className={classes.heading}>IDW4 Conversion</Typography>
-        </Tooltip>
+        <Typography className={classes.heading}>{taskName}</Typography>
+        <Typography className={classes.secondaryHeading}>
+          {getSubHeadingText(options.invalidFiles, selected)}
+        </Typography>
       </ExpansionPanelSummary>
       <ExpansionPanelDetails className={classes.expansionPanelDetails}>
         <form noValidate autoComplete="off">

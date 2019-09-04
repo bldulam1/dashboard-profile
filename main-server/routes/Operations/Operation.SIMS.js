@@ -49,5 +49,6 @@ function createSimsTasks(props, files) {
 }
 
 module.exports = {
-  createSimsTasks
+  createSimsTasks,
+  createSimsScript
 };

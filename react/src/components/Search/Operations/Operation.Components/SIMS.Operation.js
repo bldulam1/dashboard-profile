@@ -18,7 +18,6 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Tooltip from "@material-ui/core/Tooltip";
-
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker
@@ -44,15 +43,13 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-// function reducer(state, action) {
-//   return { ...state, ...action };
-// }
-
 function OutputOption(extension, disabled, selected) {
   return { extension, disabled, selected };
 }
 
 export default params => {
+  const taskName = "SIMS";
+  const validExtension = "cvw";
   const { searchFileProps } = useContext(FileSearchContext);
   const { name } = useContext(UserContext);
   const { selected, project } = searchFileProps;
@@ -106,7 +103,7 @@ export default params => {
   };
 
   const handleSubmitTasks = () => {
-    const url = `${api_server}/tasks/SIMS/new`;
+    const url = `${api_server}/tasks/${taskName}/new`;
     const { simsLocation, version, commandLineArgs, expiryDate } = options;
     Axios.post(url, {
       project,
@@ -118,7 +115,7 @@ export default params => {
       expiryDate: options.autoClean ? expiryDate : null
     })
       .then(results => {
-        const displayText = `${results.data.length} SIMS tasks submitted`;
+        const displayText = `${results.data.length} ${taskName} tasks submitted`;
         enqueueSnackbar(displayText, { variant: "success" });
       })
       .catch(results => {
@@ -135,7 +132,7 @@ export default params => {
   };
 
   useEffect(() => {
-    const url = `${api_server}/tasks/check-extensions/${project}/SIMS/ext=cvw`;
+    const url = `${api_server}/tasks/check-extensions/${project}/${taskName}/ext=${validExtension}`;
     Axios.post(url, {
       fileIDs: selected
     }).then(results => {
@@ -145,8 +142,8 @@ export default params => {
 
   return (
     <ExpansionPanel
-      expanded={expanded === "SIMS"}
-      onChange={handleExpanChange("SIMS")}
+      expanded={expanded === taskName}
+      onChange={handleExpanChange(taskName)}
     >
       <ExpansionPanelSummary
         expandIcon={<ExpandMoreIcon />}
@@ -158,7 +155,7 @@ export default params => {
           title={`${options.invalidFiles.length} invalid, ${selected.length -
             options.invalidFiles.length} files`}
         >
-          <Typography className={classes.heading}>SIMS</Typography>
+          <Typography className={classes.heading}>{taskName}</Typography>
         </Tooltip>
       </ExpansionPanelSummary>
       <ExpansionPanelDetails className={classes.expansionPanelDetails}>

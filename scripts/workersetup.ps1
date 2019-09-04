@@ -24,9 +24,9 @@ for ($ic = $start; $ic -le $end; $ic++) {
     Write-Host run $computername
     Invoke-Command -Session $s -ScriptBlock {
       Set-Location ~/clarity2.0
+      git reset --hard
       git pull origin
     }
   }
-
 }
 

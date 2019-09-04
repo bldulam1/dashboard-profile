@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import { FileSearchContext } from "../../../../context/Search.Context";
 import Typography from "@material-ui/core/Typography";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
@@ -19,22 +19,53 @@ import { UserContext } from "../../../../context/User.Context";
 import { useSnackbar } from "notistack";
 import { getSubHeadingText } from "../../../../util/search";
 import { useOperationStyles } from "../../../../styles/operationsClasses";
+import Input from "@material-ui/core/Input";
+import Chip from "@material-ui/core/Chip";
+import { useTheme } from "@material-ui/styles";
 
-// let newRootDebounceTimer = null;
+import fileDownload from "js-file-download";
+import { json2csv } from "../../../../util/my-library";
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250
+    }
+  }
+};
 
+function getStyles(name, personName, theme) {
+  return {
+    fontWeight:
+      personName.indexOf(name) === -1
+        ? theme.typography.fontWeightRegular
+        : theme.typography.fontWeightMedium
+  };
+}
 
 export default params => {
-  const taskName = "File Splitting";
-  const validExtension = "dat";
+  const taskName = "Export List";
   const { searchFileProps } = useContext(FileSearchContext);
   const { name } = useContext(UserContext);
   const { selected, project } = searchFileProps;
   const { expanded, handleExpanChange } = params;
+  const theme = useTheme();
 
   const [options, setOptions] = useState({
-    splitFileFor: 1,
-    splitFileForOptions: ["OD and WL", "TSR"],
+    selectedFileInfo: ["Full Filename"],
+    fileInfoOptions: [
+      "File Name",
+      "Full Filename",
+      "Path",
+      "extension",
+      "size",
+      "tags",
+      "operations"
+    ],
+    output: "csv",
     invalidFiles: []
   });
   const { enqueueSnackbar } = useSnackbar();
@@ -48,18 +79,24 @@ export default params => {
 
   const handleSubmitTasks = () => {
     const url = `${api_server}/tasks/${taskName}/new`;
-    const {
-      splitFileFor
-    } = options;
+    const { selectedFileInfo } = options;
     Axios.post(url, {
       project,
       fileIDs: selected,
-      splitFileFor,
-      requestedBy: name
+      requestedBy: name,
+      selectedFileInfo
     })
       .then(results => {
-        const displayText = `${results.data.length} ${taskName} tasks submitted`;
-        enqueueSnackbar(displayText, { variant: "success" });
+        switch (options.output) {
+          case "txt":
+            return fileDownload(json2csv(results.data), "fileList.txt");
+          case "csv":
+            return fileDownload(json2csv(results.data), "fileList.csv");
+          case "json":
+            return fileDownload(JSON.stringify(results.data), "fileList.json");
+          default:
+            break;
+        }
       })
       .catch(results => {
         enqueueSnackbar(
@@ -71,17 +108,12 @@ export default params => {
 
   const classes = useOperationStyles();
   const isRequestValid = () => {
-    return Boolean(selected.length && !options.invalidFiles.length);
+    return Boolean(
+      selected.length &&
+        !options.invalidFiles.length &&
+        options.selectedFileInfo.length
+    );
   };
-
-  useEffect(() => {
-    const url = `${api_server}/tasks/check-extensions/${project}/${taskName}/ext=${validExtension}`;
-    Axios.post(url, {
-      fileIDs: selected
-    }).then(results => {
-      handleChange("invalidFiles", results.data.map(rd => rd.fileName));
-    });
-  }, [selected, project]);
 
   return (
     <ExpansionPanel
@@ -95,30 +127,58 @@ export default params => {
       >
         <Typography className={classes.heading}>{taskName}</Typography>
         <Typography className={classes.secondaryHeading}>
-          {getSubHeadingText(options.invalidFiles, selected)}
+          {getSubHeadingText([], selected)}
         </Typography>
       </ExpansionPanelSummary>
       <ExpansionPanelDetails className={classes.expansionPanelDetails}>
         <form noValidate autoComplete="off">
           <FormControl fullWidth className={classes.formControl}>
-            <InputLabel htmlFor="splitFileFor-select">
-              Split file for
+            <InputLabel htmlFor="select-fileInfo-chip">
+              Select File Info
             </InputLabel>
             <Select
-              value={options.splitFileFor}
+              fullWidth
+              multiple
+              value={options.selectedFileInfo}
               onChange={event =>
-                handleChange("splitFileFor", event.target.value)
+                handleChange("selectedFileInfo", event.target.value)
               }
-              inputProps={{
-                name: "splitFileFor",
-                id: "splitFileFor-select"
-              }}
+              input={<Input id="select-fileInfo-chip" />}
+              renderValue={selected => (
+                <div className={classes.chips}>
+                  {selected.map(value => (
+                    <Chip key={value} label={value} className={classes.chip} />
+                  ))}
+                </div>
+              )}
+              MenuProps={MenuProps}
             >
-              {options.splitFileForOptions.map((option, index) => (
-                <MenuItem key={`sv-${option}`} value={index + 1}>
-                  {option}
+              {options.fileInfoOptions.map(name => (
+                <MenuItem
+                  key={name}
+                  value={name}
+                  style={getStyles(name, options.selectedFileInfo, theme)}
+                >
+                  {name}
                 </MenuItem>
               ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth className={classes.formControl}>
+            <InputLabel htmlFor="output-simple">Output</InputLabel>
+            <Select
+              value={options.output}
+              fullWidth
+              onChange={event => handleChange("output", event.target.value)}
+              inputProps={{
+                name: "output",
+                id: "output-simple"
+              }}
+            >
+              <MenuItem value={"txt"}>Text File</MenuItem>
+              <MenuItem value={"csv"}>CSV File</MenuItem>
+              <MenuItem value={"json"}>JSON File</MenuItem>
             </Select>
           </FormControl>
         </form>

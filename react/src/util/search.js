@@ -68,3 +68,16 @@ export function QueryItemObject(_key, value, relation) {
     relationOptions
   };
 }
+
+export function getSubHeadingText(invalidFiles, selected) {
+  const invalidLen = invalidFiles.length;
+  const selectedLen = selected.length;
+
+  if (!selectedLen) {
+    return "";
+  } else if (invalidLen && selectedLen) {
+    return `${invalidLen} Invalid file${invalidLen > 1 ? "s" : ""}`;
+  } else if (!invalidLen) {
+    return `${selectedLen} Valid file${selectedLen > 1 ? "s" : ""}`;
+  }
+}

@@ -37,11 +37,15 @@ export default () => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Server</TableCell>
-            <TableCell align="right">Server Type</TableCell>
-            <TableCell align="right">Status</TableCell>
+            <TableCell padding="checkbox">Server</TableCell>
+            <TableCell padding="checkbox" align="right">
+              Server Type
+            </TableCell>
+            <TableCell padding="checkbox" align="right">
+              Status
+            </TableCell>
             {allTasks.map(task => (
-              <TableCell key={uuid()} align="right">
+              <TableCell padding="checkbox" key={uuid()} align="right">
                 {task}
               </TableCell>
             ))}
@@ -53,11 +57,13 @@ export default () => {
 
             return (
               <TableRow key={_id}>
-                <TableCell component="th" scope="row">
+                <TableCell padding="checkbox" component="th" scope="row">
                   {serverName}
                 </TableCell>
-                <TableCell align="right">Server Type</TableCell>
-                <TableCell align="right">
+                <TableCell padding="checkbox" align="right">
+                  Server Type
+                </TableCell>
+                <TableCell padding="checkbox" align="right">
                   {active ? (
                     <WifiIcon color="primary" />
                   ) : (
@@ -65,7 +71,7 @@ export default () => {
                   )}
                 </TableCell>
                 {allTasks.map(taskName => (
-                  <TableCell key={uuid()} align="right">
+                  <TableCell padding="checkbox" key={uuid()} align="right">
                     <Checkbox
                       color="primary"
                       checked={server.allowedTasks.includes(taskName)}

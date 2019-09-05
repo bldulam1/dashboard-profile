@@ -54,6 +54,7 @@ export default props => {
         setTaskState({
           ...defaultState,
           query: defaultQuery,
+          project: activeProject,
           tasks,
           count
         });

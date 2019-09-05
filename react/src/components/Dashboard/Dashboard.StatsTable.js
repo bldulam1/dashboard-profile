@@ -17,13 +17,25 @@ export default params => {
     <Table>
       <TableHead>
         <TableRow>
-          <TableCell>Server</TableCell>
-          <TableCell align="right">Status</TableCell>
-          <TableCell align="right">CPU</TableCell>
-          <TableCell align="right">RAM</TableCell>
-          <TableCell align="right">Receive</TableCell>
-          <TableCell align="right">Transmit</TableCell>
-          <TableCell align="right">Task</TableCell>
+          <TableCell padding="checkbox">Server</TableCell>
+          <TableCell padding="checkbox" align="right">
+            Status
+          </TableCell>
+          <TableCell padding="checkbox" align="right">
+            CPU
+          </TableCell>
+          <TableCell padding="checkbox" align="right">
+            RAM
+          </TableCell>
+          <TableCell padding="checkbox" align="right">
+            Receive
+          </TableCell>
+          <TableCell padding="checkbox" align="right">
+            Transmit
+          </TableCell>
+          <TableCell padding="checkbox" align="right">
+            Task
+          </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -32,29 +44,31 @@ export default params => {
 
           return (
             <TableRow key={_id}>
-              <TableCell component="th" scope="row">
+              <TableCell padding="checkbox" component="th" scope="row">
                 {serverName}
               </TableCell>
-              <TableCell align="right">
+              <TableCell padding="checkbox" align="right">
                 {active ? (
                   <WifiIcon color="primary" />
                 ) : (
                   <WifiOffIcon color="secondary" />
                 )}
               </TableCell>
-              <TableCell align="right">
+              <TableCell padding="checkbox" align="right">
                 <MemCPUProgressBar value={active ? cpu : 0} />
               </TableCell>
-              <TableCell align="right">
+              <TableCell padding="checkbox" align="right">
                 <MemCPUProgressBar value={active ? mem : 0} />
               </TableCell>
-              <TableCell align="right">{`${normalizeSize(
+              <TableCell padding="checkbox" align="right">{`${normalizeSize(
                 server.rx_bytes
               )}/s`}</TableCell>
-              <TableCell align="right">{`${normalizeSize(
+              <TableCell padding="checkbox" align="right">{`${normalizeSize(
                 server.tx_bytes
               )}/s`}</TableCell>
-              <TableCell align="right">{taskID}</TableCell>
+              <TableCell padding="checkbox" align="right">
+                {taskID}
+              </TableCell>
             </TableRow>
           );
         })}

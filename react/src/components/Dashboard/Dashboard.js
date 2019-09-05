@@ -11,10 +11,22 @@ import DashboardAssignmentsTable from "./Dashboard.AssignmentsTable";
 let intervalTimer = null;
 
 const useStyles = makeStyles(theme => ({
-  contentPaper: {
-    margin: "1rem",
+  mainGrid: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    margin: "1rem 0.5rem"
+  },
+  subGrid: {
+    display: "flex",
+    margin: "0.5rem",
     padding: "1rem",
-    width: "100%"
+    flexDirection: "column",
+    flexGrow: 1,
+    flexBasis: 1
+  },
+  pb1: {
+    marginBottom: theme.spacing(3)
   }
 }));
 
@@ -54,21 +66,26 @@ export default props => {
   }
 
   return (
-    <Paper className={classes.contentPaper}>
-      <DashboardContext.Provider value={{ dashboard, dashboardDispatch }}>
-        <Tabs
-          value={selectedTab}
-          onChange={handleChange}
-          indicatorColor="primary"
-          textColor="primary"
-          centered
-        >
-          <Tab label="Server Status" />
-          <Tab label="Server Assignments" />
-        </Tabs>
-        {selectedTab === 0 && <DashboardStatsTable servers={servers} />}
-        {selectedTab === 1 && <DashboardAssignmentsTable servers={servers} />}
-      </DashboardContext.Provider>
-    </Paper>
+    <DashboardContext.Provider value={{ dashboard, dashboardDispatch }}>
+      <div className={classes.mainGrid}>
+        <Paper className={classes.subGrid}>Hello</Paper>
+
+        <Paper className={classes.subGrid}>
+          <Tabs
+            value={selectedTab}
+            onChange={handleChange}
+            indicatorColor="primary"
+            textColor="primary"
+            centered
+            className={classes.pb1}
+          >
+            <Tab label="Server Status" />
+            <Tab label="Server Assignments" />
+          </Tabs>
+          {selectedTab === 0 && <DashboardStatsTable servers={servers} />}
+          {selectedTab === 1 && <DashboardAssignmentsTable servers={servers} />}
+        </Paper>
+      </div>
+    </DashboardContext.Provider>
   );
 };

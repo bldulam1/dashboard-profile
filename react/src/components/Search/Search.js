@@ -51,6 +51,8 @@ export default () => {
       selected: [],
       isAllSelected: false,
       rootPaths: [],
+      extensionOptions: [],
+      rootOptions: [],
       sort: { extension: 1, fileName: 1 },
       skip: 0,
       limit: 30
@@ -60,8 +62,15 @@ export default () => {
   useEffect(() => {
     const rootPathsURL = `${api_server}/search/${activeProject}/unique/roots`;
     Axios.get(rootPathsURL).then(res => {
-      searchFileDispatch({ rootPaths: res.data });
+      searchFileDispatch({
+        rootPaths: res.data,
+        rootOptions: res.data.map(d => d._id)
+      });
     });
+    const extensionURL = `${api_server}/search/${activeProject}/unique/key=extension`;
+    Axios.get(extensionURL).then(res =>
+      searchFileDispatch({ extensionOptions: res.data })
+    );
   }, [activeProject]);
 
   return (

@@ -44,24 +44,25 @@ export function getRelationOptions(key) {
   }
 }
 
-export function QueryItemObject(_key, value, relation) {
-  const keyOptions = [
-    KeyOption("fileName", "File Name"),
-    KeyOption("extension", "Extension"),
-    KeyOption("size", "Size"),
-    KeyOption("path", "Path"),
-    KeyOption("root", "Root"),
-    KeyOption("date.modified", "Date Modified"),
-    KeyOption("date.birth", "Date Created"),
-    KeyOption("date.mapped", "Date Mapped")
-  ];
+export const keyOptions = [
+  KeyOption("fileName", "File Name"),
+  KeyOption("extension", "Extension"),
+  KeyOption("size", "Size"),
+  KeyOption("path", "Path"),
+  KeyOption("root", "Root"),
+  KeyOption("date.modified", "Date Modified"),
+  KeyOption("date.birth", "Date Created"),
+  KeyOption("date.mapped", "Date Mapped")
+];
 
+export const keyOptionsWithValues = ["root", "extension"];
+
+export function QueryItemObject(_key, value, relation) {
   const relationOptions = getRelationOptions(_key);
   return {
     id: uuid(),
     type: "item",
     _key,
-    keyOptions,
     value,
     valueOptions: [],
     relation: relationOptions[0].value,
@@ -79,3 +80,30 @@ export function getSubHeadingText(invalidFiles, selected) {
     return `${invalidLen} Invalid file${invalidLen > 1 ? "s" : ""}`;
   }
 }
+
+
+export const parseQueryGroup = queryObject => {
+  const items = queryObject.items
+    .map(item => {
+      if (item.type === "item") {
+        let val = {};
+        if (item.relation === "e") {
+          val = { $eq: item.value };
+        } else if (item.relation === "lt") {
+          val = { $lt: item.value };
+        } else if (item.relation === "lte") {
+          val = { $lte: item.value };
+        } else if (item.relation === "gt") {
+          val = { $gt: item.value };
+        } else if (item.relation === "gte") {
+          val = { $gte: item.value };
+        } else {
+          val = { $regex: item.value, $options: "i" };
+        }
+        return { [item._key]: val };
+      } else {
+        return parseQueryGroup(item);
+      }
+    });
+  return queryObject.operator === "and" ? { $and: items } : { $or: items };
+};

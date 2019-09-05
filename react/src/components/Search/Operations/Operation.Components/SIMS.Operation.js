@@ -10,7 +10,7 @@ import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
 import IconButton from "@material-ui/core/IconButton";
 import SendIcon from "@material-ui/icons/Send";
 import TextField from "@material-ui/core/TextField";
-import DateFnsUtils from "@date-io/date-fns"; // import
+import DateFnsUtils from "@date-io/date-fns";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";

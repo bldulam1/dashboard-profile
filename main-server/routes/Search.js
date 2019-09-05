@@ -44,6 +44,13 @@ router.get("/:project/unique/roots", async (req, res) => {
     .catch(() => res.send([]));
 });
 
+router.get("/:project/unique/key=:key", async (req, res) => {
+  const { project, key } = req.params;
+  Scene.distinct(key, { project })
+    .then(results => res.send(results.sort()))
+    .catch(() => res.send([]));
+});
+
 router.get("/:project/unique/tag/:key", async (req, res) => {
   const { project, key } = req.params;
   const uniqueKeys = await Scene.distinct(key, { project });
@@ -74,7 +81,13 @@ router.get(
           inputLocation,
           project
         },
-        { status: 1, operation: 1, requestedBy: 1, assignedWorker: 1, requestDate: 1 }
+        {
+          status: 1,
+          operation: 1,
+          requestedBy: 1,
+          assignedWorker: 1,
+          requestDate: 1
+        }
       ),
       Tag.find(
         {
@@ -99,6 +112,7 @@ router.get(
     const sort = JSON.parse(sortString);
     const query = JSON.parse(queryString);
     // console.log({ skip, limit, sort, query });
+    console.log(queryString);
 
     const count_scenes = await Promise.all([
       Scene.countDocuments(query),

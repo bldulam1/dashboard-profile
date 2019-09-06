@@ -112,7 +112,7 @@ router.get(
     const sort = JSON.parse(sortString);
     const query = JSON.parse(queryString);
     // console.log({ skip, limit, sort, query });
-    console.log(queryString);
+    // console.log(queryString);
 
     const count_scenes = await Promise.all([
       Scene.countDocuments(query),

@@ -16,7 +16,9 @@ function KeyOption(dbName, dispName) {
 function RelationOption(value) {
   const relationDictionary = {
     e: "=",
+    ne: "≠",
     w: "with",
+    wo: "without",
     lte: "≤",
     lt: "<",
     gte: "≥",
@@ -27,20 +29,22 @@ function RelationOption(value) {
 }
 
 export function getRelationOptions(key) {
-  const stringTypeKeys = ["fileName", "extension", "path"];
+  const stringTypeKeys = ["fileName", "path"];
   const numericTypeKeys = [
     "size",
     "date.mapped",
     "date.modified",
     "date.birth"
   ];
-  const fixedTypeKeys = ["root", "tags"];
+  const fixedTypeKeys = ["root", "extension", "tags"];
   if (stringTypeKeys.includes(key)) {
-    return ["e", "w"].map(item => RelationOption(item));
+    return ["e", "ne", "w", "wo"].map(item => RelationOption(item));
   } else if (numericTypeKeys.includes(key)) {
-    return ["lte", "lt", "e", "gt", "gte"].map(item => RelationOption(item));
+    return ["lte", "lt", "e", "ne", "gt", "gte"].map(item =>
+      RelationOption(item)
+    );
   } else if (fixedTypeKeys.includes(key)) {
-    return ["e"].map(item => RelationOption(item));
+    return ["e", "ne"].map(item => RelationOption(item));
   }
 }
 
@@ -81,29 +85,31 @@ export function getSubHeadingText(invalidFiles, selected) {
   }
 }
 
-
 export const parseQueryGroup = queryObject => {
-  const items = queryObject.items
-    .map(item => {
-      if (item.type === "item") {
-        let val = {};
-        if (item.relation === "e") {
-          val = { $eq: item.value };
-        } else if (item.relation === "lt") {
-          val = { $lt: item.value };
-        } else if (item.relation === "lte") {
-          val = { $lte: item.value };
-        } else if (item.relation === "gt") {
-          val = { $gt: item.value };
-        } else if (item.relation === "gte") {
-          val = { $gte: item.value };
-        } else {
-          val = { $regex: item.value, $options: "i" };
-        }
-        return { [item._key]: val };
-      } else {
-        return parseQueryGroup(item);
+  const items = queryObject.items.map(item => {
+    if (item.type === "item") {
+      let val = {};
+      if (item.relation === "e") {
+        val = { $eq: item.value };
+      } else if (item.relation === "ne") {
+        val = { $ne: item.value };
+      } else if (item.relation === "lt") {
+        val = { $lt: item.value };
+      } else if (item.relation === "lte") {
+        val = { $lte: item.value };
+      } else if (item.relation === "gt") {
+        val = { $gt: item.value };
+      } else if (item.relation === "gte") {
+        val = { $gte: item.value };
+      } else if (item.relation === "w") {
+        val = { $regex: item.value, $options: "i" };
+      } else if (item.relation === "wo") {
+        val = { "$regex": `^((?!${item.value}).)*$`, "$options": "im" };
       }
-    });
+      return { [item._key]: val };
+    } else {
+      return parseQueryGroup(item);
+    }
+  });
   return queryObject.operator === "and" ? { $and: items } : { $or: items };
 };

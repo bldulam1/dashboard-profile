@@ -123,4 +123,16 @@ router.get(
   }
 );
 
+router.post("/:project/fetch-scenes", async (req, res) => {
+  const { skip, limit, sort, query } = req.body;
+  console.log(JSON.stringify(query));
+
+  const count_scenes = await Promise.all([
+    Scene.countDocuments(query),
+    Scene.find(query, null, { skip, limit, sort })
+  ]);
+
+  res.send({ skip, limit, count: count_scenes[0], scenes: count_scenes[1] });
+});
+
 module.exports = router;

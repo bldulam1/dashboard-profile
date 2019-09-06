@@ -5,11 +5,9 @@ export function fetchScenesData(
   { project, skip, limit, query, sort },
   callback
 ) {
-  // const skip = page * rowsPerPage;
-  const searchValueString = JSON.stringify(query);
-  const sortString = JSON.stringify(sort);
-  const scenesURL = `${api_server}/search/${project}/skip=${skip}/limit=${limit}/sort=${sortString}/query=${searchValueString}`;
-  Axios.get(scenesURL).then(res => {
+  const scenesURL = `${api_server}/search/${project}/fetch-scenes`;
+  const body = { skip, limit, query, sort };
+  Axios.post(scenesURL, body).then(res => {
     callback({
       count: res.data.count,
       scenes: res.data.scenes,

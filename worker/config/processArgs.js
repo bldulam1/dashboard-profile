@@ -5,7 +5,7 @@ let port = 8000;
 let hostname = os.hostname().toLowerCase();
 // let hostname = "localhost";
 let serverName = hostname;
-let mainPort = process.env.NODE_ENV === "development" ? 8080 : 80;
+let mainPort = 8080;
 let mainHost =
   process.env.NODE_ENV === "development" ? "localhost" : "jp01-clarity01";
 let allowedTasks = [];

@@ -158,7 +158,6 @@ function QueryItem({ id }) {
           </Select>
         </Tooltip>
       </FormControl>
-
       <ValueField id={id} _key={_key} value={value} />
     </form>
   );
@@ -186,9 +185,7 @@ function ValueField(props) {
     rootOptions,
     advancedQuery,
     project,
-    skip,
     limit,
-    query,
     sort
   } = searchFileProps;
 

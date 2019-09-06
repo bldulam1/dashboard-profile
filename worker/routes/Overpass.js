@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const { Scene, SearchFolder } = require("../../main-server/schemas/scene");
 const axios = require("axios");
 
 router.get("/:query", async (req, res) => {

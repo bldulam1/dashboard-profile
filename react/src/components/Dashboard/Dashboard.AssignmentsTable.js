@@ -1,7 +1,6 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import WifiIcon from "@material-ui/icons/Wifi";
@@ -12,10 +11,14 @@ import { allTasks } from "../../environment/config";
 import Axios from "axios";
 import { api_server } from "../../environment/environment";
 import { DashboardContext } from "../../context/Dashboard.Context";
-
+import EnhancedTableCell from "./TableComponents/EnhancedTableCell";
+import DashboardSettings from "./Dashboard.Settings";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 export default () => {
   const { dashboard, dashboardDispatch } = useContext(DashboardContext);
-  const { servers } = dashboard;
+  const { servers, serverTypes } = dashboard;
 
   const handleTaskClick = (taskName, serverID) => {
     const serverIndex = servers.findIndex(server => server._id === serverID);
@@ -32,52 +35,76 @@ export default () => {
     });
   };
 
+  const handleTypeChange = (serverID, type) => {
+    const serverIndex = servers.findIndex(server => server._id === serverID);
+    const url = `${api_server}/service-workers/update/${serverID}`;
+
+    Axios.put(url, { type }).then(results => {
+      let newServers = servers;
+      newServers[serverIndex].type = results.data.type;
+      dashboardDispatch({ servers: newServers });
+    });
+  };
+
+  const colHeaders = ["Server", "Status", "Type"];
+
   return (
     <div>
+      <DashboardSettings />
+      <br />
+      <hr />
+      <br />
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell padding="checkbox">Server</TableCell>
-            <TableCell padding="checkbox" align="right">
-              Server Type
-            </TableCell>
-            <TableCell padding="checkbox" align="right">
-              Status
-            </TableCell>
-            {allTasks.map(task => (
-              <TableCell padding="checkbox" key={uuid()} align="right">
-                {task}
-              </TableCell>
+            {colHeaders.map((ch, chI) => (
+              <EnhancedTableCell key={uuid()} contents={ch} index={chI} />
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
           {servers.map(server => {
             const { _id, serverName, active } = server;
+            const activeStatus = active ? (
+              <WifiIcon color="primary" />
+            ) : (
+              <WifiOffIcon color="secondary" />
+            );
+
+            const rowValues = [
+              serverName,
+              activeStatus,
+              <FormControl fullWidth>
+                {/* <InputLabel htmlFor="type-simple">Type</InputLabel> */}
+                <Select
+                  fullWidth
+                  value={server.type}
+                  onChange={event => handleTypeChange(_id, event.target.value)}
+                  inputProps={{
+                    name: "type",
+                    id: "type-simple"
+                  }}
+                >
+                  {serverTypes.map(st => (
+                    <MenuItem key={uuid()} value={st.name}>
+                      {st.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              // ...allTasks.map(taskName => (
+              //   <Checkbox
+              //     color="primary"
+              //     checked={server.allowedTasks.includes(taskName)}
+              //     onChange={() => handleTaskClick(taskName, _id)}
+              //   />
+              // ))
+            ];
 
             return (
               <TableRow key={_id}>
-                <TableCell padding="checkbox" component="th" scope="row">
-                  {serverName}
-                </TableCell>
-                <TableCell padding="checkbox" align="right">
-                  Server Type
-                </TableCell>
-                <TableCell padding="checkbox" align="right">
-                  {active ? (
-                    <WifiIcon color="primary" />
-                  ) : (
-                    <WifiOffIcon color="secondary" />
-                  )}
-                </TableCell>
-                {allTasks.map(taskName => (
-                  <TableCell padding="checkbox" key={uuid()} align="right">
-                    <Checkbox
-                      color="primary"
-                      checked={server.allowedTasks.includes(taskName)}
-                      onChange={() => handleTaskClick(taskName, _id)}
-                    />
-                  </TableCell>
+                {rowValues.map((rv, index) => (
+                  <EnhancedTableCell key={uuid()} contents={rv} index={index} />
                 ))}
               </TableRow>
             );

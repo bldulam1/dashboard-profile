@@ -37,6 +37,7 @@ export default props => {
   const [dashboard, dashboardDispatch] = useReducer(reducer, {
     refreshRate: 1000,
     servers: [],
+    serverTypes: [],
     selectedTab: 1
   });
   const { servers, refreshRate, selectedTab } = dashboard;
@@ -46,6 +47,12 @@ export default props => {
     Axios.get(`${api_server}/service-workers/stats-on/current-only`).then(
       results => {
         dashboardDispatch({ servers: results.data });
+
+        Axios.get(`${api_server}/server-assignments/all`)
+          .then(results => {
+            dashboardDispatch({ serverTypes: results.data });
+          })
+          .catch(error => console.log(error));
       }
     );
   }, []);
@@ -79,8 +86,8 @@ export default props => {
             centered
             className={classes.pb1}
           >
-            <Tab label="Server Status" />
-            <Tab label="Server Assignments" />
+            <Tab label="Status" />
+            <Tab label="Assignments" />
           </Tabs>
           {selectedTab === 0 && <DashboardStatsTable servers={servers} />}
           {selectedTab === 1 && <DashboardAssignmentsTable servers={servers} />}

@@ -25,14 +25,15 @@ app.use(
 app.set("view options", { pretty: true });
 
 app.use("/api/fs", require("./routes/File"));
+app.use("/api/naming-convention", require("./routes/NamingConventions"));
 app.use("/api/project", require("./routes/Project"));
-app.use("/api/upload", require("./routes/Upload"));
 app.use("/api/search", require("./routes/Search"));
+app.use("/api/service-workers", require("./routes/ServiceWorkers"));
+app.use("/api/server-assignments", require("./routes/ServerAssignment"));
 app.use("/api/tasks", require("./routes/Task"));
 app.use("/api/tc", require("./routes/TestCatalog"));
+app.use("/api/upload", require("./routes/Upload"));
 app.use("/api/user", require("./routes/User"));
-app.use("/api/naming-convention", require("./routes/NamingConventions"));
-app.use("/api/service-workers", require("./routes/ServiceWorkers"));
 
 const httpsPort = process.env.NODE_ENV === "development" ? 4444 : 443;
 const httpPort = process.env.NODE_ENV === "development" ? 8080 : 80;

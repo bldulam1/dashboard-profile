@@ -1,3 +1,6 @@
 import { createContext } from "react";
 
-export const ProjectContext = createContext({});
+export const ProjectContext = createContext({
+  activeProject: "",
+  setActiveProject: null
+});

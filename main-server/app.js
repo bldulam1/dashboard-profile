@@ -26,7 +26,7 @@ app.set("view options", { pretty: true });
 
 app.use("/api/fs", require("./routes/File"));
 app.use("/api/naming-convention", require("./routes/NamingConventions"));
-app.use("/api/project", require("./routes/Project"));
+app.use("/api/projects", require("./routes/Project"));
 app.use("/api/search", require("./routes/Search"));
 app.use("/api/service-workers", require("./routes/ServiceWorkers"));
 app.use("/api/server-assignments", require("./routes/ServerAssignment"));

@@ -1,6 +1,6 @@
 import React from "react";
 import Drawer from "@material-ui/core/Drawer";
-import Divider from "@material-ui/core/Divider";
+import Link from "@material-ui/core/Link";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
   toolbar: theme.mixins.toolbar
 }));
 
-export default (navbarGroups) => {
+export default navbarGroups => {
   const classes = useStyles();
   const [open, toggleDrawer] = useToggle(false);
 
@@ -53,7 +53,7 @@ export default (navbarGroups) => {
       }}
       open={open}
     >
-      <div className={classes.toolbar}/>
+      <div className={classes.toolbar} />
       {navbarGroups.map(group => (
         <div key={uuid()}>
           <Typography

@@ -8,18 +8,7 @@ const Project = require("../schemas/project");
 // const Axios = require("axios");
 
 router.get("/all", async (req, res) => {
-  const projects = [
-    "Nissan L53H",
-    "Renault Nissan",
-    "Subaru SVS",
-    "Subaru 77GHz",
-    "Honda",
-    "Toyota"
-  ]
-    .sort()
-    .map(p => new Project({ name: p }));
-
-  res.send(projects);
+  res.send(await Project.find({}));
 });
 
 module.exports = router;

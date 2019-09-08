@@ -11,8 +11,10 @@ import { api_server, redirectUri, clientId } from "./environment/environment";
 
 export default () => {
   const [user, setUser] = useState({
-    name: null,
-    email: null
+    _id: "",
+    name: "",
+    email: "",
+    projects: []
   });
 
   const config = {
@@ -41,14 +43,13 @@ export default () => {
     return <button>login</button>;
   };
 
-  const handleUserInfo = async userInfo => {
+  const handleUserInfo = userInfo => {
     const { name, userName } = userInfo.account;
-    setUser({ name, email: userName });
     Axios.post(`${api_server}/user/login/${name}`, {
       name,
       email: userName
     }).then(results => {
-      // console.log(results.data);
+      setUser(results.data);
     });
   };
 
@@ -60,8 +61,8 @@ export default () => {
             provider={provider}
             forceLogin={true}
             unauthenticatedFunction={unauthenticatedFunction}
-            accountInfoCallback={handleUserInfo}
             authenticatedFunction={() => <MainFrame />}
+            accountInfoCallback={handleUserInfo}
           />
         </BrowserRouter>
       </UserContext.Provider>

@@ -9,8 +9,6 @@ import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import Avatar from "@material-ui/core/Avatar";
 import Tooltip from "@material-ui/core/Tooltip";
-// import MenuItem from "@material-ui/core/MenuItem";
-// import Menu from "@material-ui/core/Menu";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
@@ -21,7 +19,6 @@ import { SnackbarProvider } from "notistack";
 import logo from "../logo.svg";
 
 import { getProjectComponents, settingsComponents } from "../frame/Projects";
-import { projects } from "../environment/config";
 
 import { useStyles } from "../styles/classes";
 import { ProjectContext } from "../context/Project.Context";
@@ -29,86 +26,88 @@ import { UserContext } from "../context/User.Context";
 import { getInitials } from "../util/strings";
 
 export default () => {
+  const { name, projects } = useContext(UserContext);
   const [open, toggleDrawer] = useToggle(false);
-  const [activeProject, setActiveProject] = React.useState(projects[0]);
+  const [activeProject, setActiveProject] = React.useState("");
   const classes = useStyles();
-  const { name } = useContext(UserContext);
+
+  React.useEffect(() => {
+    const defaultProject = projects.length
+      ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
+      : "";
+    setActiveProject(defaultProject);
+    return () => {};
+  }, [projects]);
 
   return (
     <div className={classes.root}>
-      <CssBaseline />
-      <AppBar
-        position="fixed"
-        className={clsx(classes.appBar, {
-          [classes.appBarShift]: open
-        })}
-      >
-        <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <IconButton
-              color="inherit"
-              aria-label="Open drawer"
-              onClick={toggleDrawer}
-              edge="start"
-              className={clsx(classes.menuButton)}
-            >
-              <MenuIcon />
-            </IconButton>
-            <div className={classes.toolbar}>
-              <img src={logo} alt="Clarity" style={{ height: "3rem" }} />
+      <ProjectContext.Provider value={{ activeProject, setActiveProject }}>
+        <CssBaseline />
+        <AppBar
+          position="fixed"
+          className={clsx(classes.appBar, {
+            [classes.appBarShift]: open
+          })}
+        >
+          <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", flexDirection: "row" }}>
+              <IconButton
+                color="inherit"
+                aria-label="Open drawer"
+                onClick={toggleDrawer}
+                edge="start"
+                className={clsx(classes.menuButton)}
+              >
+                <MenuIcon />
+              </IconButton>
+              <div className={classes.toolbar}>
+                <img src={logo} alt="Clarity" style={{ height: "3rem" }} />
+              </div>
             </div>
-          </div>
-          <IconButton
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            // onClick={handleMenu}
-          >
-            <Tooltip title={name}>
-              <Avatar className={classes.colorSecondary}>
-                {getInitials(name)}
-              </Avatar>
-            </Tooltip>
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        variant="permanent"
-        className={clsx(classes.drawer, {
-          [classes.drawerOpen]: open,
-          [classes.drawerClose]: !open
-        })}
-        classes={{
-          paper: clsx({
+            <IconButton
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              // onClick={handleMenu}
+            >
+              <Tooltip title={name}>
+                <Avatar className={classes.colorSecondary}>
+                  {getInitials(name)}
+                </Avatar>
+              </Tooltip>
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+        <Drawer
+          variant="permanent"
+          className={clsx(classes.drawer, {
             [classes.drawerOpen]: open,
             [classes.drawerClose]: !open
-          })
-        }}
-        open={open}
-      >
-        <div className={classes.toolbar} />
-
-        <ProjectSelection
+          })}
+          classes={{
+            paper: clsx({
+              [classes.drawerOpen]: open,
+              [classes.drawerClose]: !open
+            })
+          }}
           open={open}
-          activeProject={activeProject}
-          setActiveProject={setActiveProject}
-        />
-
-        <ProjectComponents open={open} activeProject={activeProject} />
-        <SettingsComponents open={open} activeProject={activeProject} />
-      </Drawer>
-      <SnackbarProvider maxSnack={4}>
-        <main
-          className={
-            open ? classes.contentDrawerOpen : classes.contentDrawerClose
-          }
         >
-          <ProjectContext.Provider value={{ activeProject }}>
+          <div className={classes.toolbar} />
+
+          <ProjectSelection open={open} />
+          <ProjectComponents open={open} />
+          <SettingsComponents open={open} />
+        </Drawer>
+        <SnackbarProvider maxSnack={4}>
+          <main
+            className={
+              open ? classes.contentDrawerOpen : classes.contentDrawerClose
+            }
+          >
             {getProjectComponents(activeProject).map(comp => (
               <Route
                 exact
                 key={uuid()}
-                activeProject={activeProject}
                 path={comp.route}
                 component={comp.component}
               />
@@ -121,28 +120,24 @@ export default () => {
               path="/"
               render={() => <Redirect to={`/${activeProject}/search`} />}
             />
-          </ProjectContext.Provider>
-        </main>
-      </SnackbarProvider>
+          </main>
+        </SnackbarProvider>
+      </ProjectContext.Provider>
     </div>
   );
 };
 
 function ProjectNavItem(props) {
-  const {
-    open,
-    project,
-    toggleList,
-    listOpen,
-    isPrimary,
-    activeProject,
-    setActiveProject
-  } = props;
+  const { activeProject, setActiveProject } = useContext(ProjectContext);
+  const { open, project, toggleList, listOpen, isPrimary } = props;
   const classes = useStyles();
+
   const onProjectClick = () => {
     toggleList();
     !isPrimary && setActiveProject(project);
   };
+  console.log(activeProject);
+
   return (
     <Link
       to={activeProject !== project ? `/${project}/Dashboard` : "#"}
@@ -164,9 +159,11 @@ function ProjectNavItem(props) {
           {getInitials(project)}
         </Avatar>
       </Tooltip>
-      <Typography hidden={!open} style={{ paddingLeft: "1rem" }}>
-        {project}
-      </Typography>
+      <Tooltip title="Role: Guest">
+        <Typography hidden={!open} style={{ paddingLeft: "1rem" }}>
+          {project}
+        </Typography>
+      </Tooltip>
       {isPrimary && (
         <span hidden={!open} style={{ float: "right" }}>
           {listOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -178,7 +175,9 @@ function ProjectNavItem(props) {
 
 function ProjectSelection(props) {
   const [listOpen, toggleList] = useToggle(false);
-  const { open, activeProject, setActiveProject } = props;
+  const { activeProject } = useContext(ProjectContext);
+  const { projects } = useContext(UserContext);
+  const { open } = props;
   const classes = useStyles();
 
   return (
@@ -197,27 +196,25 @@ function ProjectSelection(props) {
         toggleList={toggleList}
         listOpen={listOpen}
         isPrimary={true}
-        activeProject={activeProject}
-        setActiveProject={setActiveProject}
       />
       {listOpen &&
         projects.map(project => (
           <ProjectNavItem
             key={uuid()}
             open={open}
-            project={project}
+            project={project.name}
             toggleList={toggleList}
             listOpen={listOpen}
-            setActiveProject={setActiveProject}
           />
         ))}
-      {/* {!open && <Divider className={classes.drawerDivider} variant="middle" />} */}
     </div>
   );
 }
 
 function ProjectComponents(props) {
-  const { open, activeProject } = props;
+  const { open } = props;
+  const { activeProject } = useContext(ProjectContext);
+
   const classes = useStyles();
   const components = getProjectComponents(activeProject);
   return (

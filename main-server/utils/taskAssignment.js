@@ -1,7 +1,23 @@
+/**
+ * Pseudo code
+ *
+ * 1.0 Fetch Available workers
+ * 2.0 Iterate each worker
+ * 2.1 Determine worker's allowed tasks, distribution of tasks for the worker's group/server type
+ * 2.2 Calculate Distribution Error, highest error = highest priority
+ * 2.3 Get a task based from highest priority operation type
+ * 3 If task is available,
+ * 3.1 update task and worker
+ * 3.2 Send task to worker
+ * 4.0 recurse until workers/tasks are empty
+ */
+
 const Worker = require("../schemas/worker");
 const ServerType = require("../schemas/serverType");
 const Axios = require("axios");
 const Task = require("../schemas/task");
+
+// +++++++++++++++++++++++++ Helper Functions
 
 async function getWorkers() {
   return Worker.find(
@@ -68,7 +84,10 @@ async function updateTask_Worker(taskID, operation, workerID, assignedWorker) {
     Task.findByIdAndUpdate(taskID, { assignedWorker })
   ]);
 }
+// ---------------------- Helper Functions
 
+
+// ++++++++++++++++++++++ Main Function
 let block = false;
 async function executeTasks() {
   if (block) return console.log("blocked");
@@ -113,6 +132,8 @@ async function executeTasks() {
   }
   block = false;
 }
+// ----------------------- Main Function
+
 
 module.exports = {
   executeTasks

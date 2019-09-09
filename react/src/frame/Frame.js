@@ -27,11 +27,11 @@ import { getInitials } from "../util/strings";
 
 export default () => {
   const { name, projects } = useContext(UserContext);
-  // const defaultProject = projects.length
-  //   ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
-  //   : "";
+  const defaultProject = projects.length
+    ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
+    : "";
   const [open, toggleDrawer] = useToggle(false);
-  const [activeProject, setActiveProject] = React.useState("");
+  const [activeProject, setActiveProject] = React.useState(defaultProject);
   const classes = useStyles();
 
   React.useEffect(() => {

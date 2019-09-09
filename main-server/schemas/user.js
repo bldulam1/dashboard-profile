@@ -7,4 +7,4 @@ let schema = mongoose.Schema({
   projects: [{ name: String, role: String, roleLevel: Number }]
 });
 
-module.exports = mongoose.model("User", schema);
+module.exports = mongoose.model("Client", schema);

@@ -5,13 +5,12 @@ const { createSimsTasks } = require("./Operations/Operation.SIMS");
 const {
   createIDW4ConvTasks
 } = require("./Operations/Operation.IDW4Conversion");
-const Worker = require("../schemas/worker");
-const ServerType = require("../schemas/serverType");
-const Axios = require("axios");
 const {
   fetchFileInfo,
   alignFileInfo
 } = require("./Operations/Operation.ExportList");
+
+const { executeTasks } = require("../utils/taskAssignment");
 
 router.post("/:operation/new", async (req, res) => {
   const { operation } = req.params;
@@ -97,80 +96,3 @@ router.get("/:project/get-ids/query=:queryString(*)", async (req, res) => {
 });
 
 module.exports = router;
-
-let blockTaskExecution = false;
-async function executeTasks() {
-  if (blockTaskExecution) return;
-  blockTaskExecution = true;
-  const workers = await Worker.find(
-    { taskID: null, active: true },
-    { url: 1, type: 1, serverName: 1 }
-  );
-
-  for (let index = 0; index < workers.length; index++) {
-    const worker = workers[index];
-
-    // Get servertype and allowed Tasks
-    const serverType = await ServerType.findOne({ name: worker.type });
-    let allowedTasks = serverType.tasks;
-    allowedTasks = allowedTasks
-      .sort((a, b) => b.priority - a.priority)
-      .filter(at => at.priority > 0);
-
-    // Get current task Distribution
-    const [workerTypeCount, taskCount] = await Promise.all([
-      Worker.countDocuments({ type: worker.type }),
-      Worker.aggregate([
-        { $match: { activeTask: { $ne: null } } },
-        { $group: { _id: "$activeTask", count: { $sum: 1 } } }
-      ])
-    ]);
-
-    // Task Distribution Error
-    const distributionError = allowedTasks
-      .map(({ task, priority }) => {
-        let distribution = taskCount.filter(tc => tc._id === task);
-        distribution = distribution.length
-          ? (100 * distribution[0].count) / workerTypeCount
-          : 0;
-        return { task, error: priority - distribution };
-      })
-      .sort((a, b) => b.error - a.error);
-
-    let task = null;
-    // Find Task from highest priority
-    for (let opIndex = 0; opIndex < distributionError.length; opIndex++) {
-      const operation = distributionError[opIndex].task;
-      task = await Task.findOne(
-        {
-          assignedWorker: null,
-          operation
-        },
-        { script: 1 },
-        { sort: { priority: -1, requestDate: 1, size: 1 } }
-      );
-
-      if (task) break;
-    }
-
-    if (worker && task) {
-      await Promise.all([
-        Worker.findByIdAndUpdate(worker._id, {
-          taskID: task._id,
-          activeTask: task.operation
-        }),
-        Task.findByIdAndUpdate(task._id, {
-          assignedWorker: worker.serverName
-        })
-      ]);
-
-      Axios.post(`${worker.url}/tasks/execute`, { task }).then(() => {
-        Worker.findByIdAndUpdate(worker._id, {
-          taskID: null
-        }).then(executeTasks);
-      });
-    }
-  }
-  blockTaskExecution = false;
-  // console.log("Task execution Finished");
-}

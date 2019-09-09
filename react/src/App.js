@@ -43,31 +43,38 @@ export default () => {
     return <button>login</button>;
   };
 
-  const handleUserInfo = async userInfo => {
+  const handleUserInfo = userInfo => {
     const { name, userName } = userInfo.account;
+    setUser({
+      name,
+      projects: [{ name: "Nissan L53H", role: "Guest", roleLeve: 0 }]
+    });
 
-    const results = await Axios.post(`${api_server}/user/login/${name}`, {
+    Axios.post(`${api_server}/user/login/${name}`, {
       name,
       email: userName
+    }).then(results => {
+      setUser(results.data);
     });
-    // console.log(results.data);
-
-    setUser(results.data);
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <UserContext.Provider value={{ ...user }}>
-        <BrowserRouter>
-          <AzureAD
-            provider={provider}
-            forceLogin={true}
-            unauthenticatedFunction={unauthenticatedFunction}
-            authenticatedFunction={() => <MainFrame />}
-            accountInfoCallback={handleUserInfo}
-          />
-        </BrowserRouter>
-      </UserContext.Provider>
+      <BrowserRouter>
+        <AzureAD
+          provider={provider}
+          forceLogin={true}
+          unauthenticatedFunction={unauthenticatedFunction}
+          authenticatedFunction={() => {
+            return (
+              <UserContext.Provider value={{ user }}>
+                <MainFrame />
+              </UserContext.Provider>
+            );
+          }}
+          accountInfoCallback={handleUserInfo}
+        />
+      </BrowserRouter>
     </ThemeProvider>
   );
 };

@@ -26,7 +26,7 @@ import { UserContext } from "../context/User.Context";
 import { getInitials } from "../util/strings";
 
 export default () => {
-  const { name, projects } = useContext(UserContext);
+  const { name, projects } = useContext(UserContext).user;
   const defaultProject = projects.length
     ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
     : "";

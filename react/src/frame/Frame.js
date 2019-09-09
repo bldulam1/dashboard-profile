@@ -27,6 +27,7 @@ import { getInitials } from "../util/strings";
 
 export default () => {
   const { name, projects } = useContext(UserContext).user;
+  console.log(name);
   const defaultProject = projects.length
     ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
     : "";
@@ -34,13 +35,13 @@ export default () => {
   const [activeProject, setActiveProject] = React.useState(defaultProject);
   const classes = useStyles();
 
-  React.useEffect(() => {
-    const defaultProject = projects.length
-      ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
-      : "";
-    setActiveProject(defaultProject);
-    return () => {};
-  }, [projects]);
+  // React.useEffect(() => {
+  //   const defaultProject = projects.length
+  //     ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
+  //     : "";
+  //   setActiveProject(defaultProject);
+  //   return () => {};
+  // }, [projects]);
 
   return (
     <div className={classes.root}>
@@ -178,7 +179,7 @@ function ProjectNavItem(props) {
 function ProjectSelection(props) {
   const [listOpen, toggleList] = useToggle(false);
   const { activeProject } = useContext(ProjectContext);
-  const { projects } = useContext(UserContext);
+  const { projects } = useContext(UserContext).user;
   const { open } = props;
   const classes = useStyles();
 

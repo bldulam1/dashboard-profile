@@ -14,7 +14,7 @@ export default () => {
     _id: "",
     name: "",
     email: "",
-    projects: [{ name: "", role: 0, roleLevel: "Guest" }]
+    projects: []
   });
 
   const config = {
@@ -45,11 +45,6 @@ export default () => {
 
   const handleUserInfo = userInfo => {
     const { name, userName } = userInfo.account;
-    setUser({
-      name,
-      projects: [{ name: "Nissan L53H", role: "Guest", roleLeve: 0 }]
-    });
-
     Axios.post(`${api_server}/user/login/${name}`, {
       name,
       email: userName
@@ -66,11 +61,13 @@ export default () => {
           forceLogin={true}
           unauthenticatedFunction={unauthenticatedFunction}
           authenticatedFunction={() => {
-            return (
-              <UserContext.Provider value={{ user }}>
-                <MainFrame />
-              </UserContext.Provider>
-            );
+            if (user.name.length) {
+              return (
+                <UserContext.Provider value={{ user }}>
+                  <MainFrame />
+                </UserContext.Provider>
+              );
+            } else return <div>Fetching User Info</div>;
           }}
           accountInfoCallback={handleUserInfo}
         />

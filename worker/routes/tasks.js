@@ -44,9 +44,7 @@ router.post("/execute", BlockingMiddleware, async (req, res) => {
 
   // const child = spawn("powershell.exe", [task.script]);
   const child = spawn("powershell.exe", [
-    `Start-Sleep -s ${8 *
-      Math.random()}; Write-Host "Log Date"; Start-Sleep -s ${2 *
-      Math.random()};`
+    `Start-Sleep -Milliseconds  ${task.size / 500}; Write-Host "Log Date";`
   ]);
 
   child.stdout.on("data", buff => handleNewLog(buff, task._id));
@@ -71,11 +69,19 @@ router.post("/update/allowed-tasks", async (req, res) => {
 module.exports = router;
 
 function createNewTask(task, pid) {
-  task.process_id = pid;
-  task.start_time = new Date();
-  task.assigned_worker = serverName;
-  task.status = createStatus(INPROGRESS);
-  tasks.set(task._id, task);
+  const taskDetails = {
+    process_id: pid,
+    start_time: new Date(),
+    assigned_worker: serverName,
+    status: {
+      text: INPROGRESS,
+      value: 1
+    }
+  };
+  const updates = { ...task, ...taskDetails };
+
+  tasks.set(task._id, updates);
+  updateTask(task._id, taskDetails);
 }
 
 function updateTask(taskID, updateData) {
@@ -85,9 +91,11 @@ function updateTask(taskID, updateData) {
   // Update the main server
 
   const newTaskURL = `${mainHostURL}/tasks/update/${taskID}`;
-  Axios.put(newTaskURL, tasks.get(taskID)).then(results => {
-    console.log("task updated");
-  });
+  Axios.put(newTaskURL, tasks.get(taskID))
+    .then(results => {
+      console.log("task updated successfully", results.data);
+    })
+    .catch(err => console.error(err));
 }
 
 function handleNewLog(buff, taskID) {

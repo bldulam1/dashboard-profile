@@ -25,7 +25,7 @@ export default params => {
   const taskName = "IDW4 Conversion";
   const validExtension = "idw4";
   const { searchFileProps } = useContext(FileSearchContext);
-  const { name } = useContext(UserContext);
+  const { name } = useContext(UserContext).user;
   const { selected, project } = searchFileProps;
   const { expanded, handleExpanChange } = params;
 

@@ -51,7 +51,7 @@ export default params => {
   const taskName = "SIMS";
   const validExtension = "cvw";
   const { searchFileProps } = useContext(FileSearchContext);
-  const { name } = useContext(UserContext);
+  const { name } = useContext(UserContext).user;
   const { selected, project } = searchFileProps;
   const { expanded, handleExpanChange } = params;
 

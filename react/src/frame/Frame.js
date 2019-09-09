@@ -93,7 +93,7 @@ export default () => {
           <ProjectComponents open={open} />
           <SettingsComponents open={open} />
         </Drawer>
-        <SnackbarProvider maxSnack={4}>
+        <SnackbarProvider maxSnack={5}>
           <main
             className={
               open ? classes.contentDrawerOpen : classes.contentDrawerClose
@@ -124,7 +124,7 @@ export default () => {
 
 function ProjectNavItem(props) {
   const { activeProject, setActiveProject } = useContext(ProjectContext);
-  const { open, project, toggleList, listOpen, isPrimary } = props;
+  const { open, project, toggleList, listOpen, isPrimary, role } = props;
   const classes = useStyles();
 
   const onProjectClick = () => {
@@ -153,7 +153,7 @@ function ProjectNavItem(props) {
           {getInitials(project)}
         </Avatar>
       </Tooltip>
-      <Tooltip title="Role: Guest">
+      <Tooltip title={role ? `Role: ${role}` : ""}>
         <Typography hidden={!open} style={{ paddingLeft: "1rem" }}>
           {project}
         </Typography>
@@ -196,6 +196,7 @@ function ProjectSelection(props) {
           <ProjectNavItem
             key={uuid()}
             open={open}
+            role={project.role}
             project={project.name}
             toggleList={toggleList}
             listOpen={listOpen}

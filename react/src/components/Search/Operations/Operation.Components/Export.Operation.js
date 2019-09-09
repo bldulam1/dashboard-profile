@@ -49,7 +49,7 @@ function getStyles(name, personName, theme) {
 export default params => {
   const taskName = "Export List";
   const { searchFileProps } = useContext(FileSearchContext);
-  const { name } = useContext(UserContext);
+  const { name } = useContext(UserContext).user;
   const { selected, project } = searchFileProps;
   const { expanded, handleExpanChange } = params;
   const theme = useTheme();

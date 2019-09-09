@@ -13,9 +13,6 @@ const FileSplitting = Task("File Splitting", 4, ["File Splitting"]);
 const SIMS = Task("SIMS", 1, ["SIMS"]);
 const CVW2MAT = Task("CVW2MAT", 1, ["CVW2MAT"]);
 
-
-
-
 module.exports = {
   IDW4Conversion,
   FileSplitting,

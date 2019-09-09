@@ -14,7 +14,7 @@ export default () => {
     _id: "",
     name: "",
     email: "",
-    projects: []
+    projects: [{ name: "", role: 0, roleLevel: "Guest" }]
   });
 
   const config = {
@@ -43,14 +43,16 @@ export default () => {
     return <button>login</button>;
   };
 
-  const handleUserInfo = userInfo => {
+  const handleUserInfo = async userInfo => {
     const { name, userName } = userInfo.account;
-    Axios.post(`${api_server}/user/login/${name}`, {
+
+    const results = await Axios.post(`${api_server}/user/login/${name}`, {
       name,
       email: userName
-    }).then(results => {
-      setUser(results.data);
     });
+    // console.log(results.data);
+
+    setUser(results.data);
   };
 
   return (

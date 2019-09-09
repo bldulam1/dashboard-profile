@@ -36,7 +36,7 @@ app.use("/api/upload", require("./routes/Upload"));
 app.use("/api/user", require("./routes/User"));
 
 const httpsPort = process.env.NODE_ENV === "development" ? 4444 : 443;
-const httpPort = process.env.NODE_ENV === "development" ? 8080 : 80;
+const httpPort = process.env.NODE_ENV === "development" ? 8080 : 8080;
 
 if (process.env.NODE_ENV === "production") {
   const reactAppDir = path.join(__dirname, "../react/build/");

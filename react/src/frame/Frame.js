@@ -27,6 +27,9 @@ import { getInitials } from "../util/strings";
 
 export default () => {
   const { name, projects } = useContext(UserContext);
+  // const defaultProject = projects.length
+  //   ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
+  //   : "";
   const [open, toggleDrawer] = useToggle(false);
   const [activeProject, setActiveProject] = React.useState("");
   const classes = useStyles();
@@ -136,7 +139,6 @@ function ProjectNavItem(props) {
     toggleList();
     !isPrimary && setActiveProject(project);
   };
-  console.log(activeProject);
 
   return (
     <Link

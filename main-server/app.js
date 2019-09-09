@@ -16,7 +16,7 @@ app.use(
   cors({
     credentials: true,
     origin: [
-      "https://jp01-of-wl8197",
+      "https://localhost",
       "https://jp01-clarity01",
       "https://jp01-clarity01.corp.int"
     ]

@@ -1,4 +1,5 @@
-const hostname = "jp01-of-wl8197";
+const hostname =
+  process.env.NODE_ENV === "development" ? "localhost" : "jp01-clarity01";
 
 const api_server =
   process.env.NODE_ENV === "development"

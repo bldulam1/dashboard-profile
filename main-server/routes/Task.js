@@ -3,6 +3,9 @@ const { Scene } = require("../schemas/scene");
 const Task = require("../schemas/task");
 const { createSimsTasks } = require("./Operations/Operation.SIMS");
 const {
+  createCVWOperationTasks
+} = require("./Operations/Operation.CVWConversion");
+const {
   createIDW4ConvTasks
 } = require("./Operations/Operation.IDW4Conversion");
 const {
@@ -21,7 +24,9 @@ router.post("/:operation/new", async (req, res) => {
   let tasks = [];
   switch (operation) {
     case "CVW Conversion":
-      return res.send("Hello");
+      tasks = await createCVWOperationTasks(req.body, files);
+      executeTasks();
+      return res.send(tasks);
 
     case "Export List":
       const { fileIDs, selectedFileInfo } = req.body;
@@ -50,8 +55,7 @@ router.post("/:operation/new", async (req, res) => {
 });
 
 router.put("/update/:id", async (req, res) => {
-  const newData = await Task.findByIdAndUpdate(req.params.id, { ...req.body });
-  // console.log(req.body);
+  const newData = await Task.findByIdAndUpdate(req.params.id, req.body);
   res.send(newData);
 });
 

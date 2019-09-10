@@ -1,6 +1,7 @@
 let mongoose = require("mongoose");
 
 let taskSchema = mongoose.Schema({
+  priority: Number,
   operation: String,
   project: String,
   requestedBy: String,

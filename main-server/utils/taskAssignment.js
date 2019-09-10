@@ -69,7 +69,7 @@ async function getTask(distributionError) {
         assignedWorker: null,
         operation
       },
-      { script: 1 },
+      { script: 1, operation: 1, outputLocation: 1 },
       { sort: { priority: -1, requestDate: 1, size: 1 } }
     );
 
@@ -85,7 +85,6 @@ async function updateTask_Worker(taskID, operation, workerID, assignedWorker) {
   ]);
 }
 // ---------------------- Helper Functions
-
 
 // ++++++++++++++++++++++ Main Function
 let block = false;
@@ -133,7 +132,6 @@ async function executeTasks() {
   block = false;
 }
 // ----------------------- Main Function
-
 
 module.exports = {
   executeTasks

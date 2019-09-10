@@ -5,6 +5,7 @@ import IDW4ConversionOperation from "./Operation.Components/IDW4Conversion.Opera
 import FileSplittingOperation from "./Operation.Components/FileSplitting.Operation";
 import { ProjectContext } from "../../../context/Project.Context";
 import ExportOperation from "./Operation.Components/Export.Operation";
+import CVWConversionOperation from "./Operation.Components/CVWConversion.Operation";
 
 export default () => {
   const [expanded, setExpanded] = React.useState(null);
@@ -24,6 +25,7 @@ export default () => {
       ) && (
         <Fragment>
           <SIMSOperation handleExpanChange={handleChange} expanded={expanded} />
+          <CVWConversionOperation handleExpanChange={handleChange} expanded={expanded} />
         </Fragment>
       )}
 

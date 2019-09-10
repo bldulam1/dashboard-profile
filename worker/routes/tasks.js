@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const mkdirp = require("mkdirp");
 const { spawn } = require("child_process");
 const props = require("../config/processArgs");
 const Axios = require("axios");
@@ -40,21 +41,17 @@ router.post("/max", async (req, res) => {
 
 router.post("/execute", BlockingMiddleware, async (req, res) => {
   const { task } = req.body;
-  console.log("start", task._id);
-
-  // const child = spawn("powershell.exe", [task.script]);
-  const child = spawn("powershell.exe", [
-    `Start-Sleep -Milliseconds  ${task.size / 100}; Write-Host "Log Date";`
-  ]);
-
-  child.stdout.on("data", buff => handleNewLog(buff, task._id));
-  child.stderr.on("data", buff => handleNewLog(buff, task._id));
-  child.on("exit", (code, signal) => {
-    handleTaskFinish(code, signal, task._id);
-    console.log("end", task._id);
-    res.send(tasks.get(task._id));
+  startTask(task).then(child => {
+    console.log("start", task._id);
+    child.stdout.on("data", buff => handleNewLog(buff, task._id));
+    child.stderr.on("data", buff => handleNewLog(buff, task._id));
+    child.on("exit", (code, signal) => {
+      handleTaskFinish(code, signal, task._id);
+      console.log("end", task._id);
+      res.send(tasks.get(task._id));
+    });
+    createNewTask(task, child.pid);
   });
-  createNewTask(task, child.pid);
 });
 
 router.get("/allowed-tasks", async (req, res) => {
@@ -67,6 +64,19 @@ router.post("/update/allowed-tasks", async (req, res) => {
 });
 
 module.exports = router;
+
+function startTask(task) {
+  const { script, outputLocation, operation } = task;
+  return new Promise((resolve, reject) => {
+    if (["SIMS", "CVW Conversion"].includes(operation)) {
+      mkdirp(outputLocation, err => {
+        err ? reject(err) : resolve(spawn("powershell.exe", [script]));
+      });
+    } else {
+      resolve(spawn("powershell.exe", [script]));
+    }
+  });
+}
 
 function createNewTask(task, pid) {
   const taskDetails = {

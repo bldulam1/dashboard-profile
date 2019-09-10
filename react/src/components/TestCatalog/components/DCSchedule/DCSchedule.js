@@ -4,6 +4,10 @@ import RLDD from "react-list-drag-and-drop/lib/RLDD";
 import { Button, IconButton } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { makeStyles } from "@material-ui/styles";
+import Axios from "axios";
+import { api_server } from "../../../../environment/environment";
+import { ProjectContext } from "../../../../context/Project.Context";
+import fileDownload from "js-file-download";
 
 const useStyles = makeStyles(theme => ({
   itemWrapper: {
@@ -37,16 +41,26 @@ const useStyles = makeStyles(theme => ({
 
 export default () => {
   const { itemWrapper, itemPriority, itemContent, itemAction } = useStyles();
+  const { activeProject } = useContext(ProjectContext);
   const { tcProps, tcDispatch } = useContext(TestCatalogContext);
   const { selected } = tcProps;
   let items = selected.map((s, i) => ({ id: i, ...s }));
 
   const handleRLDDChange = newItems => tcDispatch({ selected: newItems });
+  const handleExportClick = () => {
+    Axios({
+      url: `${api_server}/tc/${activeProject}/create-schedule`,
+      method: "POST",
+      responseType: "blob"
+    }).then(results => {
+      fileDownload(results.data, "schedule.xlsx");
+    });
+  };
 
   return (
     <div>
       <div>
-        <Button>Export</Button>
+        <Button onClick={handleExportClick}>Export</Button>
       </div>
 
       <RLDD

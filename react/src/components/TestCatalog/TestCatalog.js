@@ -7,14 +7,17 @@ import { ProjectContext } from "../../context/Project.Context";
 import { initializeTCProps } from "../../util/test-catalog";
 import TestCatalogSearch from "./components/TestCatalogSearch/TestCatalogSearch";
 import DCSchedule from "./components/DCSchedule/DCSchedule";
-import { AppBar, Tabs, Tab, Typography, Box } from "@material-ui/core";
+import { Tabs, Tab, Typography, Box } from "@material-ui/core";
 import PropTypes from "prop-types";
 
 const useStyles = makeStyles(theme => ({
   contentPaper: {
     margin: "1rem",
     padding: "1rem",
-    width: "98%"
+    width: "98%",
+    // display: "flex",
+    // flexDirection: "column",
+    // justifyContent: "center"
   }
 }));
 
@@ -93,17 +96,15 @@ export default props => {
   return (
     <Paper className={classes.contentPaper}>
       <TestCatalogContext.Provider value={{ tcProps, tcDispatch }}>
-        <AppBar color="secondary" position="static">
-          <Tabs
-            indicatorColor="primary"
-            value={value}
-            onChange={handleChange}
-            aria-label="simple tabs example"
-          >
-            <Tab label="Search" {...a11yProps(0)} />
-            <Tab label="Create Schedule" {...a11yProps(1)} />
-          </Tabs>
-        </AppBar>
+        <Tabs
+          indicatorColor="primary"
+          value={value}
+          onChange={handleChange}
+          aria-label="simple tabs example"
+        >
+          <Tab label="Search" {...a11yProps(0)} />
+          <Tab label="Create Schedule" {...a11yProps(1)} />
+        </Tabs>
 
         <TabPanel value={value} index={0}>
           <TestCatalogSearch />

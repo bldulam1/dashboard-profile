@@ -11,6 +11,8 @@
     "log": "node ./node_modules/pm2/bin/pm2 log",
     "list": "node ./node_modules/pm2/bin/pm2 list",
     "gen-certificates": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certificates/selfsigned.key -out ./certificates/selfsigned.crt",
+    "restart": "node ./node_modules/pm2/bin/pm2 restart worker",
+    "synchronize": "git pull origin; node ./node_modules/pm2/bin/pm2 restart worker",
     "test": "mocha"
   },
   "author": "Clarity",

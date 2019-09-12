@@ -27,7 +27,7 @@ function createCVWOperationScript({
   outputLocation,
   configJSON
 }) {
-  return `Set-Location "${cvwBIN}"; ./CVW2Mat.exe "${fullFile}" -o "${outputLocation}" --overwrite ${commandLineArgs} -l ${configJSON};`;
+  return `Set-Location "${cvwBIN}"; ./CVW2Mat.exe "${fullFile}" -o "${outputLocation}" --overwrite ${commandLineArgs} -l ${configJSON} --a2l-file "R7_31_70D6_0_a2l.txt";`;
 }
 
 function createDirectory(dir) {

@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const Worker = require("../schemas/worker");
+const { executeTasks } = require("../utils/taskAssignment");
 
 // root: /service-workers
 
@@ -65,6 +66,7 @@ router.post("/new", async (req, res) => {
     }
   );
   res.send(worker);
+  executeTasks();
 });
 
 module.exports = router;

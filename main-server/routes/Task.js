@@ -57,6 +57,9 @@ router.post("/:operation/new", async (req, res) => {
 router.put("/update/:id", async (req, res) => {
   const newData = await Task.findByIdAndUpdate(req.params.id, req.body);
   res.send(newData);
+  if (req.body.status && req.body.status.text === "Completed") {
+    executeTasks();
+  }
 });
 
 router.post(

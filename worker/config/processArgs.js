@@ -9,11 +9,7 @@ let mainHost =
   process.env.NODE_ENV === "development" ? "localhost" : "jp01-clarity01";
 let allowedTasks = [];
 
-const serverTypes = {
-  subaru_svs: ["IDW4 Conversion", "File Splitting"],
-  hil: ["HIL", "SIMS", "CVW2MAT"],
-  generic: ["SIMS", "CVW2MAT"]
-};
+console.log(process.env.NODE_ENV, mainHost, mainPort);
 
 args.forEach(arg => {
   if (arg.includes("port:")) {
@@ -22,10 +18,6 @@ args.forEach(arg => {
     mainHost = arg.replace("mainHost:", "");
   } else if (arg.includes("serverName:")) {
     serverName = arg.replace("serverName:", "");
-  } else if (arg.includes("https")) {
-    url = url.replace("http:", "https:");
-  } else if (arg.includes("allowedTasks:")) {
-    allowedTasks = arg.replace("allowedTasks:", "").split(",");
   }
 });
 

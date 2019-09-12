@@ -5,7 +5,7 @@ module.exports = {
       script: "app.js",
 
       // Options reference: https://pm2.io/doc/en/runtime/reference/ecosystem-file/
-      args: "",
+      args: "--silent",
       autorestart: true,
       watch: true,
       ignore_watch: ["node_modules", "tmp"],
@@ -13,7 +13,7 @@ module.exports = {
       max_memory_restart: "1G",
       detached: true,
       env: {
-        NODE_ENV: "development"
+        NODE_ENV: "production"
       },
       env_production: {
         NODE_ENV: "production"

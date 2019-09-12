@@ -8,10 +8,11 @@ const fs = require("fs");
 const path = require("path");
 const https = require("https");
 const { getCPU_MEM, getNetworkStats } = require("./routines/routine.stats");
+const { executeTasks } = require("./utils/taskAssignment");
 
 app.use(bodyParser.urlencoded({ extended: false, limit: "1000mb" }));
 app.use(bodyParser.json({ limit: "1000mb" }));
-app.use(logger("dev"));
+// app.use(logger("dev"));
 app.use(
   cors({
     credentials: true,
@@ -68,5 +69,6 @@ mongoose.connection.on("open", () => {
   });
   app.listen(httpPort, () => {
     console.log(`Clarity HTTP server is listening on port ${httpPort}`);
+    executeTasks();
   });
 });

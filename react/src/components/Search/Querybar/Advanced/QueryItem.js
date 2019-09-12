@@ -112,7 +112,14 @@ function QueryItem({ id }) {
   }
 
   return (
-    <form className={classes.root} autoComplete="off">
+    <form
+      className={classes.root}
+      autoComplete="off"
+      onSubmit={event => {
+        event.preventDefault();
+        console.log(event);
+      }}
+    >
       <IconButton
         className={classes.button}
         aria-label="delete"

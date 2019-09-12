@@ -90,12 +90,15 @@ async function updateTask_Worker(taskID, operation, workerID, assignedWorker) {
 let block = false;
 async function executeTasks() {
   if (block) return console.log("blocked");
+  console.log("assigning tasks enter");
   block = true;
 
   const workers = await getWorkers();
+  console.log(`${workers.length} workers found`);
 
   for (let index = 0; index < workers.length; index++) {
     const worker = workers[index];
+    console.log(worker.serverName);
 
     // Get current task Distribution
     const [
@@ -115,21 +118,26 @@ async function executeTasks() {
     const task = await getTask(distributionError);
 
     if (worker && task) {
+      console.log(task.operation);
+
       await updateTask_Worker(
         task._id,
         task.operation,
         worker._id,
         worker.serverName
       );
-
-      Axios.post(`${worker.url}/tasks/execute`, { task }).then(() => {
-        Worker.findByIdAndUpdate(worker._id, {
-          taskID: null
-        }).then(executeTasks);
-      });
+      console.log("assigning task");
+      Axios.post(`${worker.url}/tasks/execute`, { task })
+        .then(results => {
+          console.log(`${results.data} task assigned to ${worker.serverName}`);
+        })
+        .catch(() => {
+          console.log(`${worker.serverName} is busy`);
+        });
     }
   }
   block = false;
+  console.log("assigning tasks exit");
 }
 // ----------------------- Main Function
 

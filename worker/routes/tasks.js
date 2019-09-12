@@ -48,9 +48,9 @@ router.post("/execute", BlockingMiddleware, async (req, res) => {
     child.on("exit", (code, signal) => {
       handleTaskFinish(code, signal, task._id);
       console.log("end", task._id);
-      res.send(tasks.get(task._id));
     });
     createNewTask(task, child.pid);
+    res.send(task._id);
   });
 });
 
@@ -101,11 +101,12 @@ function updateTask(taskID, updateData) {
   // Update the main server
 
   const newTaskURL = `${mainHostURL}/tasks/update/${taskID}`;
+  const _task = tasks.get(taskID);
   Axios.put(newTaskURL, tasks.get(taskID))
     .then(results => {
-      if (results.data.status && results.data.status.text === "Completed") {
+      if (_task.status.text === "Completed") {
         tasks.delete(taskID);
-        console.log("task completed", results.data);
+        console.log("task completed", results.data.inputFile);
       }
     })
     .catch(err => console.error(err));

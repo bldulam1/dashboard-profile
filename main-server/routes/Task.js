@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const { Scene } = require("../schemas/scene");
 const Task = require("../schemas/task");
+const Worker = require("../schemas/worker");
 const { createSimsTasks } = require("./Operations/Operation.SIMS");
 const {
   createCVWOperationTasks
@@ -55,10 +56,16 @@ router.post("/:operation/new", async (req, res) => {
 });
 
 router.put("/update/:id", async (req, res) => {
-  const newData = await Task.findByIdAndUpdate(req.params.id, req.body);
+  const newData = await Task.findByIdAndUpdate(req.params.id, req.body, {
+    new: true
+  });
   res.send(newData);
-  if (req.body.status && req.body.status.text === "Completed") {
-    executeTasks();
+  if (newData.status.text === "Completed") {
+    Worker.findOneAndUpdate(
+      { serverName: newData.assignedWorker },
+      { taskID: null },
+      { new: true }
+    ).then(executeTasks);
   }
 });
 

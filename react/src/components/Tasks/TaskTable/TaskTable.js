@@ -312,7 +312,7 @@ export default params => {
 
     fetchTasksData(
       project,
-      newPage,
+      newPage * newRowsPerPage,
       newRowsPerPage,
       sort,
       query,
@@ -348,7 +348,7 @@ export default params => {
         if (hasUnFinishedTasks()) {
           fetchTasksData(
             project,
-            page,
+            page * rowsPerPage,
             rowsPerPage,
             sort,
             query,
@@ -362,6 +362,8 @@ export default params => {
               });
             }
           );
+        } else {
+          clearInterval(intervalTimer);
         }
       }, 1000);
     }

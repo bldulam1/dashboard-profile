@@ -103,7 +103,10 @@ function updateTask(taskID, updateData) {
   const newTaskURL = `${mainHostURL}/tasks/update/${taskID}`;
   Axios.put(newTaskURL, tasks.get(taskID))
     .then(results => {
-      console.log("task updated successfully", results.data);
+      if (results.data.status && results.data.status.text === "Completed") {
+        tasks.delete(taskID);
+        console.log("task completed", results.data);
+      }
     })
     .catch(err => console.error(err));
 }

@@ -24,9 +24,10 @@ function createCVWOperationScript({
   cvwBIN,
   fullFile,
   commandLineArgs,
-  outputLocation
+  outputLocation,
+  configJSON
 }) {
-  return `Set-Location "${cvwBIN}"; ./CVW2Mat.exe "${fullFile}" -o "${outputLocation}" --overwrite ${commandLineArgs};`;
+  return `Set-Location "${cvwBIN}"; ./CVW2Mat.exe "${fullFile}" -o "${outputLocation}" --overwrite ${commandLineArgs} -l ${configJSON};`;
 }
 
 function createDirectory(dir) {
@@ -60,7 +61,8 @@ async function createCVWOperationTasks(props, files) {
       cvwBIN,
       fullFile: Path.join(path, fileName),
       commandLineArgs: cli,
-      outputLocation
+      outputLocation,
+      configJSON: Path.resolve("V:/JP01/DataLake/Common_Write/ClarityResources/Subaru77/CVW2MAT/config.json")
     });
     return new Task({
       priority,

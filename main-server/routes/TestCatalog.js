@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const TestCatalog = require("../schemas/test-catalog");
 const { createSchedule } = require("./ExcelCreator/DCSchedule");
-const Path = require("path");
+const fs = require("fs");
 
 router.get("/:project/unique/feature/:feature", async (req, res) => {
   const { project, feature } = req.params;
@@ -74,8 +74,8 @@ router.get("/:project/unique/sheetName", async (req, res) => {
 });
 
 router.post("/:project/create-schedule/", async (req, res) => {
-  const outputFile = createSchedule(req.body.selected, req.params.project);
-  res.sendFile(Path.resolve(outputFile));
+  const outputFile = createSchedule(req.body, req.params.project);
+  res.sendFile(outputFile, () => console.log(outputFile));
 });
 
 module.exports = router;

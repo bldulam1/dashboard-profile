@@ -1,4 +1,5 @@
 var excel = require("excel4node");
+const Path = require("path");
 
 function editWorksheet(worksheet, row, col, type, content) {
   if (type === "string") worksheet.cell(row, col).string(content);
@@ -10,7 +11,7 @@ function entireColumn(colLetter, rowStart, rowEnd) {
   return `${colLetter}${rowStart}:${colLetter}${rowEnd}`;
 }
 
-function createSchedule(data) {
+function createSchedule(data, project) {
   const startRow = 6;
   const endRow = 111;
   var workbook = new excel.Workbook();
@@ -23,6 +24,9 @@ function createSchedule(data) {
   //   },
   //   numberFormat: "$#,##0.00; ($#,##0.00); -"
   // });
+
+  // console.log(data, project);
+
 
   editWorksheet(
     worksheet,
@@ -86,7 +90,7 @@ function createSchedule(data) {
   // worksheet.cell(3,1).bool(true).style(style).style({font: {size: 14}});
   const fileName = "./tmp/DC Schedule.xlsx";
   workbook.write(fileName);
-  return fileName;
+  return Path.resolve(fileName);
 }
 
 module.exports = {

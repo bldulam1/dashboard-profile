@@ -4,7 +4,7 @@ const os = require("os");
 let port = 8000;
 let hostname = os.hostname().toLowerCase();
 let serverName = hostname;
-let mainPort = 8080;
+let mainPort = process.env.NODE_ENV === "development" ? 8080 : 80;
 let mainHost =
   process.env.NODE_ENV === "development" ? "localhost" : "jp01-clarity01";
 let allowedTasks = [];

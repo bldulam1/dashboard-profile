@@ -18,7 +18,9 @@ app.use(
     origin: [
       "https://localhost",
       "https://jp01-clarity01",
-      "https://jp01-clarity01.corp.int"
+      "http://jp01-clarity01",
+      "https://jp01-clarity01.corp.int",
+      "http://jp01-clarity01.corp.int"
     ]
   })
 );
@@ -36,7 +38,7 @@ app.use("/api/upload", require("./routes/Upload"));
 app.use("/api/user", require("./routes/User"));
 
 const httpsPort = process.env.NODE_ENV === "development" ? 4444 : 443;
-const httpPort = process.env.NODE_ENV === "development" ? 8080 : 8080;
+const httpPort = process.env.NODE_ENV === "development" ? 8080 : 80;
 
 if (process.env.NODE_ENV === "production") {
   const reactAppDir = path.join(__dirname, "../react/build/");

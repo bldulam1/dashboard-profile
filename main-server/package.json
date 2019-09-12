@@ -5,7 +5,7 @@
   "scripts": {
     "list": "node ./node_modules/pm2/bin/pm2 list",
     "log": "node ./node_modules/pm2/bin/pm2 log",
-    "prod": "cross-env NODE_ENV=production node ./node_modules/pm2/bin/pm2 start ecosystem.config.js",
+    "prod": "cross-env NODE_ENV=production node ./node_modules/pm2/bin/pm2 start app.js",
     "prod-stop": "node ./node_modules/pm2/bin/pm2 stop clarity",
     "prod-start": "cross-env NODE_ENV=production node ./node_modules/nodemon/bin/nodemon.js --ignore './tmp/' app.js",
     "start": "cross-env NODE_ENV=development node ./node_modules/nodemon/bin/nodemon.js --ignore './tmp/' app.js",

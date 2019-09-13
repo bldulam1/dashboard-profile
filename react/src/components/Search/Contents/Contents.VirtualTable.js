@@ -256,11 +256,11 @@ export default () => {
     const allSelectionState = evaluateSelections();
     if (allSelectionState === -1) {
       // if selection is empty
-      const sortString = JSON.stringify(sort);
-      const queryString = JSON.stringify(query);
+      // const sortString = JSON.stringify(sort);
+      // const queryString = JSON.stringify(query);
 
-      const selectAllURL = `${api_server}/search/${project}/ids-only/sort=${sortString}/query=${queryString}`;
-      Axios.get(selectAllURL).then(results =>
+      const selectAllURL = `${api_server}/search/${project}/ids-only/`;
+      Axios.post(selectAllURL, {sort, query}).then(results =>
         searchFileDispatch({ selected: results.data })
       );
     } else {

@@ -57,17 +57,11 @@ router.get("/:project/unique/tag/:key", async (req, res) => {
   res.send(uniqueKeys);
 });
 
-router.get(
-  "/:project/ids-only/sort=:sortString(*)/query=:queryString(*)",
-  async (req, res) => {
-    const { sortString, queryString } = req.params;
-    const sort = JSON.parse(sortString);
-    const query = JSON.parse(queryString);
-
-    let ids = await Scene.find(query, { _id: 1 });
-    res.send(ids.map(s => s._id));
-  }
-);
+router.post("/:project/ids-only", async (req, res) => {
+  const { sort, query } = req.body;
+  let ids = await Scene.find(query, { _id: 1 }, { sort });
+  res.send(ids.map(s => s._id));
+});
 
 router.get(
   "/:project/get-ops/file=:inputFile/path=:inputLocation(*)",

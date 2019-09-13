@@ -1,4 +1,5 @@
 Stop-Process -ProcessName node;
+set-location ~
 git clone http://bldulam1:tha3nohk!@de01-gitlab01.corp.int/clarity/clarity2.0.git;
 Set-Location ~/clarity2.0/worker;
 npm config set proxy http://10.1.9.51:80;

@@ -12,10 +12,10 @@
  * 4.0 recurse until workers/tasks are empty
  */
 
-const Worker = require("../schemas/worker");
-const ServerType = require("../schemas/serverType");
 const Axios = require("axios");
+const ServerType = require("../schemas/serverType");
 const Task = require("../schemas/task");
+const Worker = require("../schemas/worker");
 
 // +++++++++++++++++++++++++ Helper Functions
 
@@ -35,7 +35,7 @@ async function getAllowedTasks(type) {
 }
 
 async function getTaskDistribution(type) {
-  return await Promise.all([
+  return Promise.all([
     getAllowedTasks(type),
     Worker.countDocuments({ type }),
     Worker.aggregate([
@@ -64,11 +64,8 @@ async function getTaskDistributionError(
 async function getTask(distributionError) {
   for (let opIndex = 0; opIndex < distributionError.length; opIndex++) {
     const operation = distributionError[opIndex].task;
-    task = await Task.findOne(
-      {
-        assignedWorker: null,
-        operation
-      },
+    const task = await Task.findOne(
+      { assignedWorker: null, operation },
       { script: 1, operation: 1, outputLocation: 1 },
       { sort: { priority: -1, requestDate: 1, size: 1 } }
     );
@@ -78,7 +75,7 @@ async function getTask(distributionError) {
   return null;
 }
 
-async function updateTask_Worker(taskID, operation, workerID, assignedWorker) {
+async function updateTaskWorker(taskID, operation, workerID, assignedWorker) {
   return Promise.all([
     Worker.findByIdAndUpdate(workerID, { taskID, activeTask: operation }),
     Task.findByIdAndUpdate(taskID, { assignedWorker })
@@ -118,15 +115,12 @@ async function executeTasks() {
     const task = await getTask(distributionError);
 
     if (worker && task) {
-      console.log(task.operation);
-
-      await updateTask_Worker(
+      await updateTaskWorker(
         task._id,
         task.operation,
         worker._id,
         worker.serverName
       );
-      console.log("assigning task");
       Axios.post(`${worker.url}/tasks/execute`, { task })
         .then(results => {
           console.log(`${results.data} task assigned to ${worker.serverName}`);

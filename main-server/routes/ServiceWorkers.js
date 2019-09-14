@@ -17,7 +17,7 @@ router.get("/stats-on/current-only", async (req, res) => {
     sort: { active: 1, serverName: 1 }
   });
   workers = workers.map(worker => {
-    const { _id, serverName, active, taskID, type } = worker;
+    const { _id, serverName, active, taskID, type, cores } = worker;
     const cpu = active ? worker.cpu[worker.cpu.length - 1].currentload : 0;
     const { used, total } = worker.mem[worker.mem.length - 1];
     const { ifaces } = worker.network[worker.network.length - 1];
@@ -30,6 +30,7 @@ router.get("/stats-on/current-only", async (req, res) => {
 
     return {
       _id,
+      cores,
       serverName,
       active,
       type,

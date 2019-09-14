@@ -1,5 +1,6 @@
 const args = process.argv;
 const os = require("os");
+const cores = os.cpus().length;
 
 let port = 8000;
 let hostname = os.hostname().toLowerCase();
@@ -32,5 +33,6 @@ module.exports = {
   serverName,
   mainPort,
   mainHost,
-  mainHostURL
+  mainHostURL,
+  cores
 };

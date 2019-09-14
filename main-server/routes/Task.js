@@ -24,32 +24,32 @@ router.post("/:operation/new", async (req, res) => {
   );
   let tasks = [];
   switch (operation) {
-    case "CVW Conversion":
+    case "CVW Conversion": {
       tasks = await createCVWOperationTasks(req.body, files);
       executeTasks();
       return res.send(tasks);
-
-    case "Export List":
+    }
+    case "Export List": {
       const { fileIDs, selectedFileInfo } = req.body;
       const fileInfo = await fetchFileInfo(fileIDs);
       return res.send(await alignFileInfo(fileInfo, selectedFileInfo));
-
-    case "File Splitting":
+    }
+    case "File Splitting": {
       return res.send("Hello");
-
-    case "HIL":
+    }
+    case "HIL": {
       return res.send("Hello");
-
-    case "IDW4 Conversion":
+    }
+    case "IDW4 Conversion": {
       tasks = await createIDW4ConvTasks(req.body, files);
       executeTasks();
       return res.send(tasks);
-
-    case "SIMS":
+    }
+    case "SIMS": {
       tasks = await createSimsTasks(req.body, files);
       executeTasks();
       return res.send(tasks);
-
+    }
     default:
       break;
   }

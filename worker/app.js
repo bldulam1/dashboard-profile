@@ -24,7 +24,7 @@ app.use("/", require("./routes/statistics"));
 app.listen(props.port, async () => {
   const { mainHostURL } = props;
   const mainURL = `${mainHostURL}/service-workers/new`;
-  const { hostname, port, serverName, url } = props;
+  const { hostname, port, serverName, url, cores } = props;
 
   axios
     .post(mainURL, {
@@ -33,7 +33,8 @@ app.listen(props.port, async () => {
       serverName,
       url,
       taskID: null,
-      searchID: null
+      searchID: null,
+      cores
     })
     .then(() => console.log("success"))
     .catch(() => console.log("failed", mainURL));

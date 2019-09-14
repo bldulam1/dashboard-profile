@@ -47,6 +47,7 @@ export default props => {
     Axios.get(`${api_server}/service-workers/stats-on/current-only`).then(
       results => {
         dashboardDispatch({ servers: results.data });
+        console.log(results.data);
 
         Axios.get(`${api_server}/server-assignments/all`)
           .then(results => {

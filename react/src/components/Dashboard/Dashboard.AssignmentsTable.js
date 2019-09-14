@@ -20,21 +20,6 @@ export default () => {
   const { dashboard, dashboardDispatch } = useContext(DashboardContext);
   const { servers, serverTypes } = dashboard;
 
-  // const handleTaskClick = (taskName, serverID) => {
-  //   const serverIndex = servers.findIndex(server => server._id === serverID);
-  //   const newAllowedTasks = servers[serverIndex].allowedTasks.includes(taskName)
-  //     ? servers[serverIndex].allowedTasks.filter(t => t !== taskName)
-  //     : [...servers[serverIndex].allowedTasks, taskName];
-
-  //   const url = `${api_server}/service-workers/update/${serverID}`;
-
-  //   Axios.put(url, { allowedTasks: newAllowedTasks }).then(results => {
-  //     let newServers = servers;
-  //     newServers[serverIndex].allowedTasks = newAllowedTasks;
-  //     dashboardDispatch({ servers: newServers });
-  //   });
-  // };
-
   const handleTypeChange = (serverID, type) => {
     const serverIndex = servers.findIndex(server => server._id === serverID);
     const url = `${api_server}/service-workers/update/${serverID}`;
@@ -68,6 +53,7 @@ export default () => {
             id: "type-simple"
           }}
         >
+          <MenuItem value="undefined"></MenuItem>
           {serverTypes.map(st => (
             <MenuItem key={uuid()} value={st.name}>
               {st.name}
@@ -91,7 +77,7 @@ export default () => {
         </TableHead>
         <TableBody>
           {servers.map(server => {
-            const { _id, serverName, active } = server;
+            const { _id, serverName, active, cores } = server;
             const activeStatus = active ? (
               <WifiIcon color="primary" />
             ) : (
@@ -103,7 +89,7 @@ export default () => {
               activeStatus,
               <ServerTypeSelection server={server} _id={_id} />,
               1,
-              4
+              cores
             ];
 
             return (

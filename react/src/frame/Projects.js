@@ -2,6 +2,7 @@ import React from "react";
 import Dashboard from "../components/Dashboard/Dashboard";
 import Search from "../components/Search/Search";
 import Upload from "../components/Uploads/Upload";
+import Kpi from "../components/KPI/KPI";
 import Maps from "../components/Maps";
 import SettingsUser from "../components/Settings.User";
 import SettingsProject from "../components/Settings.Project";
@@ -10,6 +11,7 @@ import DashboardIcon from "@material-ui/icons/Dashboard";
 import SearchIcon from "@material-ui/icons/Search";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import MapIcon from "@material-ui/icons/Map";
+import InsertChartIcon from "@material-ui/icons/InsertChart";
 import LocalLibraryIcon from "@material-ui/icons/LocalLibrary";
 import PersonIcon from "@material-ui/icons/Person";
 import GroupIcon from "@material-ui/icons/Group";
@@ -55,6 +57,13 @@ const projectComponents = new Set([
     Maps,
     ["Nissan L53H", "Renault Nissan", "Subaru SVS"],
     <MapIcon />
+  ),
+  Component(
+    "kpi",
+    "/:project/kpi",
+    Kpi,
+    ["Nissan L53H", "Renault Nissan", "Subaru 77GHz"],
+    <InsertChartIcon />
   ),
   Component(
     "test catalog",

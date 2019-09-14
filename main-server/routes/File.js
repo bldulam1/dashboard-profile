@@ -5,6 +5,7 @@ const { existsSync } = require("fs");
 const readdirp = require("readdirp");
 const path = require("path");
 const Axios = require("axios");
+const exploreDirectories = require("../utils/collaborativeSearch");
 
 const UPLOAD_ROOT = path.resolve("V:\\JP01\\DataLake\\Common_Write");
 
@@ -56,78 +57,9 @@ router.get("/map-dir/:project/:dir(*)", async (req, res) => {
     { project, root, folder: root },
     { upsert: true, new: true }
   );
-  let block = false;
-  const pickFolder = async serverName => {
-    if (block) return { block, folder: null };
-    block = true;
-    const folder = await SearchFolder.findOneAndUpdate(
-      { assignedServer: null },
-      { assignedServer: serverName }
-    );
 
-    block = false;
-    return { block, folder };
-  };
+  exploreDirectories();
 
-  const removeFolder = async _id => {
-    await SearchFolder.findByIdAndDelete(_id);
-  };
-
-  const unPickFolder = async _id => {
-    await SearchFolder.findByIdAndUpdate(_id, { assignedServer: null });
-  };
-
-  const isFinished = array => {
-    for (let index = 0; index < array.length; index++) {
-      const workerFlag = array[index];
-      if (!workerFlag) return false;
-    }
-    return true;
-  };
-
-  const workers = await Worker.find({ active: true });
-  let workersFlags = workers.map(() => false);
-  let isLastChild = false;
-
-  do {
-    for (let index = 0; index < workers.length; index++) {
-      const { serverName, url } = workers[index];
-      const pick = await pickFolder(serverName);
-      if (pick.folder && pick.folder.folder && !workersFlags[index]) {
-        const { folder, _id } = pick.folder;
-        Axios.post(`${url}/fileSearch/${project}/dir/${folder}`, {root })
-          .then(async results => {
-            await removeFolder(_id);
-            const { files, directories } = getFilesAndDirectories({
-              ...results.data,
-              root
-            });
-            if (files.length) {
-              filesCount += files.length;
-              Scene.deleteMany({ path: folder }).then(() => {
-                Scene.insertMany(files);
-              });
-            }
-            if (directories.length) {
-              workersFlags = workers.map(() => false);
-              await Promise.all(
-                directories.map(directory => new SearchFolder(directory).save())
-              );
-            } else {
-              isLastChild = null === (await SearchFolder.findOne());
-            }
-          })
-          .catch(async () => {
-            await unPickFolder(_id);
-            workersFlags = workersFlags.map(() => false);
-          });
-      } else if (isLastChild && !pick.block && !pick.folder) {
-        workersFlags[index] = true;
-      }
-    }
-  } while (!isFinished(workersFlags));
-
-  // console.log(workersFlags);
   elapsedTime = new Date().getTime() - elapsedTime;
   res.send({ filesCount, elapsedTime });
 });
@@ -170,9 +102,3 @@ router.delete("/del-dir/:project/:dir(*)", async (req, res) => {
 });
 
 module.exports = router;
-function getFilesAndDirectories({ files, directories, project, root }) {
-  return {
-    files,
-    directories: directories.map(folder => ({ project, root, folder }))
-  };
-}

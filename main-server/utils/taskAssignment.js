@@ -87,7 +87,7 @@ async function updateTaskWorker(taskID, operation, workerID, assignedWorker) {
 let block = false;
 async function executeTasks() {
   if (block) return console.log("blocked");
-  console.log("assigning tasks enter");
+  // console.log("assigning tasks enter");
   block = true;
 
   const workers = await getWorkers();
@@ -95,7 +95,7 @@ async function executeTasks() {
 
   for (let index = 0; index < workers.length; index++) {
     const worker = workers[index];
-    console.log(worker.serverName);
+    // console.log(worker.serverName);
 
     // Get current task Distribution
     const [
@@ -131,7 +131,7 @@ async function executeTasks() {
     }
   }
   block = false;
-  console.log("assigning tasks exit");
+  // console.log("assigning tasks exit");
 }
 // ----------------------- Main Function
 

@@ -45,9 +45,7 @@ router.put("/edit/:id", async (req, res) => {
     id,
     { $set: req.body },
     function(err, result) {
-      if (err) {
-        console.log(err);
-      }
+      if (err) console.log(err);
     }
   );
 

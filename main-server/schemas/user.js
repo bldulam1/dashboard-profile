@@ -4,6 +4,7 @@ let schema = mongoose.Schema({
   name: String,
   email: String,
   online: Boolean,
+  socketID: String,
   projects: [{ name: String, role: String, roleLevel: Number }]
 });
 

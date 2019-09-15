@@ -1,12 +1,6 @@
 const router = require("express").Router();
-const { Scene, SearchFolder } = require("../schemas/scene");
 const Client = require("../schemas/user");
 const Project = require("../schemas/project");
-// const Project = require("../schemas/project");
-const { existsSync } = require("fs");
-const readdirp = require("readdirp");
-const path = require("path");
-const Axios = require("axios");
 
 function Role(roleLevel) {
   const roles = ["Guest", "Developer", "Team Leader", "Admin"];
@@ -14,13 +8,17 @@ function Role(roleLevel) {
 }
 
 router.post("/login/:name", async (req, res) => {
-  const { email, name } = req.body;
+  const { email, name, online } = req.body;
 
-  let user = await Client.findOne({ email });
+  let user = await Client.findOneAndUpdate(
+    { email },
+    { online },
+    { new: true }
+  );
   if (!user) {
     let projects = await Project.find({}, { name: 1, _id: 0 });
     projects = projects.map(({ name }) => ({ name, ...Role(0) }));
-    user = new Client({ email, name, projects });
+    user = new Client({ email, name, projects, online });
     await user.save();
   }
   res.send(user);

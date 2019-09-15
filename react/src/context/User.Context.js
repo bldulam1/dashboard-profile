@@ -4,6 +4,8 @@ export const UserContext = createContext({
   user: {
     name: "",
     email: "",
-    projects: []
-  }
+    projects: [],
+    online: true
+  },
+  setUser: null
 });

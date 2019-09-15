@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import clsx from "clsx";
 import Drawer from "@material-ui/core/Drawer";
 import AppBar from "@material-ui/core/AppBar";
@@ -15,7 +15,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import useToggle from "../hooks/useToggle";
 import uuid from "uuid";
 import { Route, Link, Redirect } from "react-router-dom";
-import { SnackbarProvider } from "notistack";
+import { useSnackbar } from "notistack";
 import logo from "../logo.svg";
 
 import { getProjectComponents, settingsComponents } from "../frame/Projects";
@@ -25,14 +25,35 @@ import { ProjectContext } from "../context/Project.Context";
 import { UserContext } from "../context/User.Context";
 import { getInitials } from "../util/strings";
 
+import { socket } from "../environment/environment";
+
 export default () => {
-  const { name, projects } = useContext(UserContext).user;
+  const { user, setUser } = useContext(UserContext);
+  const { _id, name, projects, online } = user;
+
   const defaultProject = projects.length
     ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
     : "";
   const [open, toggleDrawer] = useToggle(false);
   const [activeProject, setActiveProject] = React.useState(defaultProject);
   const classes = useStyles();
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    socket.emit("online", { _id });
+    socket.on("reconnect", () => {
+      enqueueSnackbar(`Welcome back ${name}!`, { variant: "success" });
+      setUser({ ...user, online: true });
+      socket.emit("online", { _id });
+    });
+    socket.on("disconnect", () => {
+      enqueueSnackbar(`You are disconnected`, { variant: "warning" });
+      setUser({ ...user, online: false });
+
+      console.log("disconnected");
+    });
+    return () => {};
+  }, [user]);
 
   return (
     <div className={classes.root}>
@@ -66,7 +87,11 @@ export default () => {
               // onClick={handleMenu}
             >
               <Tooltip title={name}>
-                <Avatar className={classes.colorSecondary}>
+                <Avatar
+                  className={
+                    online ? classes.colorSecondary : classes.colorGrey
+                  }
+                >
                   {getInitials(name)}
                 </Avatar>
               </Tooltip>
@@ -93,30 +118,28 @@ export default () => {
           <ProjectComponents open={open} />
           <SettingsComponents open={open} />
         </Drawer>
-        <SnackbarProvider maxSnack={5}>
-          <main
-            className={
-              open ? classes.contentDrawerOpen : classes.contentDrawerClose
-            }
-          >
-            {getProjectComponents(activeProject).map(comp => (
-              <Route
-                exact
-                key={uuid()}
-                path={comp.route}
-                component={comp.component}
-              />
-            ))}
-            {settingsComponents.map(({ route, component }) => (
-              <Route exact key={uuid()} path={route} component={component} />
-            ))}
+        <main
+          className={
+            open ? classes.contentDrawerOpen : classes.contentDrawerClose
+          }
+        >
+          {getProjectComponents(activeProject).map(comp => (
             <Route
               exact
-              path="/"
-              render={() => <Redirect to={`/${activeProject}/search`} />}
+              key={uuid()}
+              path={comp.route}
+              component={comp.component}
             />
-          </main>
-        </SnackbarProvider>
+          ))}
+          {settingsComponents.map(({ route, component }) => (
+            <Route exact key={uuid()} path={route} component={component} />
+          ))}
+          <Route
+            exact
+            path="/"
+            render={() => <Redirect to={`/${activeProject}/search`} />}
+          />
+        </main>
       </ProjectContext.Provider>
     </div>
   );

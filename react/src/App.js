@@ -7,6 +7,8 @@ import MainFrame from "./frame/Frame";
 import { AzureAD, MsalAuthProviderFactory, LoginType } from "react-aad-msal";
 import { UserContext } from "./context/User.Context";
 import Axios from "../../main-server/node_modules/axios";
+import { SnackbarProvider } from "notistack";
+
 import { api_server, redirectUri, clientId } from "./environment/environment";
 
 export default () => {
@@ -47,7 +49,8 @@ export default () => {
     const { name, userName } = userInfo.account;
     Axios.post(`${api_server}/user/login/${name}`, {
       name,
-      email: userName
+      email: userName,
+      online: true
     }).then(results => {
       setUser(results.data);
     });
@@ -63,11 +66,18 @@ export default () => {
           authenticatedFunction={() => {
             if (user.name.length) {
               return (
-                <UserContext.Provider value={{ user }}>
-                  <MainFrame />
+                <UserContext.Provider value={{ user, setUser }}>
+                  <SnackbarProvider maxSnack={5}>
+                    <MainFrame />
+                  </SnackbarProvider>
                 </UserContext.Provider>
               );
-            } else return <div>Fetching User Info</div>;
+            } else
+              return (
+                <div>
+                  Welcome back. Please wait while we retrieve your information.
+                </div>
+              );
           }}
           accountInfoCallback={handleUserInfo}
         />

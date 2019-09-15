@@ -9,6 +9,11 @@ const path = require("path");
 const https = require("https");
 const { getCPU_MEM, getNetworkStats } = require("./routines/routine.stats");
 const { executeTasks } = require("./utils/taskAssignment");
+const httpsPort = process.env.NODE_ENV === "development" ? 4444 : 443;
+const httpPort = process.env.NODE_ENV === "development" ? 8080 : 80;
+const socketIOPort = 8081;
+const { socketIOServer, io } = require("./socket");
+const Client = require("./schemas/user");
 
 app.use(bodyParser.urlencoded({ extended: false, limit: "1000mb" }));
 app.use(bodyParser.json({ limit: "1000mb" }));
@@ -39,9 +44,6 @@ app.use("/api/tc", require("./routes/TestCatalog"));
 app.use("/api/upload", require("./routes/Upload"));
 app.use("/api/user", require("./routes/User"));
 
-const httpsPort = process.env.NODE_ENV === "development" ? 4444 : 443;
-const httpPort = process.env.NODE_ENV === "development" ? 8080 : 80;
-
 if (process.env.NODE_ENV === "production") {
   const reactAppDir = path.join(__dirname, "../react/build/");
   app.use(express.static(reactAppDir));
@@ -58,18 +60,25 @@ mongoose.connect(`mongodb://localhost:27017/clarity`, {
 mongoose.connection.on("error", err => console.log(err));
 mongoose.connection.on("open", () => {
   console.log(`${process.pid} database server connected`);
+
   const key = fs.readFileSync("./certificates/selfsigned.key");
   const cert = fs.readFileSync("./certificates/selfsigned.crt");
   const options = { key, cert };
 
-  var server = https.createServer(options, app);
-  server.listen(httpsPort, () => {
+  const httpsServer = https.createServer(options, app);
+  httpsServer.listen(httpsPort, () => {
     console.log(`Clarity HTTPS server is listening on port ${httpsPort}!`);
-    setInterval(getCPU_MEM, 1000);
-    setInterval(getNetworkStats, 5000);
   });
   app.listen(httpPort, () => {
     console.log(`Clarity HTTP server is listening on port ${httpPort}`);
-    executeTasks();
+    setInterval(getCPU_MEM, 1000);
+    setInterval(getNetworkStats, 5000);
+    // executeTasks();
+  });
+  socketIOServer.listen(socketIOPort, listener => {
+    console.log(`Clarity WS server is listening on port ${socketIOPort}`);
+    Client.updateMany({}, { online: false, socketID: null }).then(() => {
+      io.emit("reconnect");
+    });
   });
 });

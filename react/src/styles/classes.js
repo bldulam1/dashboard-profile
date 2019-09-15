@@ -128,7 +128,12 @@ const useStyles = makeStyles(theme => ({
   colorSecondary: {
     color: theme.palette.secondary.contrastText,
     backgroundColor: theme.palette.secondary.light,
+  },
+  colorGrey: {
+    color: theme.palette.secondary.contrastText,
+    backgroundColor: theme.palette.grey,
   }
+
 }));
 
 export { useStyles, drawerWidth };

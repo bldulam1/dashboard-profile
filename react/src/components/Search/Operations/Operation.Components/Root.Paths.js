@@ -161,11 +161,11 @@ export default params => {
       });
       Axios.get(`${api_server}/fs/map-dir/${activeProject}/${newRoot}`)
         .then(results => {
-          const { filesCount, elapsedTime } = results.data;
-          const filesWithComma = numberWithCommas(filesCount);
-          const normalTime = normalizeTime(elapsedTime);
-          const displayText = `Found ${filesWithComma} files from ${newRoot} in ${normalTime}`;
-          enqueueSnackbar(displayText, { variant: "success" });
+          // const { filesCount, elapsedTime } = results.data;
+          // const filesWithComma = numberWithCommas(filesCount);
+          // const normalTime = normalizeTime(elapsedTime);
+          const displayText = `Directory remapping for ${newRoot} requested.`;
+          enqueueSnackbar(displayText, { variant: "info" });
         })
         .then(() => {
           refreshRootPaths();

@@ -8,7 +8,7 @@ const props = require("./config/processArgs");
 
 app.use(bodyParser.urlencoded({ extended: false, limit: "1000mb" }));
 app.use(bodyParser.json({ limit: "1000mb" }));
-// app.use(logger("dev"));
+app.use(logger("dev"));
 app.use(
   cors({
     credentials: true,

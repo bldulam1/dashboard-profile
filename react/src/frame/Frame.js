@@ -23,7 +23,7 @@ import { getProjectComponents, settingsComponents } from "../frame/Projects";
 import { useStyles } from "../styles/classes";
 import { ProjectContext } from "../context/Project.Context";
 import { UserContext } from "../context/User.Context";
-import { getInitials } from "../util/strings";
+import { getInitials, normalizeTime } from "../util/strings";
 
 import { socket } from "../environment/environment";
 
@@ -34,7 +34,7 @@ export default () => {
   const defaultProject = projects.length
     ? projects.sort((a, b) => b.roleLevel - a.roleLevel)[0].name
     : "";
-  const [open, toggleDrawer] = useToggle(false);
+  const [open, toggleDrawer] = useToggle(true);
   const [activeProject, setActiveProject] = React.useState(defaultProject);
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
@@ -49,11 +49,19 @@ export default () => {
     socket.on("disconnect", () => {
       enqueueSnackbar(`You are disconnected`, { variant: "warning" });
       setUser({ ...user, online: false });
-
       console.log("disconnected");
     });
+    socket.on("search completed", ({ root, elapsedTime }) => {
+      const displayText = `Directory mapping for ${root} completed in ${normalizeTime(
+        elapsedTime
+      )}`;
+      enqueueSnackbar(displayText, {
+        variant: "success"
+      });
+    });
+
     return () => {};
-  }, [user]);
+  }, [user, _id]);
 
   return (
     <div className={classes.root}>

@@ -75,7 +75,7 @@ export default () => {
             } else
               return (
                 <div>
-                  Welcome back. Please wait while we retrieve your information.
+                  Welcome back! Please wait while we retrieve your information.
                 </div>
               );
           }}

@@ -50,18 +50,14 @@ router.get("/read-dir/:dir(*)", async (req, res) => {
 router.get("/map-dir/:project/:dir(*)", async (req, res) => {
   const root = path.resolve(req.params.dir);
   const project = req.params.project;
-  let filesCount = 0;
-  let elapsedTime = new Date().getTime();
   await SearchFolder.findOneAndUpdate(
     { folder: root },
     { project, root, folder: root },
     { upsert: true, new: true }
   );
 
-  exploreDirectories();
-
-  elapsedTime = new Date().getTime() - elapsedTime;
-  res.send({ filesCount, elapsedTime });
+  exploreDirectories(root, Date.now());
+  res.send(req.params);
 });
 
 router.get("/:project/unmapped-dirs", async (req, res) => {

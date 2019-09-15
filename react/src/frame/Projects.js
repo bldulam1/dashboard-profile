@@ -59,7 +59,7 @@ const projectComponents = new Set([
     <MapIcon />
   ),
   Component(
-    "kpi",
+    "statistics",
     "/:project/kpi",
     Kpi,
     ["Nissan L53H", "Renault Nissan", "Subaru 77GHz"],

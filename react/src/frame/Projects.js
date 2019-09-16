@@ -3,7 +3,7 @@ import Dashboard from "../components/Dashboard/Dashboard";
 import Search from "../components/Search/Search";
 import Upload from "../components/Uploads/Upload";
 import Kpi from "../components/KPI/KPI";
-import Maps from "../components/Maps";
+import Maps from "../components/Maps/Maps";
 import SettingsUser from "../components/Settings.User";
 import SettingsProject from "../components/Settings.Project";
 

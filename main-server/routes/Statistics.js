@@ -77,7 +77,7 @@ router.get("/:project/:user", async (req, res) => {
 
   res.send({
     tasks: {
-      completed: tasks.filter(t => t._id === "Completed").pop().count,
+      completed: 0 || (tasks.filter(t => t._id === "Completed").length && tasks.filter(t => t._id === "Completed")[0].count),
       total: tasks.reduce((sum, task) => sum + task.count, 0)
     },
     fileTypes,

@@ -28,7 +28,7 @@ async function getWorkers() {
 
 async function getAllowedTasks(type) {
   const serverType = await ServerType.findOne({ name: type });
-  let allowedTasks = serverType.tasks;
+  let allowedTasks = (serverType && serverType.tasks) || [];
   return allowedTasks
     .sort((a, b) => b.priority - a.priority)
     .filter(at => at.priority > 0);
@@ -104,32 +104,35 @@ async function executeTasks() {
       taskTypeCount
     ] = await getTaskDistribution(worker.type);
 
-    // Get task distribution Error
-    const distributionError = await getTaskDistributionError(
-      allowedTasks,
-      workerTypeCount,
-      taskTypeCount
-    );
-
-    // Find Task from highest priority
-    const task = await getTask(distributionError);
-
-    if (worker && task) {
-      await updateTaskWorker(
-        task._id,
-        task.operation,
-        worker._id,
-        worker.serverName
+    if (allowedTasks.length) {
+      // Get task distribution Error
+      const distributionError = await getTaskDistributionError(
+        allowedTasks,
+        workerTypeCount,
+        taskTypeCount
       );
-      Axios.post(`${worker.url}/tasks/execute`, { task })
-        .then(results => {
-          console.log(`${results.data} task assigned to ${worker.serverName}`);
-        })
-        .catch(() => {
-          console.log(`${worker.serverName} is busy`);
-        });
+
+      // Find Task from highest priority
+      const task = await getTask(distributionError);
+
+      if (worker && task) {
+        await updateTaskWorker(
+          task._id,
+          task.operation,
+          worker._id,
+          worker.serverName
+        );
+        Axios.post(`${worker.url}/tasks/execute`, { task })
+          .then(results => {
+            console.log(`${results.data} task assigned to ${worker.serverName}`);
+          })
+          .catch(() => {
+            console.log(`${worker.serverName} is busy`);
+          });
+      }
     }
   }
+  console.log('exited')
   block = false;
   // console.log("assigning tasks exit");
 }

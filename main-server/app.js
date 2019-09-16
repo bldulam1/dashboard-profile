@@ -39,6 +39,7 @@ app.use("/api/projects", require("./routes/Project"));
 app.use("/api/search", require("./routes/Search"));
 app.use("/api/service-workers", require("./routes/ServiceWorkers"));
 app.use("/api/server-assignments", require("./routes/ServerAssignment"));
+app.use("/api/statistics", require("./routes/Statistics"));
 app.use("/api/tasks", require("./routes/Task"));
 app.use("/api/tc", require("./routes/TestCatalog"));
 app.use("/api/upload", require("./routes/Upload"));
@@ -72,8 +73,8 @@ mongoose.connection.on("open", () => {
   app.listen(httpPort, () => {
     console.log(`Clarity HTTP server is listening on port ${httpPort}`);
     setInterval(getCPU_MEM, 1000);
-    setInterval(getNetworkStats, 5000);
-    // executeTasks();
+    // setInterval(getNetworkStats, 5000);
+    executeTasks();
   });
   socketIOServer.listen(socketIOPort, listener => {
     console.log(`Clarity WS server is listening on port ${socketIOPort}`);

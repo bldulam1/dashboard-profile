@@ -49,7 +49,6 @@ export default () => {
     socket.on("disconnect", () => {
       enqueueSnackbar(`You are disconnected`, { variant: "warning" });
       setUser({ ...user, online: false });
-      console.log("disconnected");
     });
     socket.on("search completed", ({ root, elapsedTime }) => {
       const displayText = `Directory mapping for ${root} completed in ${normalizeTime(

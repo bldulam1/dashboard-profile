@@ -13,8 +13,8 @@ export default () => {
   });
 
   React.useEffect(() => {
-    // const url = `${api_server}/kpi/moshemoshe/one/accuracyChartList.json`;
-    const url = `${api_server}/kpi/moshemoshe/one/trackDropChartList.json`;
+    const url = `${api_server}/kpi/moshemoshe/one/accuracyChartList.json`;
+    // const url = `${api_server}/kpi/moshemoshe/one/trackDropChartList.json`;
     Axios.get(url)
       .then(results => setState({ charts: results.data }))
       .catch(err => console.log(err));

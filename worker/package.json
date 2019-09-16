@@ -7,7 +7,7 @@
     "prod": "cross-env NODE_ENV=production node ./node_modules/pm2/bin/pm2 start ecosystem.config.js --silent",
     "prod-stop": "node ./node_modules/pm2/bin/pm2 stop worker",
     "start": "cross-env NODE_ENV=development node ./node_modules/nodemon/bin/nodemon.js app.js",
-    "start-prod": "cross-env NODE_ENV=production node ./node_modules/nodemon/bin/nodemon.js app.js",
+    "start-prod": "cross-env NODE_ENV=production node --max_old_space_size=4096 ./node_modules/nodemon/bin/nodemon.js app.js",
     "log": "node ./node_modules/pm2/bin/pm2 log",
     "list": "node ./node_modules/pm2/bin/pm2 list",
     "gen-certificates": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certificates/selfsigned.key -out ./certificates/selfsigned.crt",

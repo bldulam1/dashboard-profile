@@ -8,6 +8,7 @@ import DashboardStatsTable from "./Dashboard.StatsTable";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import DashboardAssignmentsTable from "./Dashboard.AssignmentsTable";
+import DashboardStatistics from "./Dashboard.Statistics";
 let intervalTimer = null;
 
 const useStyles = makeStyles(theme => ({
@@ -47,7 +48,6 @@ export default props => {
     Axios.get(`${api_server}/service-workers/stats-on/current-only`).then(
       results => {
         dashboardDispatch({ servers: results.data });
-        console.log(results.data);
 
         Axios.get(`${api_server}/server-assignments/all`)
           .then(results => {
@@ -76,7 +76,9 @@ export default props => {
   return (
     <DashboardContext.Provider value={{ dashboard, dashboardDispatch }}>
       <div className={classes.mainGrid}>
-        <Paper className={classes.subGrid}>Hello</Paper>
+        <Paper className={classes.subGrid}>
+          <DashboardStatistics />
+        </Paper>
 
         <Paper className={classes.subGrid}>
           <Tabs

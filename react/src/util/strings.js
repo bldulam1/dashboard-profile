@@ -10,7 +10,14 @@ export function normalizeSize(byteSize) {
     newSize /= 1024;
     index++;
   }
-  return `${newSize.toFixed(2)} ${units[index]}B`;
+  if (newSize < 10) {
+    newSize = newSize.toFixed(2);
+  } else if (newSize < 100) {
+    newSize = newSize.toFixed(1);
+  } else {
+    newSize = Math.round(newSize);
+  }
+  return `${newSize} ${units[index]}B`;
 }
 
 export function normalizeTime(milliSec) {

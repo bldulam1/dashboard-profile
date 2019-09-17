@@ -3,7 +3,7 @@ const Path = require("path");
 const mkdirp = require("mkdirp");
 
 const location =
-  "V:/JP01/DataLake/Common_Write/CLARITY_OUPUT/Subaru_77GHz/CVW_Conversion/Brendon_Dulam/20190912_140354";
+  "V:/JP01/DataLake/Common_Write/CLARITY_OUPUT/Subaru_77GHz/CVW_Conversion/Brendon_Dulam/20190913_150018";
 
 const LIDAR = "Lidar";
 const BRAKE = "brake";
@@ -26,6 +26,10 @@ fs.readdir(location, (err, files) => {
         newPath = Path.join(location, LABELLING, file);
       } else if (file.includes(`.mat`)) {
         newPath = Path.join(location, `MAT`, file);
+      } else if (file.includes(`.asc`)) {
+        newPath = Path.join(location, `ASC`, file);
+      } else if (file.includes(`.kml`)) {
+        newPath = Path.join(location, `KML`, file);
       }
 
       if (newPath) {

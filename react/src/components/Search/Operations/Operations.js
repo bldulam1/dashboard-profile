@@ -6,6 +6,7 @@ import FileSplittingOperation from "./Operation.Components/FileSplitting.Operati
 import { ProjectContext } from "../../../context/Project.Context";
 import ExportOperation from "./Operation.Components/Export.Operation";
 import CVWConversionOperation from "./Operation.Components/CVWConversion.Operation";
+import HILRunOperation from "./Operation.Components/HILRun.Operation";
 
 export default () => {
   const [expanded, setExpanded] = React.useState(null);
@@ -25,7 +26,14 @@ export default () => {
       ) && (
         <Fragment>
           <SIMSOperation handleExpanChange={handleChange} expanded={expanded} />
-          <CVWConversionOperation handleExpanChange={handleChange} expanded={expanded} />
+          <CVWConversionOperation
+            handleExpanChange={handleChange}
+            expanded={expanded}
+          />
+          <HILRunOperation
+            handleExpanChange={handleChange}
+            expanded={expanded}
+          />
         </Fragment>
       )}
 

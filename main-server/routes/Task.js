@@ -13,6 +13,7 @@ const {
   fetchFileInfo,
   alignFileInfo
 } = require("./Operations/Operation.ExportList");
+const { createHILTasks } = require("./Operations/Operation.HILRun");
 
 const { executeTasks } = require("../utils/taskAssignment");
 
@@ -38,7 +39,9 @@ router.post("/:operation/new", async (req, res) => {
       return res.send("Hello");
     }
     case "HIL": {
-      return res.send("Hello");
+      tasks = await createHILTasks(req.body, files);
+      console.log(tasks);
+      return res.send(files);
     }
     case "IDW4 Conversion": {
       tasks = await createIDW4ConvTasks(req.body, files);

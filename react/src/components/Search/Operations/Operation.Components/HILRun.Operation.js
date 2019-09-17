@@ -18,39 +18,33 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Tooltip from "@material-ui/core/Tooltip";
-import {
-  MuiPickersUtilsProvider,
-  KeyboardDatePicker
-} from "@material-ui/pickers";
 import Axios from "axios";
 import { api_server } from "../../../../environment/environment";
 import { UserContext } from "../../../../context/User.Context";
 import { useSnackbar } from "notistack";
-import { useOperationStyles } from "../../../../styles/operationsClasses";
+import uuid from "uuid/v4";
+import { FormLabel, FormGroup } from "@material-ui/core";
 import { getSubHeadingText } from "../../../../util/search";
+import { useOperationStyles } from "../../../../styles/operationsClasses";
 
 // let newRootDebounceTimer = null;
 
-// const useStyles = makeStyles(theme => ({
-//   expansionPanelDetails: {
-//     display: "flex",
-//     flexDirection: "column"
-//   },
-//   root: {
-//     width: "100%",
-//     backgroundColor: theme.palette.background.paper
-//   },
-//   breakWord: {
-//     wordWrap: "break-word"
-//   }
-// }));
-
-function OutputOption(extension, disabled, selected) {
-  return { extension, disabled, selected };
-}
+const useStyles = makeStyles(theme => ({
+  expansionPanelDetails: {
+    display: "flex",
+    flexDirection: "column"
+  },
+  root: {
+    width: "100%",
+    backgroundColor: theme.palette.background.paper
+  },
+  breakWord: {
+    wordWrap: "break-word"
+  }
+}));
 
 export default params => {
-  const taskName = "SIMS";
+  const taskName = "HIL";
   const validExtension = "cvw";
   const { searchFileProps } = useContext(FileSearchContext);
   const { name } = useContext(UserContext).user;
@@ -58,25 +52,20 @@ export default params => {
   const { expanded, handleExpanChange } = params;
 
   const [options, setOptions] = useState({
-    version: "SIMS_GEN12",
-    versionOptions: ["SIMS_GEN12", "SIMS_GEN12_D"],
-    simsLocation:
-      "V:/JP01/DataLake/Common_Write/ClarityResources/SIMSapp_FCR_R7_31_70D5_9",
-    simsLocationValid: true,
-    simsLocationHelperText: "",
-    commandLineArgs:
-      "-ECU 10 -ReplayDetect -VehicleData AMP -CAN1 1 -CAN2 4 -CanReDir 1 -OutVss",
-    outputs: ["log", "mat"],
-    outputOptions: [
-      OutputOption("asc", false, false),
-      OutputOption("log", false, true),
-      OutputOption("mat", false, true)
-    ],
-    outputLocation: "",
-    autoClean: false,
-    expiryDate: new Date().setTime(
-      new Date().getTime() + 7 * 24 * 60 * 60 * 1000
-    ),
+    ecuVersion: "R7_31_70D6_00",
+    versionOptions: ["R7_31_70D6_00", "R7_31_70D6_01"],
+    ecu: {
+      ECU_DO_PPAR: false,
+      ECU_DO_NVM: false
+    },
+    sensor: {
+      USE_SENSOR_10: true,
+      USE_SENSOR_11: false,
+      USE_SENSOR_12: true,
+      USE_SENSOR_30: false,
+      USE_SENSOR_32: false
+    },
+    outputLocation: "D:\\HIL_out",
     invalidFiles: []
   });
   const { enqueueSnackbar } = useSnackbar();
@@ -89,32 +78,19 @@ export default params => {
   };
 
   const handleVersionChange = event =>
-    handleChange("version", event.target.value);
-
-  const handleSimsLocationChange = event =>
-    handleChange("simsLocation", event.target.value);
-
-  const handleAutoCleanCheckbox = event =>
-    handleChange("autoClean", !options.autoClean);
-
-  const handleCommandLineArgsChange = event =>
-    handleChange("commandLineArgs", event.target.value);
-
-  const handleDateChange = ndate => {
-    handleChange("expiryDate", new Date(ndate));
-  };
+    handleChange("ecuVersion", event.target.value);
 
   const handleSubmitTasks = () => {
     const url = `${api_server}/tasks/${taskName}/new`;
-    const { simsLocation, version, commandLineArgs, expiryDate } = options;
+    const { ecuVersion, ecu, sensor, outputLocation } = options;
     Axios.post(url, {
+      ecuVersion,
       project,
-      fileIDs: selected,
-      simsLocation,
-      version,
-      commandLineArgs,
+      ecu,
+      sensor,
+      outputLocation,
       requestedBy: name,
-      expiryDate: options.autoClean ? expiryDate : null
+      fileIDs: selected
     })
       .then(results => {
         const displayText = `${results.data.length} ${taskName} tasks submitted`;
@@ -122,7 +98,7 @@ export default params => {
       })
       .catch(results => {
         enqueueSnackbar(
-          "Request not sent due to network problem. Please try again",
+          "Request not sent due to bad connection. Please try again",
           { variant: "error" }
         );
       });
@@ -149,8 +125,8 @@ export default params => {
     >
       <ExpansionPanelSummary
         expandIcon={<ExpandMoreIcon />}
-        aria-controls="sims-operation-panelbh-content"
-        id="sims-operation-panelbh-header"
+        aria-controls="root-path-panelbh-content"
+        id="root-path-panelbh-header"
       >
         <Typography className={classes.heading}>{taskName}</Typography>
         <Typography className={classes.secondaryHeading}>
@@ -160,18 +136,18 @@ export default params => {
       <ExpansionPanelDetails className={classes.expansionPanelDetails}>
         <form noValidate autoComplete="off">
           <FormControl fullWidth className={classes.formControl}>
-            <InputLabel htmlFor="version-select">SIMS Version</InputLabel>
+            <InputLabel htmlFor="ecuVersion-select">ECU Version</InputLabel>
             <Select
-              value={options.version}
+              value={options.ecuVersion}
               onChange={handleVersionChange}
               inputProps={{
-                name: "version",
-                id: "version-select"
+                name: "ecuVersion",
+                id: "ecuVersion-select"
               }}
             >
-              {options.versionOptions.map(version => (
-                <MenuItem key={`sv-${version}`} value={version}>
-                  {version}
+              {options.versionOptions.map(ev => (
+                <MenuItem key={`sv-${ev}`} value={ev}>
+                  {ev}
                 </MenuItem>
               ))}
             </Select>
@@ -180,48 +156,80 @@ export default params => {
             error={!options.simsLocationValid}
             fullWidth
             required
-            id="new-sims-operation"
-            label="SIMS Location"
-            value={options.simsLocation}
-            onChange={handleSimsLocationChange}
+            id="new-root-path"
+            label="Output Location"
+            value={options.outputLocation}
+            onChange={event =>
+              handleChange("outputLocation", event.target.value)
+            }
             margin="dense"
             helperText={options.simsLocationHelperText}
           />
-          <TextField
-            label="Command Line Input"
-            fullWidth
-            multiline
-            rowsMax="4"
-            value={options.commandLineArgs}
-            onChange={handleCommandLineArgsChange}
-            margin="dense"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                color="primary"
-                checked={options.autoClean}
-                onChange={handleAutoCleanCheckbox}
-              />
-            }
-            label="Auto-clean output folder"
-          />
-        </form>
-        {options.autoClean && (
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <KeyboardDatePicker
-              margin="dense"
-              id="date-picker-dialog"
-              label="Remove output files on"
-              format="MM/dd/yyyy"
-              value={options.expiryDate}
-              onChange={handleDateChange}
-              KeyboardButtonProps={{
-                "aria-label": "change date"
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "wrap",
+              paddingTop: "1rem"
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <FormLabel component="legend">ECU Options</FormLabel>
+              <FormGroup>
+                {Object.keys(options.ecu).map(key => (
+                  <FormControlLabel
+                    key={uuid()}
+                    control={
+                      <Checkbox
+                        color="primary"
+                        checked={options.ecu[key]}
+                        onChange={event =>
+                          setOptions({
+                            ...options,
+                            ecu: { ...options.ecu, [key]: !options.ecu[key] }
+                          })
+                        }
+                      />
+                    }
+                    label={key}
+                  />
+                ))}
+              </FormGroup>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column"
               }}
-            />
-          </MuiPickersUtilsProvider>
-        )}
+            >
+              <FormLabel component="legend">Sensor Options</FormLabel>
+              <FormGroup>
+                {Object.keys(options.sensor).map(_key => (
+                  <FormControlLabel
+                    key={uuid()}
+                    control={
+                      <Checkbox
+                        color="primary"
+                        checked={options.sensor[_key]}
+                        onChange={event =>
+                          setOptions({
+                            ...options,
+                            sensor: {
+                              ...options.sensor,
+                              [_key]: !options.sensor[_key]
+                            }
+                          })
+                        }
+                      />
+                    }
+                    label={_key}
+                  />
+                ))}
+              </FormGroup>
+            </div>
+          </div>
+        </form>
       </ExpansionPanelDetails>
       <ExpansionPanelActions>
         <IconButton disabled={!isRequestValid()} onClick={handleSubmitTasks}>

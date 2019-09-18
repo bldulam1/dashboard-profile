@@ -55,7 +55,7 @@ const projectComponents = new Set([
     "maps",
     "/:project/maps",
     Maps,
-    ["Nissan L53H", "Renault Nissan", "Subaru SVS"],
+    projects,
     <MapIcon />
   ),
   Component(

@@ -34,6 +34,7 @@ app.set("view options", { pretty: true });
 
 app.use("/api/fs", require("./routes/File"));
 app.use("/api/kpi", require("./routes/kpi"));
+app.use("/api/maps", require("./routes/Maps"));
 app.use("/api/naming-convention", require("./routes/NamingConventions"));
 app.use("/api/projects", require("./routes/Project"));
 app.use("/api/search", require("./routes/Search"));

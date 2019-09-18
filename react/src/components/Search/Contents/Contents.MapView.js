@@ -1,10 +1,9 @@
 import React from "react";
-import Paper from "@material-ui/core/Paper";
-import { useStyles } from "../../styles/classes";
 import ReactMapboxGl, { GeoJSONLayer } from "react-mapbox-gl";
 import Axios from "axios";
-import { api_server } from "../../environment/environment";
+import { api_server } from "../../../environment/environment";
 export default props => {
+  const {kmlFile} = props
   const [state, setState] = React.useState({
     center: [-122.48695850372314, 37.82931081282506],
     coordinates: [[-122.48369693756104, 37.83381888486939]]
@@ -24,8 +23,9 @@ export default props => {
   };
 
   React.useEffect(() => {
+    console.log("loading");
     Axios.get(
-      `${api_server}/maps/parse-kml/1/kml=V:\\JP01\\DataLake\\Common_Write\\Subaru_DC\\20190130_174854_FCR_SBR_AD1_R04_DC_JSOIMPREZA\\cache\\20190130_174854_FCR_SBR_AD1_R04_DC_JSOIMPREZA_split_F1.kml`
+      `${api_server}/maps/parse-kml/1/kml=${kmlFile}`
     ).then(results => {
       if (results.data.center && results.data.coordinates) {
         console.log(results.data.distance);
@@ -42,20 +42,16 @@ export default props => {
     "line-width": 5
   };
 
-  const classes = useStyles();
   return (
-    <Paper className={classes.contentPaper}>
-      <Map
-        zoom={[15]}
-        center={state.center}
-        style="mapbox://styles/mapbox/streets-v9"
-        containerStyle={{
-          height: "100%",
-          width: "100%"
-        }}
-      >
-        <GeoJSONLayer data={geojson} linePaint={linePaint} />
-      </Map>
-    </Paper>
+    <Map
+      zoom={[15]}
+      center={state.center}
+      containerStyle={{
+        height: "100%",
+        width: "100%"
+      }}
+    >
+      <GeoJSONLayer data={geojson} linePaint={linePaint} />
+    </Map>
   );
 };

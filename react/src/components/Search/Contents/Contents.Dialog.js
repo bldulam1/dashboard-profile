@@ -12,7 +12,7 @@ import Collapse from "@material-ui/core/Collapse";
 import CalendarToday from "@material-ui/icons/CalendarToday";
 import MyLocation from "@material-ui/icons/MyLocation";
 import LabelIcon from "@material-ui/icons/Label";
-import LabelImportant from "@material-ui/icons/LabelImportant";
+import MapIcon from "@material-ui/icons/Map";
 import AssignmentIcon from "@material-ui/icons/Assignment";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
@@ -27,6 +27,7 @@ import TableRow from "@material-ui/core/TableRow";
 
 import Axios from "axios";
 import { api_server } from "../../../environment/environment";
+import ContentsMapView from "./Contents.MapView";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -126,7 +127,7 @@ export default params => {
     });
   };
 
-  const { fileName, path, date, project } = fileDetails;
+  const { fileName, path, date, project, extension } = fileDetails;
   const modified = date && date.modified;
   const birth = date && date.birth;
   const mapped = date && date.mapped;
@@ -220,12 +221,12 @@ export default params => {
           </ListItem>
           <Collapse in={propsOpen.tags} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <EnhancedListItem
+              {/* <EnhancedListItem
                 icon={<LabelImportant />}
                 primaryText="Test"
                 secondaryText="Value"
                 nested={true}
-              />
+              /> */}
             </List>
           </Collapse>
 
@@ -239,6 +240,21 @@ export default params => {
           <Collapse in={propsOpen.operations} timeout="auto" unmountOnExit>
             <OperationsTable operations={fileInfo.operations} />
           </Collapse>
+
+          {/* {extension === "kml" && (
+            <React.Fragment>
+              <ListItem button onClick={() => togglePropsOpen("mapViewer")}>
+                <ListItemIcon>
+                  <MapIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText primary="Map Viewer" />
+                {propsOpen.mapViewer ? <ExpandLess /> : <ExpandMore />}
+              </ListItem>
+              <Collapse in={propsOpen.mapViewer} timeout="auto" unmountOnExit>
+                <ContentsMapView />
+              </Collapse>
+            </React.Fragment>
+          )} */}
         </List>
       </DialogContent>
       <DialogActions>

@@ -61,8 +61,8 @@ export default params => {
       CVW2MATOption("oszi", "OSZI", "", "--no-oszi", true),
       CVW2MATOption("tracking", "Tracking", "", "--no-tracking", true),
       CVW2MATOption("freespace", "Free space", "", "--no-freespace", true),
-      CVW2MATOption("allAntennas", "All Antennas", "", "--all-antennas", true),
-      CVW2MATOption("rawADC", "Raw ADC", "", "--raw-adc", true),
+      CVW2MATOption("allAntennas", "All Antennas", "--all-antennas", "", true),
+      CVW2MATOption("rawADC", "Raw ADC", "--raw-adc", "", true),
       CVW2MATOption("lidar", "Lidar Tracker", "", "--no-lidar", false),
       CVW2MATOption(
         "csv_intersection",

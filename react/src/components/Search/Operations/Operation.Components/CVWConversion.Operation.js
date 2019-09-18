@@ -73,7 +73,7 @@ export default params => {
       ),
       CVW2MATOption("csv_brake", "Brake CSV", "--brake", "", false),
       CVW2MATOption("pcap", "PCAP", "--pcap", "", false)
-    ]
+    ].sort((a, b) => a.display.localeCompare(b.display))
   });
 
   const handleChange = (key, value) => {
@@ -130,6 +130,9 @@ export default params => {
   const handleDateChange = ndate => {
     handleChange("expiryDate", new Date(ndate));
   };
+
+  const handleAutoCleanCheckbox = event =>
+    handleChange("autoClean", !options.autoClean);
 
   useEffect(() => {
     const url = `${api_server}/tasks/check-extensions/${project}/${taskName}/ext=${validExtension}`;
@@ -202,25 +205,49 @@ export default params => {
               ))}
             </Select>
           </FormControl>
-          <FormControl component="fieldset" className={classes.formControl}>
-            <FormLabel>Other Options</FormLabel>
-          </FormControl>
-          <FormGroup></FormGroup>
-          {options.others.map(option => (
-            <FormControlLabel
-              key={uuid()}
-              control={
-                <Checkbox
-                  checked={option.value}
-                  onChange={event =>
-                    handleOtherOptionChange(option.name, event.target.value)
-                  }
-                  value={option.value}
-                />
-              }
-              label={option.display}
-            />
-          ))}
+          <FormLabel style={{ paddingTop: "1rem" }} component="legend">
+            Other Options
+          </FormLabel>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row"
+            }}
+          >
+            <FormGroup style={{ display: "flex", flexDirection: "column" }}>
+              {options.others
+                .slice(0, Math.ceil(options.others.length / 2))
+                .map(option => (
+                  <OptionCheckbox
+                    handleOtherOptionChange={handleOtherOptionChange}
+                    option={option}
+                  />
+                ))}
+            </FormGroup>
+            <FormGroup style={{ display: "flex", flexDirection: "column" }}>
+              {options.others
+                .slice(
+                  Math.floor(options.others.length / 2) + 1,
+                  options.others.length
+                )
+                .map(option => (
+                  <OptionCheckbox
+                    handleOtherOptionChange={handleOtherOptionChange}
+                    option={option}
+                  />
+                ))}
+            </FormGroup>
+          </div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                color="primary"
+                checked={options.autoClean}
+                onChange={handleAutoCleanCheckbox}
+              />
+            }
+            label="Auto-clean output folder"
+          />
         </form>
         {options.autoClean && (
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -246,3 +273,22 @@ export default params => {
     </ExpansionPanel>
   );
 };
+
+function OptionCheckbox(props) {
+  const { option, handleOtherOptionChange } = props;
+  return (
+    <FormControlLabel
+      key={uuid()}
+      control={
+        <Checkbox
+          checked={option.value}
+          onChange={event =>
+            handleOtherOptionChange(option.name, event.target.value)
+          }
+          value={option.value}
+        />
+      }
+      label={option.display}
+    />
+  );
+}

@@ -3,7 +3,7 @@ const Path = require("path");
 const mkdirp = require("mkdirp");
 
 const location =
-  "V:/JP01/DataLake/Common_Write/CLARITY_OUPUT/Subaru_77GHz/CVW_Conversion/Brendon_Dulam/20190913_150018";
+  "V:\\JP01\\DataLake\\Common_Write\\CLARITY_OUPUT\\Subaru_77GHz\\CVW_Conversion\\Brendon_Dulam\\20190918_103333";
 
 const LIDAR = "Lidar";
 const BRAKE = "brake";

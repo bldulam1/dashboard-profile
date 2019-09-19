@@ -3,7 +3,7 @@ import ReactMapboxGl, { GeoJSONLayer } from "react-mapbox-gl";
 import Axios from "axios";
 import { api_server } from "../../../environment/environment";
 export default props => {
-  const {kmlFile} = props
+  const { kmlFile } = props;
   const [state, setState] = React.useState({
     center: [-122.48695850372314, 37.82931081282506],
     coordinates: [[-122.48369693756104, 37.83381888486939]]
@@ -24,9 +24,7 @@ export default props => {
 
   React.useEffect(() => {
     console.log("loading");
-    Axios.get(
-      `${api_server}/maps/parse-kml/1/kml=${kmlFile}`
-    ).then(results => {
+    Axios.get(`${api_server}/maps/parse-kml/1/kml=${kmlFile}`).then(results => {
       if (results.data.center && results.data.coordinates) {
         console.log(results.data.distance);
         setState({

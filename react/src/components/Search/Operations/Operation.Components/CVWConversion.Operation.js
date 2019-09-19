@@ -219,6 +219,7 @@ export default params => {
                 .slice(0, Math.ceil(options.others.length / 2))
                 .map(option => (
                   <OptionCheckbox
+                    key={uuid()}
                     handleOtherOptionChange={handleOtherOptionChange}
                     option={option}
                   />
@@ -232,6 +233,7 @@ export default params => {
                 )
                 .map(option => (
                   <OptionCheckbox
+                    key={uuid()}
                     handleOtherOptionChange={handleOtherOptionChange}
                     option={option}
                   />

@@ -41,7 +41,7 @@ const useStyles = makeStyles(theme => ({
       duration: theme.transitions.duration.enteringScreen
     }),
     color: theme.palette.primary.contrastText,
-    backgroundColor: "#10000B",
+    backgroundColor: "#313131",
     border: "0"
   },
   drawerClose: {
@@ -49,7 +49,7 @@ const useStyles = makeStyles(theme => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
     }),
-    backgroundColor: "#10000B",
+    backgroundColor: "#313131",
     color: theme.palette.primary.contrastText,
     overflowX: "hidden",
     width: theme.spacing(7) + 1,

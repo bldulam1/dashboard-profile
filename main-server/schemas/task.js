@@ -28,7 +28,9 @@ let taskSchema = mongoose.Schema({
   status: {
     value: Number,
     text: String
-  }
+  },
+
+  otherParameters: {}
 });
 
 module.exports = mongoose.model("Task", taskSchema);

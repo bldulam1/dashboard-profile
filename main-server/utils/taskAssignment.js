@@ -66,7 +66,7 @@ async function getTask(distributionError) {
     const operation = distributionError[opIndex].task;
     const task = await Task.findOne(
       { assignedWorker: null, operation },
-      { script: 1, operation: 1, outputLocation: 1 },
+      { script: 1, operation: 1, outputLocation: 1, otherParameters: 1 },
       { sort: { priority: -1, requestDate: 1, size: 1 } }
     );
 
@@ -122,9 +122,17 @@ async function executeTasks() {
           worker._id,
           worker.serverName
         );
-        Axios.post(`${worker.url}/tasks/execute`, { task })
+
+        const workerTaskURL =
+          task.operation === "HIL"
+            ? `${worker.url}/tasks/execute-hil-run`
+            : `${worker.url}/tasks/execute`;
+
+        Axios.post(workerTaskURL, { task })
           .then(results => {
-            console.log(`${results.data} task assigned to ${worker.serverName}`);
+            console.log(
+              `${results.data} task assigned to ${worker.serverName}`
+            );
           })
           .catch(() => {
             console.log(`${worker.serverName} is busy`);
@@ -132,7 +140,7 @@ async function executeTasks() {
       }
     }
   }
-  console.log('exited')
+  console.log("exited");
   block = false;
   // console.log("assigning tasks exit");
 }

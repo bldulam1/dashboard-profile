@@ -40,7 +40,7 @@ router.post("/:operation/new", async (req, res) => {
     }
     case "HIL": {
       tasks = await createHILTasks(req.body, files);
-      console.log(tasks);
+      executeTasks();
       return res.send(files);
     }
     case "IDW4 Conversion": {
@@ -63,7 +63,7 @@ router.put("/update/:id", async (req, res) => {
     new: true
   });
   res.send(newData);
-  if (newData.status.text === "Completed") {
+  if (["Completed", "Aborted"].includes(newData.status.text)) {
     Worker.findOneAndUpdate(
       { serverName: newData.assignedWorker },
       { taskID: null },

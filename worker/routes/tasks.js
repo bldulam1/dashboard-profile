@@ -3,7 +3,9 @@ const mkdirp = require("mkdirp");
 const { spawn } = require("child_process");
 const props = require("../config/processArgs");
 const Axios = require("axios");
-const ini = require('ini')
+const ini = require("ini");
+const fs = require("fs");
+const Path = require("path");
 
 const { serverName, mainHostURL } = props;
 const PENDING = "Pending",
@@ -56,6 +58,46 @@ router.post("/execute", BlockingMiddleware, async (req, res) => {
   });
 });
 
+router.post("/execute-hil-run", BlockingMiddleware, async (req, res) => {
+  const { task } = req.body;
+  const py1 = "C:/HILTools/HILMaster/KeepAliveGateway.py";
+  const py2 = "C:/HILTools/HILMaster/StatusGateway.py";
+
+  // create ini file
+  const hilParameter = Path.resolve(
+    "C:/HILTools/iniFiles_dontdelete/HILParameter_Gen12.ini"
+  );
+
+  mkdirp(Path.parse(hilParameter).dir, err => {
+    if (err) return console.error(err);
+    else {
+      const hilParamString = ini.stringify(req.body.task.otherParameters);
+      fs.writeFileSync(hilParameter, hilParamString);
+      const cp1 = spawn("python.exe", [py1]);
+      const cp2 = spawn("python.exe", [py2]);
+
+      if (cp1 && cp1.pid && cp2 && cp2.pid) {
+        const child = spawn("powershell.exe", [task.script]);
+
+        child.stdout.on("data", buff => handleNewLog(buff, task._id));
+        child.stderr.on("data", buff => handleNewLog(buff, task._id));
+        child.on("exit", (code, signal) => {
+          handleTaskFinish(code, signal, task._id);
+          cp1.kill();
+          cp2.kill();
+
+          console.log("end", task._id);
+        });
+        createNewTask(task, child.pid);
+      } else {
+        handleTaskFinish(-1, null, task._id);
+      }
+    }
+  });
+
+  res.send(task._id);
+});
+
 router.get("/allowed-tasks", async (req, res) => {
   res.send(allowedTasks);
 });
@@ -74,7 +116,7 @@ function startTask(task) {
       mkdirp(outputLocation, err => {
         err ? reject(err) : resolve(spawn("powershell.exe", [script]));
       });
-    } else {
+    } else if (operation !== "HIL") {
       resolve(spawn("powershell.exe", [script]));
     }
   });
@@ -106,9 +148,9 @@ function updateTask(taskID, updateData) {
   const _task = tasks.get(taskID);
   Axios.put(newTaskURL, tasks.get(taskID))
     .then(results => {
-      if (_task.status.text === "Completed") {
+      if (["Completed", "Aborted"].includes(_task.status.text)) {
         tasks.delete(taskID);
-        console.log("task completed", results.data.inputFile);
+        console.log(`${_task.status.text}: ${results.data.inputFile}`);
       }
     })
     .catch(err => console.error(err));

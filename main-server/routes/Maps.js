@@ -25,6 +25,8 @@ router.get("/parse-kml/1/kml=:kmlFile(*)", async (req, res) => {
           .filter(s => s.length)
           .map(xyz => xyz.split(",").map(point => Number(point)));
 
+        // console.log(coordinates.map(c=>`25`).join(';'))
+
         const center = coordinates
           .reduce(
             ([slat, slon, sheight], [lat, lon, height]) => [
@@ -48,6 +50,11 @@ router.get("/parse-kml/1/kml=:kmlFile(*)", async (req, res) => {
   } else {
     res.send({ error: "file does not exist" });
   }
+});
+
+router.get("/intersections/1/cvw=:cvwFile(*)", async (req, res) => {
+  const { cvwFile } = req.params;
+  res.send(Path.parse(cvwFile));
 });
 
 module.exports = router;

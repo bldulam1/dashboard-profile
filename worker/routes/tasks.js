@@ -3,6 +3,8 @@ const mkdirp = require("mkdirp");
 const { spawn } = require("child_process");
 const props = require("../config/processArgs");
 const Axios = require("axios");
+const ini = require('ini')
+
 const { serverName, mainHostURL } = props;
 const PENDING = "Pending",
   INPROGRESS = "In Progress",
@@ -125,7 +127,7 @@ function handleNewLog(buff, taskID) {
 
 function handleTaskFinish(code, signal, taskID) {
   const end_time = new Date();
-  const status = createStatus(COMPLETED);
+  const status = createStatus(code === 0 ? COMPLETED : ABORTED);
   updateTask(taskID, { code, signal, end_time, status });
 }
 

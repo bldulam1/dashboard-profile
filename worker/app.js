@@ -35,6 +35,7 @@ app.listen(props.port, async () => {
       url,
       taskID: null,
       searchID: null,
+      activeTask: null,
       cores
     })
     .then(() => console.log("success"))

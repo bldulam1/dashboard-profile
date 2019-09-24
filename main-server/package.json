@@ -17,6 +17,7 @@
     "child_process": "^1.0.2",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.5",
+    "csv-parser": "^2.3.1",
     "debug": "~2.6.9",
     "excel4node": "^1.7.2",
     "express": "~4.16.0",

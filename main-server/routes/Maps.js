@@ -5,6 +5,10 @@ const convert = require("xml-js");
 const fs = require("fs");
 const axios = require("axios");
 const { Scene } = require("../schemas/scene");
+const {
+  getIntersectionsData,
+  getIntersectionsCoordinates
+} = require("../utils/subaruRadarLabel");
 
 router.get("/parse-kml/1/kml=:kmlFile(*)", async (req, res) => {
   const kmlFile = Path.normalize(req.params.kmlFile);
@@ -33,38 +37,7 @@ router.get("/parse-kml/1/kml=:kmlFile(*)", async (req, res) => {
             return totalDist + getUnitDistance(point, coordinates[index + 1]);
           }, 0);
 
-        const _markers = [
-          [139.656482, 35.510685],
-          [139.657285, 35.510858],
-          [139.657539, 35.510888],
-          [139.658134, 35.510848],
-          [139.658432, 35.510812],
-          [139.658892, 35.510798],
-          [139.659748, 35.510841],
-          [139.660185, 35.510943],
-          [139.660367, 35.510998],
-          [139.660593, 35.511062],
-          [139.660797, 35.511124],
-          [139.66115, 35.511222],
-          [139.66165, 35.511367],
-          [139.662235, 35.51153],
-          [139.662532, 35.51162],
-          [139.662703, 35.5116],
-          [139.663215, 35.511492],
-          [139.663469, 35.511316],
-          [139.664047, 35.510698],
-          [139.664146, 35.510541],
-          [139.664338, 35.510068],
-          [139.665711, 35.50984],
-          [139.666919, 35.51046],
-          [139.667325, 35.51037],
-          [139.668256, 35.51016],
-          [139.668919, 35.510014],
-          [139.66918, 35.509952],
-          [139.671485, 35.50882]
-        ];
-
-        res.send({ center, coordinates, distance, markers });
+        res.send({ center, coordinates, distance });
       } catch (error) {
         res.send({ error: "invalid format", coordinates });
       }
@@ -76,18 +49,32 @@ router.get("/parse-kml/1/kml=:kmlFile(*)", async (req, res) => {
 
 router.get("/:project/intersections/1/cvw=:cvwFile(*)", async (req, res) => {
   const { cvwFile, project } = req.params;
-  const file = await Scene.find(
+  const file = await Scene.findOne(
     {
-      project,
-      fileName: { $regex: cvwFile },
-      extension: "kml"
+      $and: [
+        {
+          project,
+          fileName: { $regex: cvwFile },
+          extension: "csv"
+        },
+        { fileName: { $regex: "intersection" } }
+      ]
     },
     { fileName: 1, path: 1 }
   );
+  const intersectionFile = Path.join(file.path, file.fileName);
 
-  const kmlFile = Path.resolve(file.path, file.fileName);
+  if (fs.existsSync(intersectionFile)) {
+    getIntersectionsCoordinates(intersectionFile).then(summary => {
+      summary.forEach(intersection => {
+        console.log(intersection);
+      });
 
-  res.send(kmlFile);
+      res.send(summary);
+    });
+  } else {
+    res.send({ error: "file not found" });
+  }
 });
 
 module.exports = router;

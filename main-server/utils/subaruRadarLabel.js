@@ -94,4 +94,30 @@ async function getIntersectionsData(fullFileName) {
   });
 }
 
-module.exports = { getIntersectionsData };
+async function getIntersectionsCoordinates(fullFileName) {
+  return new Promise((resolve, reject) => {
+    const summary = [];
+    try {
+      fs.createReadStream(fullFileName)
+        .pipe(csv())
+        .on("data", data => {
+          summary.push({
+            cycleStart: data.CycleStart,
+            cycleEnd: data.CycleEnd,
+            coordinates: {
+              osm: [data["OSM longitude"], data["OSM Latitude"]],
+              kml: [data["KML Longitude"], data["KML Latitude"]]
+            },
+            distance: data["Distance(km)"]
+          });
+        })
+        .on("end", () => {
+          resolve(summary);
+        });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+module.exports = { getIntersectionsData, getIntersectionsCoordinates };

@@ -108,7 +108,7 @@ export default props => {
     center: [0, 0],
     distance: 0,
     carLocation: [0, 0],
-    markers: []
+    markers: [{value: 0}, {value:5}]
   });
 
   const { inputFile, coordinates, markers } = state;
@@ -195,6 +195,7 @@ export default props => {
             >
               <MapContext.Consumer>
                 {map => {
+                  console.log("hello");
                   map.addLayer({
                     id: "route",
                     type: "line",
@@ -249,8 +250,8 @@ export default props => {
               defaultValue={0}
               min={0}
               max={coordinates.length - 1}
-              step={null}
-              marks={markers}
+              step={1}
+              // marks={markers}
             />
           </div>
         </div>

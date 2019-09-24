@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import ReactMapboxGl, {
   GeoJSONLayer,
   Layer,
@@ -20,7 +20,8 @@ export default params => {
   };
 
   // const { coordinates, center } = useContext(MainMapContext).state;
-  const { coordinates, center } = useContext(MainMapContext).mapInfo;
+  const { state, setMapHandler } = useContext(MainMapContext);
+  const { coordinates, center } = state;
 
   const Map = ReactMapboxGl({ accessToken });
   const geoJsonLine = {
@@ -62,13 +63,13 @@ export default params => {
     [139.671485, 35.50882]
   ];
 
+  let mapHandler = null;
 
-
-
-
-
- return (
+  return (
     <Map
+      onStyleLoad={map => {
+        mapHandler = map;
+      }}
       id="map"
       zoom={[15]}
       onPitch={event => console.log(event.getPitch(), event.getBearing())}
@@ -82,14 +83,6 @@ export default params => {
       onClick={event => console.log(event)}
     >
       <GeoJSONLayer data={geoJsonLine} linePaint={linePaint} />
-      {markers.map(marker => {
-        return (
-          <Marker key={uuid()} coordinates={marker} anchor="bottom">
-            <img src={carMarker} style={{ height: 50 }} />
-          </Marker>
-        );
-      })}
-      {/* <EnhancedMarker carLocation={carLocation}/> */}
     </Map>
   );
 };

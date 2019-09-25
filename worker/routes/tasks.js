@@ -70,32 +70,32 @@ router.post("/execute-hil-run", BlockingMiddleware, async (req, res) => {
     "C:/HILTools/iniFiles_dontdelete/HILParameter_Gen12.ini"
   );
 
-  mkdirp(Path.parse(hilParameter).dir, err => {
-    if (err) return console.error(err);
-    else {
-      const hilParamString = ini.stringify(req.body.task.otherParameters);
-      fs.writeFileSync(hilParameter, hilParamString);
-      const cp1 = spawn("python.exe", [py1]);
-      const cp2 = spawn("python.exe", [py2]);
+  // mkdirp(Path.parse(hilParameter).dir, err => {
+  //   if (err) return console.error(err);
+  //   else {
+  //     const hilParamString = ini.stringify(req.body.task.otherParameters);
+  //     fs.writeFileSync(hilParameter, hilParamString);
+  //     const cp1 = spawn("python.exe", [py1]);
+  //     const cp2 = spawn("python.exe", [py2]);
 
-      if (cp1 && cp1.pid && cp2 && cp2.pid) {
-        const child = spawn("powershell.exe", [task.script]);
+  //     if (cp1 && cp1.pid && cp2 && cp2.pid) {
+  //       const child = spawn("powershell.exe", [task.script]);
 
-        child.stdout.on("data", buff => handleNewLog(buff, task._id));
-        child.stderr.on("data", buff => handleNewLog(buff, task._id));
-        child.on("exit", (code, signal) => {
-          handleTaskFinish(code, signal, task._id);
-          cp1.kill();
-          cp2.kill();
+  //       child.stdout.on("data", buff => handleNewLog(buff, task._id));
+  //       child.stderr.on("data", buff => handleNewLog(buff, task._id));
+  //       child.on("exit", (code, signal) => {
+  //         handleTaskFinish(code, signal, task._id);
+  //         cp1.kill();
+  //         cp2.kill();
 
-          console.log("end", task._id);
-        });
-        createNewTask(task, child.pid);
-      } else {
-        handleTaskFinish(-1, null, task._id);
-      }
-    }
-  });
+  //         console.log("end", task._id);
+  //       });
+  //       createNewTask(task, child.pid);
+  //     } else {
+  //       handleTaskFinish(-1, null, task._id);
+  //     }
+  //   }
+  // });
 
   res.send(task._id);
 });

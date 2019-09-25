@@ -128,14 +128,16 @@ async function executeTasks() {
             ? `${worker.url}/tasks/execute-hil-run`
             : `${worker.url}/tasks/execute`;
 
+        console.log(workerTaskURL);
+
         Axios.post(workerTaskURL, { task })
           .then(results => {
             console.log(
               `${results.data} task assigned to ${worker.serverName}`
             );
           })
-          .catch(() => {
-            console.log(`${worker.serverName} is busy`);
+          .catch(error => {
+            console.log(error);
           });
       }
     }

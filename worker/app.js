@@ -12,7 +12,13 @@ app.use(bodyParser.json({ limit: "1000mb" }));
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000"]
+    origin: [
+      "http://localhost:3000",
+      "https://jp01-clarity01",
+      "http://jp01-clarity01",
+      "https://jp01-clarity01:4444",
+      "http://jp01-clarity01:8080"
+    ]
   })
 );
 app.set("view options", { pretty: true });

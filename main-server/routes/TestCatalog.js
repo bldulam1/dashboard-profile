@@ -74,8 +74,14 @@ router.get("/:project/unique/sheetName", async (req, res) => {
 });
 
 router.post("/:project/create-schedule/", async (req, res) => {
-  const outputFile = createSchedule(req.body, req.params.project);
-  res.sendFile(outputFile, () => console.log(outputFile));
+  const outputFile = await createSchedule(req.body, req.params.project);
+  setTimeout(() => {
+    res.sendFile(outputFile, () =>
+      setTimeout(() => {
+        fs.unlinkSync(outputFile);
+      }, 1000)
+    );
+  }, 1000);
 });
 
 module.exports = router;

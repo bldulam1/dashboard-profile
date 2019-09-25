@@ -11,7 +11,7 @@ function entireColumn(colLetter, rowStart, rowEnd) {
   return `${colLetter}${rowStart}:${colLetter}${rowEnd}`;
 }
 
-function createSchedule(data, project) {
+async function createSchedule(data, project) {
   const startRow = 6;
   const endRow = 111;
   var workbook = new excel.Workbook();
@@ -24,9 +24,11 @@ function createSchedule(data, project) {
   //   },
   //   numberFormat: "$#,##0.00; ($#,##0.00); -"
   // });
-
-  // console.log(data, project);
-
+  // worksheet.cell(1,1).number(400).style(style);
+  // worksheet.cell(1,2).number(200).style(style);
+  // worksheet.cell(1,3).formula('A1 + B1').style(style);
+  // worksheet.cell(2,1).string('string').style(style);
+  // worksheet.cell(3,1).bool(true).style(style).style({font: {size: 14}});
 
   editWorksheet(
     worksheet,
@@ -80,16 +82,71 @@ function createSchedule(data, project) {
   editWorksheet(worksheet, 3, 15, "string", "Hour");
   editWorksheet(worksheet, 3, 18, "string", "TB");
 
-  // editWorksheet(worksheet, 5, 1, "string", "Scenario Picture");
-  // editWorksheet(worksheet, 5, 1, "string", "#");
+  const line1 = Object.keys(data.selected[0]);
+  const lineL = Object.keys(data.selected[data.selected.length - 1]);
+  const headers = line1.length > lineL.length ? line1 : lineL;
 
-  // worksheet.cell(1,1).number(400).style(style);
-  // worksheet.cell(1,2).number(200).style(style);
-  // worksheet.cell(1,3).formula('A1 + B1').style(style);
-  // worksheet.cell(2,1).string('string').style(style);
-  // worksheet.cell(3,1).bool(true).style(style).style({font: {size: 14}});
-  const fileName = "./tmp/DC Schedule.xlsx";
-  workbook.write(fileName);
+  // Headers
+  const cols = [
+    "Scenario Picture",
+    "#",
+    "Priority",
+    "Status",
+    "Scenario",
+    ...headers,
+    "Trials",
+    "Total Time",
+    "Target Type",
+    "Data Volume",
+    "DOORS",
+    "JIRA",
+    "PTC"
+  ];
+  cols.forEach((text, index) => {
+    editWorksheet(worksheet, 5, 1 + index, "string", text);
+  });
+
+  data.selected.forEach((row, rowIndex) => {
+    const _rowIndex = 6 + rowIndex;
+    let timeColIndex = "A";
+    let trialsColIndex = "A";
+    cols.forEach((col, colIndex) => {
+      const _colIndex = 1 + colIndex;
+      let cellValue;
+      let type = null;
+      if (col === "#") {
+        cellValue = rowIndex + 1;
+      } else if (col === "Trials") {
+        trialsColIndex = String.fromCharCode(65 + colIndex);
+        cellValue = 3;
+      } else if (col === "Time") {
+        cellValue = row[col];
+        timeColIndex = String.fromCharCode(65 + colIndex);
+      } else if (col === "Total Time") {
+        type = "formula";
+        cellValue = `${timeColIndex}${_rowIndex} * ${trialsColIndex}${_rowIndex}`;
+      } else if (col === "Data Volume") {
+        type = "formula";
+        cellValue = `${timeColIndex}${_rowIndex} * ${trialsColIndex}${_rowIndex} * 20`;
+      } else if (row[col] === null || row[col] === undefined) {
+        cellValue = "";
+      } else {
+        cellValue = row[col];
+      }
+
+      if (!type) {
+        type = typeof cellValue;
+      }
+
+      if (cellValue !== "") {
+        editWorksheet(worksheet, _rowIndex, _colIndex, type, cellValue);
+      }
+    });
+  });
+
+  const fileName = `./tmp/DCS_${project}.xlsx`;
+  await workbook.write(fileName);
+
   return Path.resolve(fileName);
 }
 

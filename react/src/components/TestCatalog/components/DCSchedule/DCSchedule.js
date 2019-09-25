@@ -81,14 +81,22 @@ export default () => {
 
   let items = selected.map((s, i) => ({ id: i, ...s }));
 
-  const handleRLDDChange = newItems => tcDispatch({ selected: newItems });
+  // const handleRLDDChange = newItems => tcDispatch({ selected: newItems });
   const handleExportClick = () => {
     Axios(
       {
         url: `${api_server}/tc/${activeProject}/create-schedule`,
         method: "POST",
         responseType: "blob",
-        data: { selected }
+        data: {
+          selected: selected.map(s => {
+            let retVal = { "Catalog Label": s["Record ID"] };
+            state.showColumns.forEach(keyName => {
+              retVal[keyName] = s[keyName];
+            });
+            return retVal;
+          })
+        }
       },
       { selected }
     ).then(results => {

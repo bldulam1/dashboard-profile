@@ -55,8 +55,8 @@ router.post("/execute", BlockingMiddleware, async (req, res) => {
       console.log("end", task._id);
     });
     createNewTask(task, child.pid);
-    res.send(task._id);
   });
+  res.send(task._id);
 });
 
 router.post("/execute-hil-run", BlockingMiddleware, async (req, res) => {

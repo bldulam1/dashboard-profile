@@ -1,4 +1,13 @@
-const socketIOServer = require("http").createServer();
+const fs = require("fs");
+const https = require("https");
+const express = require("express");
+const app = express();
+const options = {
+  key: fs.readFileSync("./certificates/selfsigned.key"),
+  cert: fs.readFileSync("./certificates/selfsigned.crt")
+};
+
+const socketIOServer = https.createServer(options, app);
 const io = require("socket.io")(socketIOServer, {
   serveClient: false,
   pingInterval: 10000,
@@ -14,14 +23,14 @@ io.on("connection", socket => {
       online: true,
       socketID: socket.id
     });
-    // console.log(`CONNECTED: ${client ? client.name : ""} ${socket.id}`);
+    console.log(`CONNECTED: ${client ? client.name : ""} ${socket.id}`);
   });
   socket.on("disconnect", async () => {
     const client = await Client.findOneAndUpdate(
       { socketID: socket.id },
       { online: false }
     );
-    // console.log(`DISCONNECTED: ${client ? client.name : ""}`);
+    console.log(`DISCONNECTED: ${client ? client.name : ""}`);
   });
 });
 

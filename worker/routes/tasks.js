@@ -44,6 +44,7 @@ router.post("/max", async (req, res) => {
 });
 
 router.post("/execute", BlockingMiddleware, async (req, res) => {
+  console.log("execute");
   const { task } = req.body;
   startTask(task).then(child => {
     console.log("start", task._id);
@@ -59,6 +60,7 @@ router.post("/execute", BlockingMiddleware, async (req, res) => {
 });
 
 router.post("/execute-hil-run", BlockingMiddleware, async (req, res) => {
+  console.log(req.body)
   const { task } = req.body;
   const py1 = "C:/HILTools/HILMaster/KeepAliveGateway.py";
   const py2 = "C:/HILTools/HILMaster/StatusGateway.py";

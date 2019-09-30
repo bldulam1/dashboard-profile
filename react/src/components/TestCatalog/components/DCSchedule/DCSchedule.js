@@ -1,25 +1,20 @@
 import React, { useContext, useState, useEffect } from "react";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
-import RLDD from "react-list-drag-and-drop/lib/RLDD";
+// import RLDD from "react-list-drag-and-drop/lib/RLDD";
 import {
   Button,
-  IconButton,
   Table,
   TableHead,
   TableBody,
   TableRow,
   TableCell,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
 } from "@material-ui/core";
-import DeleteIcon from "@material-ui/icons/Delete";
 import { makeStyles } from "@material-ui/styles";
 import Axios from "axios";
 import { api_server } from "../../../../environment/environment";
 import { ProjectContext } from "../../../../context/Project.Context";
 import fileDownload from "js-file-download";
+import uuid from "uuid/v4";
 
 const useStyles = makeStyles(theme => ({
   itemWrapper: {
@@ -52,9 +47,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default () => {
-  const { itemWrapper, itemPriority, itemContent, itemAction } = useStyles();
+  // const { itemWrapper, itemPriority, itemContent, itemAction } = useStyles();
   const { activeProject } = useContext(ProjectContext);
-  const { tcProps, tcDispatch } = useContext(TestCatalogContext);
+  const { tcProps } = useContext(TestCatalogContext);
   const { selected, cols } = tcProps;
   const [state, setState] = useState({ showColumns: [] });
 
@@ -79,7 +74,7 @@ export default () => {
     "Data Volume"
   ];
 
-  let items = selected.map((s, i) => ({ id: i, ...s }));
+  // let items = selected.map((s, i) => ({ id: i, ...s }));
 
   // const handleRLDDChange = newItems => tcDispatch({ selected: newItems });
   const handleExportClick = () => {
@@ -104,12 +99,12 @@ export default () => {
     });
   };
 
-  const handleChange = event => {
-    setState(oldState => ({
-      ...oldState,
-      [event.target.name]: event.target.value
-    }));
-  };
+  // const handleChange = event => {
+  //   setState(oldState => ({
+  //     ...oldState,
+  //     [event.target.name]: event.target.value
+  //   }));
+  // };
 
   const totalTime = selected.reduce((sum, s) => sum + (s.Time || 0) * 3, 0);
 
@@ -117,7 +112,7 @@ export default () => {
     <div>
       <div>
         <Button onClick={handleExportClick}>Export</Button>
-        <FormControl>
+        {/* <FormControl>
           <InputLabel htmlFor="showColumns-simple">Show Columns</InputLabel>
           <Select
             multiple
@@ -131,28 +126,28 @@ export default () => {
             {cols
               .filter(ch => !["Record ID"].includes(ch.id))
               .map(col => (
-                <MenuItem value={col.id}>{col.id}</MenuItem>
+                <MenuItem key={uuid()} value={col.id}>
+                  {col.id}
+                </MenuItem>
               ))}
-            {/* <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem> */}
           </Select>
-        </FormControl>
+        </FormControl> */}
       </div>
+
       <div style={{ overflowX: "auto", width: "100%" }}>
         <Table size="small">
           <TableHead>
             <TableRow>
               {headers.map(header => (
-                <TableCell>{header}</TableCell>
+                <TableCell key={uuid()}>{header}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
             {selected.map((s, index) => (
-              <TableRow>
+              <TableRow key={uuid()}>
                 {headers.map(header => (
-                  <TableCell>
+                  <TableCell key={uuid()}>
                     {header === "Sequence"
                       ? index
                       : header === "Priority"
@@ -164,17 +159,17 @@ export default () => {
                       : header === "Trials"
                       ? 3
                       : header === "Total Time"
-                      ? s.Time * 3
+                      ? s.Time && s.Time * 3
                       : header === "Data Volume"
                       ? `${s.Time * 60} GB`
-                      : s[header]}
+                      : "" || s[header]}
                   </TableCell>
                 ))}
               </TableRow>
             ))}
             <TableRow>
               {headers.map(header => (
-                <TableCell>
+                <TableCell key={uuid()}>
                   {header === "Sequence"
                     ? "Total"
                     : header === "Total Time"

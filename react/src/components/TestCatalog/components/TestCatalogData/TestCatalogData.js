@@ -4,28 +4,23 @@ import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
-import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import EnhancedTableHead from "./EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedTableToolbar";
-import {
-  stableSort,
-  getSorting,
-  fetchData
-} from "../../../../util/test-catalog";
+import { stableSort, getSorting } from "../../../../util/test-catalog";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
 import uuid from "uuid/v4";
 import EnhancedRow from "./EnhancedRow";
 
-EnhancedTableHead.propTypes = {
-  classes: PropTypes.object.isRequired,
-  numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(["asc", "desc"]).isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired
-};
+// EnhancedTableHead.propTypes = {
+//   classes: PropTypes.object.isRequired,
+//   numSelected: PropTypes.number.isRequired,
+//   onRequestSort: PropTypes.func.isRequired,
+//   onSelectAllClick: PropTypes.func.isRequired,
+//   order: PropTypes.oneOf(["asc", "desc"]).isRequired,
+//   orderBy: PropTypes.string.isRequired,
+//   rowCount: PropTypes.number.isRequired
+// };
 
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired
@@ -45,17 +40,6 @@ const useStyles = makeStyles(theme => ({
   },
   table: {
     minWidth: "100%"
-  },
-  visuallyHidden: {
-    border: 0,
-    clip: "rect(0 0 0 0)",
-    height: 1,
-    margin: -1,
-    overflow: "hidden",
-    padding: 0,
-    position: "absolute",
-    top: 20,
-    width: 1
   }
 }));
 
@@ -70,9 +54,7 @@ export default () => {
     dense,
     order,
     orderBy,
-    page,
     rowsPerPage,
-    rowsPerPageOptions,
     count
   } = tcProps;
 
@@ -110,23 +92,6 @@ export default () => {
     tcDispatch({ selected: newSelected });
   }
 
-  function handleChangePage(event, newPage) {
-    fetchData({ ...tcProps, page: newPage }, res => {
-      tcDispatch({ ...res, page: newPage });
-    });
-  }
-
-  function handleChangeRowsPerPage(event) {
-    const newRPP = +event.target.value;
-    const changes = {
-      rowsPerPage: newRPP,
-      page: parseInt((page * rowsPerPage) / newRPP)
-    };
-    fetchData({ ...tcProps, ...changes }, res => {
-      tcDispatch({ ...res, ...changes });
-    });
-  }
-
   const isSelected = _id => selected.findIndex(s => s._id === _id) !== -1;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length);
@@ -138,17 +103,11 @@ export default () => {
         <Table
           className={classes.table}
           aria-labelledby="tableTitle"
-          size={dense ? "small" : "medium"}
+          size="small"
         >
           <EnhancedTableHead
-            classes={classes}
-            numSelected={selected.length}
-            order={order}
-            orderBy={orderBy}
             onSelectAllClick={handleSelectAllClick}
             onRequestSort={handleRequestSort}
-            rowCount={rows.length}
-            cols={cols}
           />
           <TableBody>
             {stableSort(rows, getSorting(order, orderBy)).map((row, index) => (
@@ -168,21 +127,6 @@ export default () => {
           </TableBody>
         </Table>
       </div>
-      <TablePagination
-        rowsPerPageOptions={rowsPerPageOptions}
-        component="div"
-        count={count}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        backIconButtonProps={{
-          "aria-label": "previous page"
-        }}
-        nextIconButtonProps={{
-          "aria-label": "next page"
-        }}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
     </div>
   );
 };

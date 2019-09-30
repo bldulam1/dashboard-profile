@@ -48,19 +48,18 @@ router.get("/:project/:page/:rowsPerPage/:queryString(*)", async (req, res) => {
 
   const query = { $and: [{ project }, JSON.parse(queryString)] };
 
-  const count_tc = await Promise.all([
+  const [count, rows, subFeatures] = await Promise.all([
     TestCatalog.countDocuments(query),
     TestCatalog.find(query, null, { skip, limit }),
     TestCatalog.distinct("sheetName", query)
-    // TestCatalog.find(query, null, { skip, limit, sort: {'Record ID': 1} })
   ]);
 
   res.send({
     skip,
     limit,
-    count: count_tc[0],
-    rows: count_tc[1],
-    subFeatures: count_tc[2]
+    count,
+    rows,
+    subFeatures
   });
 });
 

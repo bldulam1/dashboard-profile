@@ -60,7 +60,7 @@ router.post("/execute", BlockingMiddleware, async (req, res) => {
 });
 
 router.post("/execute-hil-run", BlockingMiddleware, async (req, res) => {
-  console.log(req.body)
+  console.log(req.body);
   const { task } = req.body;
   const py1 = "C:/HILTools/HILMaster/KeepAliveGateway.py";
   const py2 = "C:/HILTools/HILMaster/StatusGateway.py";
@@ -116,10 +116,12 @@ function startTask(task) {
   return new Promise((resolve, reject) => {
     if (["SIMS", "CVW Conversion"].includes(operation)) {
       mkdirp(outputLocation, err => {
-        err ? reject(err) : resolve(spawn("powershell.exe", [script]));
+        err
+          ? reject(err)
+          : resolve(spawn("powershell.exe", ["-windowstyle hidden", script]));
       });
     } else if (operation !== "HIL") {
-      resolve(spawn("powershell.exe", [script]));
+      resolve(spawn("powershell.exe", ["-windowstyle hidden", script]));
     }
   });
 }

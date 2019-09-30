@@ -6,12 +6,14 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Tooltip from "@material-ui/core/Tooltip";
 import { numberWithCommas } from "../../../../util/strings";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
+import { TextField, Slider } from "@material-ui/core";
+import { fetchData } from "../../../../util/test-catalog";
 
 const useToolbarStyles = makeStyles(theme => ({
   root: {
+    display: "flex",
+    flexDirection: "row",
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(1)
   },
@@ -26,18 +28,20 @@ const useToolbarStyles = makeStyles(theme => ({
           backgroundColor: theme.palette.primary.light
         },
   spacer: {
-    flex: "1 1 100%"
+    flexGrow: 1
   },
   actions: {
+    flexGrow: 1,
     display: "flex",
     flexDirection: "row",
     justifyContent: "start",
-    color: theme.palette.text.secondary,
-    width: "40%"
+    color: theme.palette.text.secondary
+    // width: "40%"
   },
   title: {
-    width: "40%",
-    flex: "0 0 auto"
+    flexGrow: 1
+    // width: "40%",
+    // flex: "0 0 auto"
   },
   totalTime: {
     alignSelf: "center"
@@ -45,9 +49,10 @@ const useToolbarStyles = makeStyles(theme => ({
 }));
 
 export default props => {
+  let timeoutInterval = null;
   const classes = useToolbarStyles();
   const { tcProps, tcDispatch } = React.useContext(TestCatalogContext);
-  const { selected, dense, count } = tcProps;
+  const { selected, count, rowsPerPage, page } = tcProps;
 
   const numSelected = selected.length;
   const totalTime = selected.reduce(
@@ -55,12 +60,26 @@ export default props => {
     0
   );
 
-  function handleChangeDense(event) {
-    tcDispatch({
-      dense: event.target.checked
+  function handleChangeRowsPerPage(newRPP) {
+    const changes = {
+      rowsPerPage: newRPP,
+      page: parseInt(page * (rowsPerPage / newRPP))
+    };
+    clearTimeout(timeoutInterval);
+    timeoutInterval = setTimeout(() => {
+      fetchData({ ...tcProps, ...changes }, res => {
+        tcDispatch({ ...res, ...changes });
+      });
+    }, 1000);
+  }
+
+  function handleChangePageIndex(newPage) {
+    fetchData({ ...tcProps, page: newPage }, res => {
+      tcDispatch({ ...res, page: newPage });
     });
   }
 
+  const maxPage = Math.floor(count / rowsPerPage);
   return (
     <Toolbar
       className={clsx(classes.root, {
@@ -85,16 +104,24 @@ export default props => {
         </Typography>
       </div>
       <div className={classes.actions}>
-        <Tooltip title="Padding" placement="top">
-          <FormControlLabel
-            control={
-              <Switch
-                color="primary"
-                checked={dense}
-                onChange={handleChangeDense}
-              />
-            }
-            label="Dense"
+        <Tooltip title="Rows per page" placement="top">
+          <TextField
+            defaultValue={rowsPerPage}
+            onChange={event => handleChangeRowsPerPage(event.target.value)}
+            margin="dense"
+            type="number"
+            style={{ width: "5rem" }}
+          />
+        </Tooltip>
+        <Tooltip title="Page Slider" placement="top">
+          <Slider
+            style={{ margin: "auto 1rem" }}
+            defaultValue={page > maxPage ? maxPage : page}
+            onChangeCommitted={(event, value) => handleChangePageIndex(value)}
+            aria-labelledby="discrete-slider"
+            valueLabelDisplay="auto"
+            min={0}
+            max={maxPage}
           />
         </Tooltip>
       </div>

@@ -63,8 +63,8 @@ mongoose.connection.on("error", err => console.log(err));
 mongoose.connection.on("open", () => {
   console.log(`${process.pid} database server connected`);
 
-  const key = fs.readFileSync("./certificates/selfsigned.key");
-  const cert = fs.readFileSync("./certificates/selfsigned.crt");
+  const key = fs.readFileSync("./certificates/ca-signed.key");
+  const cert = fs.readFileSync("./certificates/ca-signed.cer");
   const options = { key, cert };
 
   const httpsServer = https.createServer(options, app);

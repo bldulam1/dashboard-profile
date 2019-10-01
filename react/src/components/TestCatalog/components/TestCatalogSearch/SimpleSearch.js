@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
       backgroundColor: fade("#707070", 0.1)
     },
     marginLeft: 0,
-    marginBottom: "1rem",
+    // marginBottom: "1rem",
     width: "100%"
   }
 }));
@@ -31,7 +31,6 @@ const useStyles = makeStyles(theme => ({
 export default params => {
   const classes = useStyles();
   const { tcProps, tcDispatch } = useContext(TestCatalogContext);
-  // // const { query } = tcProps;
   const [searchString, setSearchString] = React.useState("");
 
   const handleSearchString = event => {
@@ -51,7 +50,7 @@ export default params => {
 
   return (
     <div className={classes.search}>
-      <IconButton aria-label="Search">
+      <IconButton aria-label="Search" style={{ padding: "0.25rem" }}>
         <SearchIcon color="primary" aria-label="Search" />
       </IconButton>
       <InputBase

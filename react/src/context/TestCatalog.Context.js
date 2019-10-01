@@ -5,6 +5,7 @@ export const TestCatalogContext = createContext({
     query: {},
     cols: [],
     rows: [],
+    visibleColumns: [],
     selected: [],
     dense: true,
     order: null,

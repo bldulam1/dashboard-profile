@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useContext } from "react";
+import React, { useReducer, useEffect, useContext, Fragment } from "react";
 import Paper from "@material-ui/core/Paper";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { TestCatalogContext } from "../../context/TestCatalog.Context";
@@ -7,17 +7,21 @@ import { ProjectContext } from "../../context/Project.Context";
 import { initializeTCProps } from "../../util/test-catalog";
 import TestCatalogSearch from "./components/TestCatalogSearch/TestCatalogSearch";
 import DCSchedule from "./components/DCSchedule/DCSchedule";
-import { Tabs, Tab, Typography, Box } from "@material-ui/core";
-import PropTypes from "prop-types";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+
+import ColumnsSelector from "./components/ColumnsSelector/ColumnsSelector";
 
 const useStyles = makeStyles(theme => ({
   contentPaper: {
     margin: "1rem",
     padding: "1rem",
-    width: "98%",
-    // display: "flex",
-    // flexDirection: "column",
-    // justifyContent: "center"
+    width: "98%"
+  },
+  tabsContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
   }
 }));
 
@@ -31,6 +35,7 @@ const _defaultProps = {
   isLoading: true,
   cols: [],
   rows: [],
+  visibleColumns: ["Record ID", "Time"],
   selected: [],
   order: "asc",
   orderBy: "Record ID",
@@ -44,44 +49,14 @@ const _defaultProps = {
   selectedSubFeatures: []
 };
 
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <Typography
-      component="div"
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      <Box p={3}>{children}</Box>
-    </Typography>
-  );
-}
-
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired
-};
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`
-  };
-}
-
 export default props => {
   const classes = useStyles();
   const { activeProject } = useContext(ProjectContext);
   const [tcProps, tcDispatch] = useReducer(reducer, _defaultProps);
-  const [value, setValue] = React.useState(0);
+  const [selectedPanel, setSelectedPanel] = React.useState(0);
 
   function handleChange(event, newValue) {
-    setValue(newValue);
+    setSelectedPanel(newValue);
   }
 
   useEffect(() => {
@@ -97,22 +72,28 @@ export default props => {
     <Paper className={classes.contentPaper}>
       <TestCatalogContext.Provider value={{ tcProps, tcDispatch }}>
         <Tabs
+          className={classes.tabsContainer}
           indicatorColor="primary"
-          value={value}
+          value={selectedPanel}
           onChange={handleChange}
           aria-label="simple tabs example"
         >
-          <Tab label="Search" {...a11yProps(0)} />
-          <Tab label="Create Schedule" {...a11yProps(1)} />
+          <Tab label="Search" />
+          <Tab label="Create Schedule" />
         </Tabs>
 
-        <TabPanel value={value} index={0}>
-          <TestCatalogSearch />
-          <TestCatalogData />
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          <DCSchedule />
-        </TabPanel>
+        {selectedPanel === 0 ? (
+          <Fragment>
+            <TestCatalogSearch />
+            <ColumnsSelector />
+            <TestCatalogData />
+          </Fragment>
+        ) : (
+          <Fragment>
+            <ColumnsSelector />
+            <DCSchedule />
+          </Fragment>
+        )}
       </TestCatalogContext.Provider>
     </Paper>
   );

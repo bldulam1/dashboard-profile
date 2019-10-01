@@ -9,6 +9,7 @@ export default props => {
   const { cols } = React.useContext(TestCatalogContext).tcProps;
   const isItemSelected = isSelected(row._id);
   const labelId = `enhanced-table-checkbox-${index}`;
+  const { visibleColumns } = React.useContext(TestCatalogContext).tcProps;
 
   return (
     <TableRow
@@ -27,23 +28,25 @@ export default props => {
           inputProps={{ "aria-labelledby": labelId }}
         />
       </TableCell>
-      {cols.map((col, colIndex) =>
-        col.id === "Record ID" ? (
-          <TableCell
-            key={`th-${colIndex}`}
-            component="th"
-            id={labelId}
-            scope="row"
-            padding="none"
-          >
-            {row[col.id]}
-          </TableCell>
-        ) : (
-          <TableCell key={`th-${colIndex}`} align="right">
-            {row[col.id]}
-          </TableCell>
-        )
-      )}
+      {cols
+        .filter(col => visibleColumns.includes(col.id))
+        .map((col, colIndex) =>
+          col.id === "Record ID" ? (
+            <TableCell
+              key={`th-${colIndex}`}
+              component="th"
+              id={labelId}
+              scope="row"
+              padding="none"
+            >
+              {row[col.id]}
+            </TableCell>
+          ) : (
+            <TableCell key={`th-${colIndex}`} align="right">
+              {row[col.id]}
+            </TableCell>
+          )
+        )}
     </TableRow>
   );
 };

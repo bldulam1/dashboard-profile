@@ -10,7 +10,7 @@ import DCSchedule from "./components/DCSchedule/DCSchedule";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 
-import uuid from "uuid/v4";
+import ColumnsSelector from "./components/ColumnsSelector/ColumnsSelector";
 
 const useStyles = makeStyles(theme => ({
   contentPaper: {
@@ -85,10 +85,14 @@ export default props => {
         {selectedPanel === 0 ? (
           <Fragment>
             <TestCatalogSearch />
+            <ColumnsSelector />
             <TestCatalogData />
           </Fragment>
         ) : (
-          <DCSchedule key={uuid()} />
+          <Fragment>
+            <ColumnsSelector />
+            <DCSchedule />
+          </Fragment>
         )}
       </TestCatalogContext.Provider>
     </Paper>

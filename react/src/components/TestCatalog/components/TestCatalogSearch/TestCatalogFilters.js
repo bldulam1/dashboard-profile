@@ -101,14 +101,7 @@ export default () => {
     });
   }
 
-  function handleVisibleColumnsChange(column, isVisible) {
-    const newVisibleColumns = isVisible
-      ? [...visibleColumns].filter(vc => vc !== column)
-      : [...visibleColumns, column];
-    tcDispatch({
-      visibleColumns: newVisibleColumns
-    });
-  }
+
   return (
     <div className={classes.root}>
       <FormControl fullWidth>
@@ -148,29 +141,6 @@ export default () => {
         </Select>
       </FormControl>
 
-      <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-        {cols
-          .map(col => col.id)
-          .filter((x, i, a) => a.indexOf(x) === i)
-          .map(colId => {
-            const isVisible = visibleColumns.includes(colId);
-            return (
-              <FormControlLabel
-                key={uuid()}
-                control={
-                  <Checkbox
-                    value={colId}
-                    checked={isVisible}
-                    onChange={() =>
-                      handleVisibleColumnsChange(colId, isVisible)
-                    }
-                  />
-                }
-                label={colId}
-              />
-            );
-          })}
-      </div>
     </div>
   );
 };

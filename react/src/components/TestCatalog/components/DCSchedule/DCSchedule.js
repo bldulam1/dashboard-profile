@@ -1,53 +1,19 @@
 import React, { useContext, useState, useEffect } from "react";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
-// import RLDD from "react-list-drag-and-drop/lib/RLDD";
-import {
-  Button,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
+import Button from "@material-ui/core/Button";
+import Table from "@material-ui/core/Table";
+import TableHead from "@material-ui/core/TableHead";
+import TableBody from "@material-ui/core/TableBody";
+import TableRow from "@material-ui/core/TableRow";
+import TableCell from "@material-ui/core/TableCell";
+// import { makeStyles } from "@material-ui/styles";
 import Axios from "axios";
 import { api_server } from "../../../../environment/environment";
 import { ProjectContext } from "../../../../context/Project.Context";
 import fileDownload from "js-file-download";
 import uuid from "uuid/v4";
 
-const useStyles = makeStyles(theme => ({
-  itemWrapper: {
-    display: "flex",
-    flexDirection: "row",
-    cursor: "move",
-    border: "1px solid black",
-    margin: "0.5rem",
-    padding: "0 1rem",
-    borderRadius: "0.5rem"
-  },
-  itemPriority: {
-    width: "5%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-start"
-  },
-  itemContent: {
-    width: "85%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-start"
-  },
-  itemAction: {
-    width: "10%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-end"
-  }
-}));
-
 export default () => {
-  // const { itemWrapper, itemPriority, itemContent, itemAction } = useStyles();
   const { activeProject } = useContext(ProjectContext);
   const { tcProps } = useContext(TestCatalogContext);
   const { selected, cols } = tcProps;
@@ -101,39 +67,12 @@ export default () => {
     });
   };
 
-  // const handleChange = event => {
-  //   setState(oldState => ({
-  //     ...oldState,
-  //     [event.target.name]: event.target.value
-  //   }));
-  // };
-
   const totalTime = selected.reduce((sum, s) => sum + (s.Time || 0) * 3, 0);
 
   return (
     <div>
       <div>
         <Button onClick={handleExportClick}>Export</Button>
-        {/* <FormControl>
-          <InputLabel htmlFor="showColumns-simple">Show Columns</InputLabel>
-          <Select
-            multiple
-            value={state.showColumns}
-            onChange={handleChange}
-            inputProps={{
-              name: "showColumns",
-              id: "showColumns-simple"
-            }}
-          >
-            {cols
-              .filter(ch => !["Record ID"].includes(ch.id))
-              .map(col => (
-                <MenuItem key={uuid()} value={col.id}>
-                  {col.id}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl> */}
       </div>
 
       <div style={{ overflowX: "auto", width: "100%" }}>
@@ -185,24 +124,6 @@ export default () => {
           </TableBody>
         </Table>
       </div>
-
-      {/* <RLDD
-        items={items}
-        itemRenderer={(item, index) => {
-          return (
-            <div className={itemWrapper}>
-              <div className={itemPriority}>{index}</div>
-              <div className={itemContent}>{item["Record ID"]}</div>
-              <div className={itemAction}>
-                <IconButton>
-                  <DeleteIcon />
-                </IconButton>
-              </div>
-            </div>
-          );
-        }}
-        onChange={handleRLDDChange}
-      /> */}
     </div>
   );
 };

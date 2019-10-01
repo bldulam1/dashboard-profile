@@ -149,22 +149,27 @@ export default () => {
       </FormControl>
 
       <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-        {cols.map(col => {
-          const isVisible = visibleColumns.includes(col.id);
-          return (
-            <FormControlLabel
-              key={uuid()}
-              control={
-                <Checkbox
-                  value={col.id}
-                  checked={isVisible}
-                  onChange={() => handleVisibleColumnsChange(col.id, isVisible)}
-                />
-              }
-              label={col.label}
-            />
-          );
-        })}
+        {cols
+          .map(col => col.id)
+          .filter((x, i, a) => a.indexOf(x) === i)
+          .map(colId => {
+            const isVisible = visibleColumns.includes(colId);
+            return (
+              <FormControlLabel
+                key={uuid()}
+                control={
+                  <Checkbox
+                    value={colId}
+                    checked={isVisible}
+                    onChange={() =>
+                      handleVisibleColumnsChange(colId, isVisible)
+                    }
+                  />
+                }
+                label={colId}
+              />
+            );
+          })}
       </div>
     </div>
   );

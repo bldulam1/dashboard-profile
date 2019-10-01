@@ -22,4 +22,4 @@ function mapDir(rootPath) {
   });
 }
 
-mapDir("V:/JP01/DataLake/Valpro/HIL/DC_Related_Data/PUBLIC.ROAD/SUBARUHo3");
+mapDir("V:/JP01/DataLake/Common_Write/Subaru_DC");

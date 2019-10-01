@@ -51,6 +51,8 @@ export default () => {
   const { activeProject } = useContext(ProjectContext);
   const { tcProps } = useContext(TestCatalogContext);
   const { selected, cols } = tcProps;
+  const { visibleColumns } = React.useContext(TestCatalogContext).tcProps;
+
   const [state, setState] = useState({ showColumns: [] });
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export default () => {
     "Status",
     "Scenario",
     "Catalog Label",
-    ...state.showColumns.filter(ch => !["Record ID"].includes(ch)),
+    ...visibleColumns.filter(ch => !["Record ID"].includes(ch)),
     "Trials",
     "Total Time",
     "Target Type",

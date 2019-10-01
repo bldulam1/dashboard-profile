@@ -12,16 +12,6 @@ import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
 import uuid from "uuid/v4";
 import EnhancedRow from "./EnhancedRow";
 
-// EnhancedTableHead.propTypes = {
-//   classes: PropTypes.object.isRequired,
-//   numSelected: PropTypes.number.isRequired,
-//   onRequestSort: PropTypes.func.isRequired,
-//   onSelectAllClick: PropTypes.func.isRequired,
-//   order: PropTypes.oneOf(["asc", "desc"]).isRequired,
-//   orderBy: PropTypes.string.isRequired,
-//   rowCount: PropTypes.number.isRequired
-// };
-
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired
 };

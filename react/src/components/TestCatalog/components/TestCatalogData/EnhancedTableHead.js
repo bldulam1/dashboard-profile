@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
 export default function(props) {
   const classes = useStyles;
   const { tcProps, tcDispatch } = React.useContext(TestCatalogContext);
-  const { rows, selected, cols, order, orderBy } = tcProps;
+  const { rows, selected, cols, order, orderBy, visibleColumns } = tcProps;
 
   const numSelected = selected.length;
   const rowCount = rows.length;
@@ -46,27 +46,31 @@ export default function(props) {
             inputProps={{ "aria-label": "select all desserts" }}
           />
         </TableCell>
-        {cols.map((col, index) => (
-          <TableCell
-            key={uuid()}
-            align={index ? "right" : "left"}
-            padding={col.disablePadding ? "none" : "default"}
-            sortDirection={orderBy === col.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === col.id}
-              direction={order}
-              onClick={createSortHandler(col.id)}
+        {cols
+          .filter(col => visibleColumns.includes(col.id))
+          .map((col, index) => (
+            <TableCell
+              key={uuid()}
+              align={index ? "right" : "left"}
+              padding={col.disablePadding ? "none" : "default"}
+              sortDirection={orderBy === col.id ? order : false}
             >
-              {col.label}
-              {orderBy === col.id ? (
-                <span className={classes.visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </span>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
+              <TableSortLabel
+                active={orderBy === col.id}
+                direction={order}
+                onClick={createSortHandler(col.id)}
+              >
+                {col.label}
+                {/* {orderBy === col.id ? (
+                  <span className={classes.visuallyHidden}>
+                    {order === "desc"
+                      ? "sorted descending"
+                      : "sorted ascending"}
+                  </span>
+                ) : null} */}
+              </TableSortLabel>
+            </TableCell>
+          ))}
       </TableRow>
     </TableHead>
   );

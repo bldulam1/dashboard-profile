@@ -2,6 +2,8 @@ const router = require("express").Router();
 const TestCatalog = require("../schemas/test-catalog");
 const { createSchedule } = require("./ExcelCreator/DCSchedule");
 const fs = require("fs");
+const Path = require("path");
+const xlsx = require("xlsx");
 
 router.get("/:project/unique/feature/:feature", async (req, res) => {
   const { project, feature } = req.params;
@@ -82,5 +84,31 @@ router.post("/:project/create-schedule/", async (req, res) => {
     );
   }, 1000);
 });
+
+router.get("/:project/workbooks", async (req, res) => {
+  const wbPath = Path.resolve("./tmp/TestCatalog/", req.params.project);
+  res.send(fs.readdirSync(wbPath));
+});
+
+router.get("/:project/workbook=:workbook/sheets", async (req, res) => {
+  const { project, workbook } = req.params;
+  let wbPath = Path.resolve("./tmp/TestCatalog/", project, workbook);
+
+  const wb = xlsx.readFile(wbPath);
+  const sheets = wb.SheetNames;
+
+  res.send(sheets);
+});
+
+router.get("/:project/workbook=:workbook/sheet=:sheet", async (req, res) => {
+  const { project, workbook, sheet } = req.params;
+  let wbPath = Path.resolve("./tmp/TestCatalog/", project, workbook);
+
+  const wb = xlsx.readFile(wbPath);
+  const sheets = wb.SheetNames;
+
+  res.send(sheets);
+});
+
 
 module.exports = router;

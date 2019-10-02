@@ -73,7 +73,7 @@ mongoose.connection.on("open", () => {
   });
   app.listen(httpPort, () => {
     console.log(`Clarity HTTP server is listening on port ${httpPort}`);
-    setInterval(getCPU_MEM, 1000);
+    // setInterval(getCPU_MEM, 1000);
     // setInterval(getNetworkStats, 5000);
     executeTasks();
   });

@@ -9,8 +9,9 @@ import TestCatalogSearch from "./components/TestCatalogSearch/TestCatalogSearch"
 import DCSchedule from "./components/DCSchedule/DCSchedule";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-
 import ColumnsSelector from "./components/ColumnsSelector/ColumnsSelector";
+
+import TestCatalogUpload from "./components/TestCatalogUpload/TestCatalogUpload";
 
 const useStyles = makeStyles(theme => ({
   contentPaper: {
@@ -22,6 +23,10 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center"
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular
   }
 }));
 
@@ -44,8 +49,10 @@ const _defaultProps = {
   rowsPerPageOptions: [5, 10, 25, 50, 100, 200, 300],
   count: 0,
   features: [],
+  featuresMeaning: [],
   selectedFeatures: [],
   subFeatures: [],
+  subFeaturesMeaning: [],
   selectedSubFeatures: []
 };
 
@@ -85,6 +92,7 @@ export default props => {
         {selectedPanel === 0 ? (
           <Fragment>
             <TestCatalogSearch />
+            <TestCatalogUpload />
             <ColumnsSelector />
             <TestCatalogData />
           </Fragment>

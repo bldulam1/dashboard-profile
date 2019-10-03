@@ -41,6 +41,12 @@ export default props => {
             >
               {row[col.id]}
             </TableCell>
+          ) : col.id === "Time" ? (
+            <TableCell key={`th-${colIndex}`} align="right">
+              {typeof row[col.id] === "string"
+                ? row[col.id]
+                : row[col.id].toFixed(1)}
+            </TableCell>
           ) : (
             <TableCell key={`th-${colIndex}`} align="right">
               {row[col.id]}

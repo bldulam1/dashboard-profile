@@ -31,7 +31,7 @@ function createCol(id, numeric, disablePadding, label) {
   return { id, numeric, disablePadding, label };
 }
 
-function fetchColumns(rows, mainColumn) {
+async function fetchColumns(rows, mainColumn, project) {
   const unwanted_keys = [
     "_id",
     "__v",
@@ -43,23 +43,33 @@ function fetchColumns(rows, mainColumn) {
   const ids = rows.reduce((ids, row) => {
     const keys = Object.keys(row).filter(key => !unwanted_keys.includes(key));
     const cols = keys.map(key =>
-      createCol(key, !isNaN(row[key]), key === mainColumn, key)
+      createCol(key, !isNaN(row[key]), key === mainColumn)
     );
     return { ...ids, ...{ ...cols } };
   }, {});
-  return Object.values(ids);
+  const summary = Object.values(ids);
+  const summaryIDs = summary.map(s => s.id);
+  const url = `${api_server}/tc/${project}/test-catalog-codes/${JSON.stringify(
+    summaryIDs
+  )}`;
+  const results = await Axios.get(url);
+  const { values } = results.data;
+  return summary.map((s, sIndex) => ({ ...s, label: values[sIndex] }));
 }
 
 export function fetchData({ project, page, rowsPerPage, query }, callback) {
   const qs = JSON.stringify(query);
   const url = `${api_server}/tc/${project}/${page}/${rowsPerPage}/${qs}`;
-  Axios.get(url).then(res => {
-    const { rows, count, subFeatures } = res.data;
+  Axios.get(url).then(async res => {
+    const { rows, count, subFeatures, subFeaturesMeaning } = res.data;
+    console.log(res.data);
+    const cols = await fetchColumns(rows, "Record ID", project);
     callback({
       rows,
       count,
       subFeatures,
-      cols: fetchColumns(rows, "Record ID"),
+      subFeaturesMeaning,
+      cols,
       isLoading: false
     });
   });
@@ -72,15 +82,20 @@ export function initializeTCProps(
   const sheetsAPI = `${api_server}/tc/${project}/unique/sheetName`;
   const qs = JSON.stringify(query);
   const dataAPI = `${api_server}/tc/${project}/${page}/${rowsPerPage}/${qs}`;
-  Promise.all([Axios.get(sheetsAPI), Axios.get(dataAPI)]).then(values => {
-    const { features } = values[0].data;
-    const { rows, count, subFeatures } = values[1].data;
+  Promise.all([Axios.get(sheetsAPI), Axios.get(dataAPI)]).then(async values => {
+    const { features, featuresMeaning } = values[0].data;
+    const { rows, count, subFeatures, subFeaturesMeaning } = values[1].data;
+
+    const cols = await fetchColumns(rows, "Record ID", project);
+
     callback({
       features,
+      featuresMeaning,
       subFeatures,
+      subFeaturesMeaning,
       rows,
       count,
-      cols: fetchColumns(rows, "Record ID"),
+      cols,
       isLoading: false
     });
   });

@@ -14,6 +14,7 @@ var storage = multer.diskStorage({
     cb(null, file.originalname);
   }
 });
+var upload = multer({ storage: storage });
 
 router.post("/v-drive/:project", async (req, res) => {
   const { project } = req.params;
@@ -53,7 +54,6 @@ router.post("/v-drive/:project", async (req, res) => {
   }
 });
 
-var upload = multer({ storage: storage });
 router.post("/:project", upload.array("file", 1), async (req, res, next) => {
   // const destinationFolder =
   //   "V:/JP01/DataLake/Common_Write/CLARITY_OUTPUT_FILES/Recycle Bin";

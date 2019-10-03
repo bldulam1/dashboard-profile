@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -11,7 +11,6 @@ import { stableSort, getSorting } from "../../../../util/test-catalog";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
 import uuid from "uuid/v4";
 import EnhancedRow from "./EnhancedRow";
-import { FormControlLabel, Checkbox } from "@material-ui/core";
 
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired
@@ -38,15 +37,7 @@ export default () => {
   const classes = useStyles();
 
   const { tcProps, tcDispatch } = React.useContext(TestCatalogContext);
-  const {
-    rows,
-    selected,
-    dense,
-    order,
-    orderBy,
-    rowsPerPage,
-    count,
-  } = tcProps;
+  const { rows, selected, dense, order, orderBy, rowsPerPage, count } = tcProps;
 
   function handleRequestSort(event, property) {
     const isDesc = orderBy === property && order === "desc";

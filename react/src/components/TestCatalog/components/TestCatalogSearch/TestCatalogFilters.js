@@ -5,11 +5,10 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import Checkbox from "@material-ui/core/Checkbox";
 import ListItemText from "@material-ui/core/ListItemText";
-import { makeStyles, FormControlLabel } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 import Input from "@material-ui/core/Input";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
 import { fetchData } from "../../../../util/test-catalog";
-import uuid from "uuid/v4";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -50,12 +49,13 @@ export default () => {
     page,
     rowsPerPage,
     features,
+    featuresMeaning,
     selectedFeatures,
     subFeatures,
-    selectedSubFeatures,
-    cols,
-    visibleColumns
+    subFeaturesMeaning,
+    selectedSubFeatures
   } = tcProps;
+
   const classes = useStyles;
   function handleFeaturesChange(event) {
     const newFeatures = event.target.value;
@@ -101,7 +101,6 @@ export default () => {
     });
   }
 
-
   return (
     <div className={classes.root}>
       <FormControl fullWidth>
@@ -114,10 +113,12 @@ export default () => {
           renderValue={selected => selected.join(", ")}
           MenuProps={MenuProps}
         >
-          {features.map(sheetName => (
+          {features.map((sheetName, fIndex) => (
             <MenuItem key={sheetName} value={sheetName}>
               <Checkbox checked={selectedFeatures.indexOf(sheetName) > -1} />
-              <ListItemText primary={sheetName} />
+              <ListItemText
+                primary={`${sheetName}: ${featuresMeaning[fIndex]}`}
+              />
             </MenuItem>
           ))}
         </Select>
@@ -132,15 +133,14 @@ export default () => {
           renderValue={selected => selected.join(", ")}
           MenuProps={MenuProps}
         >
-          {subFeatures.map(sf => (
+          {subFeatures.map((sf, sfIndex) => (
             <MenuItem key={sf} value={sf}>
               <Checkbox checked={selectedSubFeatures.indexOf(sf) > -1} />
-              <ListItemText primary={sf} />
+              <ListItemText primary={`${sf}: ${subFeaturesMeaning[sfIndex]}`} />
             </MenuItem>
           ))}
         </Select>
       </FormControl>
-
     </div>
   );
 };

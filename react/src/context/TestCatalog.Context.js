@@ -14,8 +14,10 @@ export const TestCatalogContext = createContext({
     rowsPerPage: null,
     count: 0,
     features: [],
+    featuresMeaning: [],
     selectedFeatures: [],
     subFeatures: [],
+    subFeaturesMeaning: [],
     selectedSubFeatures: []
   },
   tcDispatch: null

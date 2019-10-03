@@ -10,7 +10,8 @@ const useStyle = makeStyles(theme => ({
   mainContainer: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    marginTop: "1rem",
   },
   filterContainer: {
     width: "60%"

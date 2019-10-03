@@ -1,13 +1,34 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import uuid from "uuid/v4";
 import { Typography } from "@material-ui/core";
+import {
+  ExpansionPanel,
+  ExpansionPanelSummary,
+  ExpansionPanelDetails
+} from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import makeStyles from "@material-ui/styles/makeStyles";
+
+const useStyles = makeStyles(theme => ({
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular
+  },
+  expansionPanelDetails: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between"
+  }
+}));
 
 export default () => {
+  const classes = useStyles();
   const { tcProps, tcDispatch } = React.useContext(TestCatalogContext);
-  const { visibleColumns, cols, rows } = tcProps;
+  const { visibleColumns, cols } = tcProps;
   function handleVisibleColumnsChange(column, isVisible) {
     const newVisibleColumns = isVisible
       ? [...visibleColumns].filter(vc => vc !== column)
@@ -17,14 +38,16 @@ export default () => {
     });
   }
 
-  console.log(
-    cols.filter(col => rows.findIndex(row => row[col.id] === null) < 0)
-  );
-
   return (
-    <div>
-      <Typography> Column Selector</Typography>
-      <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+    <ExpansionPanel className={classes.expansionPanel}>
+      <ExpansionPanelSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls="panel1a-content"
+        id="panel1a-header"
+      >
+        <Typography className={classes.heading}>Column Selector</Typography>
+      </ExpansionPanelSummary>
+      <ExpansionPanelDetails className={classes.expansionPanelDetails}>
         {[...cols.map(col => col.id), ...visibleColumns]
           .filter((x, i, a) => a.indexOf(x) === i)
           .map(colId => {
@@ -45,7 +68,7 @@ export default () => {
               />
             );
           })}
-      </div>
-    </div>
+      </ExpansionPanelDetails>
+    </ExpansionPanel>
   );
 };

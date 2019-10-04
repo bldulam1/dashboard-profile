@@ -5,7 +5,7 @@ import { lighten } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Tooltip from "@material-ui/core/Tooltip";
-import { numberWithCommas } from "../../../../util/strings";
+import { numberWithCommas, normalizeTime } from "../../../../util/strings";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
 import { TextField, Slider } from "@material-ui/core";
 import { fetchData } from "../../../../util/test-catalog";
@@ -100,7 +100,7 @@ export default props => {
       </div>
       <div className={classes.spacer}>
         <Typography variant="subtitle2" className={classes.totalTime}>
-          <b>Total Time</b> : <span>{totalTime} mins</span>
+          <b>Total Time</b> : <span>{normalizeTime(totalTime * 60000)}</span>
         </Typography>
       </div>
       <div className={classes.actions}>

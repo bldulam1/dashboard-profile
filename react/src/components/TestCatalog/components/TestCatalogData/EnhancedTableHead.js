@@ -6,24 +6,24 @@ import TableCell from "@material-ui/core/TableCell";
 import Checkbox from "@material-ui/core/Checkbox";
 import TableRow from "@material-ui/core/TableRow";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
-import { makeStyles } from "@material-ui/styles";
+// import { makeStyles } from "@material-ui/styles";
 
-const useStyles = makeStyles(theme => ({
-  visuallyHidden: {
-    border: 0,
-    clip: "rect(0 0 0 0)",
-    height: 1,
-    margin: -1,
-    overflow: "hidden",
-    padding: 0,
-    position: "absolute",
-    top: 20,
-    width: 1
-  }
-}));
+// const useStyles = makeStyles(theme => ({
+//   visuallyHidden: {
+//     border: 0,
+//     clip: "rect(0 0 0 0)",
+//     height: 1,
+//     margin: -1,
+//     overflow: "hidden",
+//     padding: 0,
+//     position: "absolute",
+//     top: 20,
+//     width: 1
+//   }
+// }));
 export default function(props) {
-  const classes = useStyles;
-  const { tcProps, tcDispatch } = React.useContext(TestCatalogContext);
+  // const classes = useStyles;
+  const { tcProps } = React.useContext(TestCatalogContext);
   const { rows, selected, cols, order, orderBy, visibleColumns } = tcProps;
 
   const numSelected = selected.length;
@@ -60,7 +60,7 @@ export default function(props) {
                 direction={order}
                 onClick={createSortHandler(col.id)}
               >
-                {col.label}
+                {col.label.replace(/_/g, " ")}
                 {/* {orderBy === col.id ? (
                   <span className={classes.visuallyHidden}>
                     {order === "desc"

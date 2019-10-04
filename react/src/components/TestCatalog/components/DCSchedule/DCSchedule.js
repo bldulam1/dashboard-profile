@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext } from "react";
 import { TestCatalogContext } from "../../../../context/TestCatalog.Context";
 import Button from "@material-ui/core/Button";
 import Table from "@material-ui/core/Table";
@@ -16,18 +16,11 @@ import uuid from "uuid/v4";
 export default () => {
   const { activeProject } = useContext(ProjectContext);
   const { tcProps } = useContext(TestCatalogContext);
-  const { selected, cols } = tcProps;
-  const { visibleColumns } = React.useContext(TestCatalogContext).tcProps;
+  const { selected, cols, visibleColumns } = tcProps;
 
-  const [state, setState] = useState({ showColumns: [] });
-
-  useEffect(() => {
-    setState({
-      showColumns: cols
-        .map(col => col.id)
-        .filter(ch => !["Record ID"].includes(ch))
-    });
-  }, [cols]);
+  const keyHeaders = cols.filter(col => visibleColumns.includes(col.id));
+  const keyHeadersID = keyHeaders.map(kh => kh.id);
+  const keyHeadersLabels = keyHeaders.map(kh => kh.label);
 
   const headers = [
     "Sequence",
@@ -35,7 +28,9 @@ export default () => {
     "Status",
     "Scenario",
     "Catalog Label",
-    ...visibleColumns.filter(ch => !["Record ID"].includes(ch)),
+    ...keyHeaders
+      .map(keyHeader => keyHeader.id)
+      .filter(kh => !/record id/gi.test(kh)),
     "Trials",
     "Total Time",
     "Target Type",
@@ -54,7 +49,7 @@ export default () => {
         data: {
           selected: selected.map(s => {
             let retVal = { "Catalog Label": s["Record ID"] };
-            state.showColumns.forEach(keyName => {
+            visibleColumns.forEach(keyName => {
               retVal[keyName] = s[keyName];
             });
             return retVal;
@@ -72,16 +67,31 @@ export default () => {
   return (
     <div>
       <div>
-        <Button onClick={handleExportClick}>Export</Button>
+        <Button
+          onClick={handleExportClick}
+          variant="contained"
+          color="primary"
+          size="small"
+        >
+          Export
+        </Button>
       </div>
 
       <div style={{ overflowX: "auto", width: "100%" }}>
         <Table size="small">
           <TableHead>
             <TableRow>
-              {headers.map(header => (
-                <TableCell key={uuid()}>{header}</TableCell>
-              ))}
+              {headers.map(header => {
+                const headerIndex = keyHeadersID.findIndex(
+                  khID => khID === header
+                );
+
+                return (
+                  <TableCell key={uuid()}>
+                    {headerIndex < 0 ? header : keyHeadersLabels[headerIndex]}
+                  </TableCell>
+                );
+              })}
             </TableRow>
           </TableHead>
           <TableBody>

@@ -52,6 +52,7 @@ export default () => {
           .filter((x, i, a) => a.indexOf(x) === i)
           .map(colId => {
             const isVisible = visibleColumns.includes(colId);
+            const index = cols.findIndex(col => col.id === colId);
             return (
               <FormControlLabel
                 key={uuid()}
@@ -64,7 +65,7 @@ export default () => {
                     }
                   />
                 }
-                label={colId}
+                label={index < 0 ? colId : cols[index].label.replace(/_/g, " ")}
               />
             );
           })}

@@ -13,9 +13,36 @@ function entireColumn(colLetter, rowStart, rowEnd) {
 
 async function createSchedule(data, project) {
   const startRow = 6;
-  const endRow = 111;
+  const endRow = data.selected.length + startRow - 1;
   var workbook = new excel.Workbook();
   var worksheet = workbook.addWorksheet("Day 1");
+  const line1 = Object.keys(data.selected[0]);
+  const lineL = Object.keys(data.selected[data.selected.length - 1]);
+  const headers = line1.length > lineL.length ? line1 : lineL;
+
+  // Headers
+  const cols = [
+    "Scenario Picture",
+    "#",
+    "Priority",
+    "Status",
+    "Scenario",
+    ...headers,
+    "Trials",
+    "Total Time",
+    "Target Type",
+    "Data Volume",
+    "DOORS",
+    "JIRA",
+    "PTC"
+  ];
+
+  const getCol = (cols, colName) =>
+    String.fromCharCode(65 + cols.findIndex(col => col === colName));
+
+  const totalTimeCol = getCol(cols, "Total Time");
+  const dataVolCol = getCol(cols, "Data Volume");
+  const trialsCol = getCol(cols, "Trials");
 
   // var style = workbook.createStyle({
   //   font: {
@@ -44,11 +71,17 @@ async function createSchedule(data, project) {
     2,
     8,
     "formula",
-    `COUNT(${entireColumn("B", startRow, endRow)},)`
+    `COUNT(${entireColumn("B", startRow, endRow)})`
   );
   editWorksheet(worksheet, 2, 9, "string", "Variants");
   editWorksheet(worksheet, 2, 10, "string", "Number of Trials");
-  editWorksheet(worksheet, 2, 11, "number", 150);
+  editWorksheet(
+    worksheet,
+    2,
+    11,
+    "formula",
+    `SUM(${entireColumn(trialsCol, startRow, endRow)})`
+  );
   editWorksheet(worksheet, 2, 12, "string", "Trials");
   editWorksheet(worksheet, 2, 13, "string", "Completed");
   editWorksheet(
@@ -60,6 +93,13 @@ async function createSchedule(data, project) {
   );
   editWorksheet(worksheet, 2, 15, "string", "Scenarios");
   editWorksheet(worksheet, 2, 16, "string", "Data Volume Estimated");
+  editWorksheet(
+    worksheet,
+    2,
+    17,
+    "formula",
+    `SUM(${entireColumn(dataVolCol, startRow, endRow)})`
+  );
   editWorksheet(worksheet, 2, 18, "string", "GB");
 
   editWorksheet(worksheet, 3, 1, "string", "JARI STC Genaral Test Course");
@@ -69,12 +109,13 @@ async function createSchedule(data, project) {
   editWorksheet(worksheet, 3, 8, "number", 12);
   editWorksheet(worksheet, 3, 9, "string", "Hour");
   editWorksheet(worksheet, 3, 10, "string", "Total Test Time");
+
   editWorksheet(
     worksheet,
     3,
     11,
     "formula",
-    `SUM(${entireColumn("O", startRow, endRow)})`
+    `SUM(${entireColumn(totalTimeCol, startRow, endRow)})/60`
   );
   editWorksheet(worksheet, 3, 12, "string", "Hour");
   editWorksheet(worksheet, 3, 13, "string", "Over");
@@ -82,26 +123,6 @@ async function createSchedule(data, project) {
   editWorksheet(worksheet, 3, 15, "string", "Hour");
   editWorksheet(worksheet, 3, 18, "string", "TB");
 
-  const line1 = Object.keys(data.selected[0]);
-  const lineL = Object.keys(data.selected[data.selected.length - 1]);
-  const headers = line1.length > lineL.length ? line1 : lineL;
-
-  // Headers
-  const cols = [
-    "Scenario Picture",
-    "#",
-    "Priority",
-    "Status",
-    "Scenario",
-    ...headers,
-    "Trials",
-    "Total Time",
-    "Target Type",
-    "Data Volume",
-    "DOORS",
-    "JIRA",
-    "PTC"
-  ];
   cols.forEach((text, index) => {
     editWorksheet(worksheet, 5, 1 + index, "string", text);
   });
@@ -146,7 +167,6 @@ async function createSchedule(data, project) {
 
   const fileName = `./tmp/DCS_${project}.xlsx`;
   await workbook.write(fileName);
-
   return Path.resolve(fileName);
 }
 

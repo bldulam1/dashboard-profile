@@ -62,7 +62,7 @@ export function fetchData({ project, page, rowsPerPage, query }, callback) {
   const url = `${api_server}/tc/${project}/${page}/${rowsPerPage}/${qs}`;
   Axios.get(url).then(async res => {
     const { rows, count, subFeatures, subFeaturesMeaning } = res.data;
-    console.log(res.data);
+    // console.log(res.data);
     const cols = await fetchColumns(rows, "Record ID", project);
     callback({
       rows,

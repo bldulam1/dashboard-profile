@@ -37,16 +37,30 @@ router.post("/v-drive/:project", async (req, res) => {
           issue: { title: "Failed to create " + newLocation }
         });
       } else {
-        fs.rename(fullPath, newPath, err => {
+        fs.copyFile(fullPath, newPath, err => {
           if (err) {
             res.send({
               progress: -1,
               issue: { title: "No Write Permission to " + _storageLocation }
             });
           } else {
+            setTimeout(() => {
+              fs.unlinkSync(fullPath);
+            }, 1000);
             res.send({ progress: 1 });
           }
+          // console.log("source.txt was copied to destination.txt");
         });
+        // fs.rename(fullPath, newPath, err => {
+        //   if (err) {
+        //     res.send({
+        //       progress: -1,
+        //       issue: { title: "No Write Permission to " + _storageLocation }
+        //     });
+        //   } else {
+        //     res.send({ progress: 1 });
+        //   }
+        // });
       }
     });
   } else {

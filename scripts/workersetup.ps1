@@ -63,3 +63,6 @@ foreach ($computername in $generic) {
     Write-Host run $computername
   }
 }
+
+
+# net use V: \\corp.int\common$ /persistent:Yes;

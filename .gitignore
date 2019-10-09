@@ -8,3 +8,6 @@
 /main-server/certificates/selfsigned.crt
 /main-server/certificates/selfsigned.key
 react/src/environment/environment.js
+helper/package-lock.json
+helper/fileList.js
+helper/package-lock.json

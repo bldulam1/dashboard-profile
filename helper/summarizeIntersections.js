@@ -38,6 +38,7 @@ function parseIntersection(file, start, end) {
     fs.createReadStream(file)
       .pipe(csv())
       .on("data", data => {
+        // console.log(data);
         const retVal = {
           start: data.CycleStart * 1,
           end: data.CycleEnd * 1,
@@ -46,7 +47,7 @@ function parseIntersection(file, start, end) {
           kmlLat: data["KML Latitude"] * 1,
           kmlLon: data["KML Longitude"] * 1
         };
-        if (retVal.start === start) {
+        if (retVal.start === start && retVal.end === end) {
           resolve(retVal);
         }
       })
@@ -61,7 +62,7 @@ function getBaseFile(fullFile) {
   const splitIndex = baseFile.indexOf("_split_F1");
   const bIndex = baseFile.indexOf("_B");
   const eIndex = baseFile.indexOf("_E", bIndex);
-  const sIndex = baseFile.indexOf("_S", eIndex);
+  // const sIndex = baseFile.indexOf("_S", eIndex);
 
   return {
     baseFile: baseFile.slice(0, splitIndex),
@@ -84,6 +85,8 @@ async function parseLabelling(file) {
     end
   );
 
+  if (!osmLat || !osmLon) return;
+
   return new Promise((resolve, reject) => {
     fs.createReadStream(file)
       .pipe(csv())
@@ -97,7 +100,9 @@ async function parseLabelling(file) {
 
           filteredKey = filteredKey.length ? filteredKey[0] : null;
 
-          if (filteredKey) {
+          if (header === "Start") {
+            pushValue = start;
+          } else if (filteredKey) {
             pushValue = data[filteredKey];
             const parsedIntVal = pushValue * 1;
             if (parsedIntVal) {
@@ -107,10 +112,8 @@ async function parseLabelling(file) {
             }
           } else if (/filename/gi.test(header)) {
             pushValue = baseFile;
-          } else if (/start/gi.test(header)) {
-            pushValue = start;
           } else if (/end/gi.test(header)) {
-            pushValue = start;
+            pushValue = end;
           } else if (/osmlat/gi.test(header)) {
             pushValue = osmLat;
           } else if (/osmlon/gi.test(header)) {
@@ -123,7 +126,6 @@ async function parseLabelling(file) {
 
           newData.push(pushValue);
         });
-        // console.log(newData.join(","));
         logger.write(newData.join(",") + ",\n");
       })
       .on("end", () => {
@@ -138,6 +140,7 @@ async function main() {
     .map(file => Path.resolve(labellingLocation, file));
 
   const total = labellingFiles.length;
+  // const total = 1;
 
   for (let index = 0; index < total; index++) {
     const file = labellingFiles[index];

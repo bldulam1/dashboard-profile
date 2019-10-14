@@ -21,7 +21,7 @@ import ErrorIcon from "@material-ui/icons/Error";
 import ScheduleIcon from "@material-ui/icons/Schedule";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-const VIRTUAL_PAGE_SIZE = 100;
+const VIRTUAL_PAGE_SIZE = 50;
 const MAX_ROWS = 50000;
 const getRowId = row => row._id;
 
@@ -134,7 +134,7 @@ export default params => {
   };
 
   const buildQueryString = () => {
-    const { filters, sorting } = state;
+    const { filters, sorting, requestedSkip, take } = state;
 
     const sort = sorting.reduce(
       (acc, { columnName, direction }) => ({
@@ -149,16 +149,22 @@ export default params => {
         [columnName]: { $regex: value, $options: "ig" },
         ...acc
       }),
-      { }
+      {}
     );
 
-    return JSON.stringify({ sort, query });
+    const skip = requestedSkip;
+    const limit = take;
+
+    return JSON.stringify({ sort, query, skip, limit });
   };
 
   const loadData = () => {
     const { requestedSkip, take, lastQuery, loading, forceReload } = state;
+
     const queryString = buildQueryString();
     if ((queryString !== lastQuery || forceReload) && !loading) {
+      console.log(requestedSkip);
+
       if (forceReload) {
         cache.invalidate();
       }
@@ -170,15 +176,13 @@ export default params => {
 
         Axios.get(`${api_server}/tasks/${project}`, {
           params: {
-            skip: requestedSkip,
-            limit: take,
             queryString
           }
         })
           .then(results => {
-            const { count, limit, skip, tasks } = results.data;
+            const { count, tasks } = results.data;
             cache.setRows(requestedSkip, tasks);
-            updateRows(skip, limit, count);
+            updateRows(requestedSkip, take, count);
           })
           .catch(() => dispatch({ type: "REQUEST_ERROR" }));
       }
@@ -198,9 +202,7 @@ export default params => {
 
   const { rows, skip, totalCount, loading, sorting, filters } = state;
   return (
-    <AutoSizer
-      style={{ backgroundColor: "coral", color: "rgba(255,255,255,0.9)" }}
-    >
+    <AutoSizer>
       {({ width, height }) => (
         <div style={{ width, height }}>
           <Grid rows={rows} columns={columns} getRowId={getRowId}>

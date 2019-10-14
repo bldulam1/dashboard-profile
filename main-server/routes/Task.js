@@ -21,9 +21,7 @@ const fs = require("fs");
 const mkdirp = require("mkdirp");
 
 router.get("/:project", async (req, res) => {
-  const skip = req.query.skip * 1;
-  const limit = req.query.limit * 1;
-  const { query, sort } = JSON.parse(req.query.queryString);
+  const { query, sort, skip, limit } = JSON.parse(req.query.queryString);
   query.project = req.params.project;
 
   const [count, tasks] = await Promise.all([

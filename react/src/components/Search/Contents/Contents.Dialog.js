@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -12,7 +12,7 @@ import Collapse from "@material-ui/core/Collapse";
 import CalendarToday from "@material-ui/icons/CalendarToday";
 import MyLocation from "@material-ui/icons/MyLocation";
 import LabelIcon from "@material-ui/icons/Label";
-import MapIcon from "@material-ui/icons/Map";
+// import MapIcon from "@material-ui/icons/Map";
 import AssignmentIcon from "@material-ui/icons/Assignment";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
@@ -27,7 +27,7 @@ import TableRow from "@material-ui/core/TableRow";
 
 import Axios from "axios";
 import { api_server } from "../../../environment/environment";
-import ContentsMapView from "./Contents.MapView";
+// import ContentsMapView from "./Contents.MapView";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -66,49 +66,49 @@ function EnhancedListItem(params) {
   );
 }
 
-function OperationListItem(params) {
-  const { icon, task, nested } = params;
-  console.log(task);
-  const { operation, status, requestedBy, assignedWorker } = task;
-  const classes = useStyles();
+// function OperationListItem(params) {
+//   const { icon, task, nested } = params;
+//   console.log(task);
+//   const { operation, status, requestedBy, assignedWorker } = task;
+//   const classes = useStyles();
 
-  return (
-    <ListItem className={`${nested && classes.nested}`}>
-      <ListItemIcon>{icon}</ListItemIcon>
-      <ListItemText
-        primary={operation}
-        secondary={
-          <Fragment>
-            <Typography
-              component="div"
-              variant="caption"
-              color="textPrimary"
-              className={classes.breakWord}
-            >
-              {status.text}
-            </Typography>
-            <Typography
-              component="div"
-              variant="caption"
-              color="textPrimary"
-              className={classes.breakWord}
-            >
-              {requestedBy}
-            </Typography>
-            <Typography
-              component="div"
-              variant="caption"
-              color="textPrimary"
-              className={classes.breakWord}
-            >
-              {assignedWorker}
-            </Typography>
-          </Fragment>
-        }
-      />
-    </ListItem>
-  );
-}
+//   return (
+//     <ListItem className={`${nested && classes.nested}`}>
+//       <ListItemIcon>{icon}</ListItemIcon>
+//       <ListItemText
+//         primary={operation}
+//         secondary={
+//           <Fragment>
+//             <Typography
+//               component="div"
+//               variant="caption"
+//               color="textPrimary"
+//               className={classes.breakWord}
+//             >
+//               {status.text}
+//             </Typography>
+//             <Typography
+//               component="div"
+//               variant="caption"
+//               color="textPrimary"
+//               className={classes.breakWord}
+//             >
+//               {requestedBy}
+//             </Typography>
+//             <Typography
+//               component="div"
+//               variant="caption"
+//               color="textPrimary"
+//               className={classes.breakWord}
+//             >
+//               {assignedWorker}
+//             </Typography>
+//           </Fragment>
+//         }
+//       />
+//     </ListItem>
+//   );
+// }
 
 export default params => {
   const classes = useStyles();
@@ -127,7 +127,7 @@ export default params => {
     });
   };
 
-  const { fileName, path, date, project, extension } = fileDetails;
+  const { fileName, path, date, project } = fileDetails;
   const modified = date && date.modified;
   const birth = date && date.birth;
   const mapped = date && date.mapped;

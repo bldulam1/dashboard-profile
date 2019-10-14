@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { FileSearchContext } from "../../../../context/Search.Context";
-import { makeStyles } from "@material-ui/styles";
+// import { makeStyles } from "@material-ui/styles";
 import Typography from "@material-ui/core/Typography";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
@@ -10,14 +10,14 @@ import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
 import IconButton from "@material-ui/core/IconButton";
 import SendIcon from "@material-ui/icons/Send";
 import TextField from "@material-ui/core/TextField";
-import DateFnsUtils from "@date-io/date-fns";
+// import DateFnsUtils from "@date-io/date-fns";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
-import Tooltip from "@material-ui/core/Tooltip";
+// import Tooltip from "@material-ui/core/Tooltip";
 import Axios from "axios";
 import { api_server } from "../../../../environment/environment";
 import { UserContext } from "../../../../context/User.Context";
@@ -29,19 +29,19 @@ import { useOperationStyles } from "../../../../styles/operationsClasses";
 
 // let newRootDebounceTimer = null;
 
-const useStyles = makeStyles(theme => ({
-  expansionPanelDetails: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  root: {
-    width: "100%",
-    backgroundColor: theme.palette.background.paper
-  },
-  breakWord: {
-    wordWrap: "break-word"
-  }
-}));
+// const useStyles = makeStyles(theme => ({
+//   expansionPanelDetails: {
+//     display: "flex",
+//     flexDirection: "column"
+//   },
+//   root: {
+//     width: "100%",
+//     backgroundColor: theme.palette.background.paper
+//   },
+//   breakWord: {
+//     wordWrap: "break-word"
+//   }
+// }));
 
 export default params => {
   const taskName = "HIL";

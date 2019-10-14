@@ -7,7 +7,7 @@ import { ProjectContext } from "../../../context/Project.Context";
 import ExportOperation from "./Operation.Components/Export.Operation";
 import CVWConversionOperation from "./Operation.Components/CVWConversion.Operation";
 import HILRunOperation from "./Operation.Components/HILRun.Operation";
-import ContentsMapView from "../Contents/Contents.MapView";
+// import ContentsMapView from "../Contents/Contents.MapView";
 
 export default () => {
   const [expanded, setExpanded] = React.useState(null);

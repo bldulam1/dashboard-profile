@@ -36,10 +36,10 @@ export default () => {
             isAccLineChart =
               plotElements.path.includes("TestResults") &&
               plotElements.path.includes("plots"),
-            isStackedBarChart = plotElements.hasOwnProperty("bars"),
-            isDeviationOccurChart =
-              plotElements.hasOwnProperty("DataOk") &&
-              plotElements.hasOwnProperty("DataNok");
+            isStackedBarChart = plotElements.hasOwnProperty("bars");
+            // isDeviationOccurChart =
+            //   plotElements.hasOwnProperty("DataOk") &&
+            //   plotElements.hasOwnProperty("DataNok");
 
           if (isTrackPerfChart || isTrackDropChart)
             return <HeatMap key={uuid()} plotElements={plotElements} />;
@@ -47,7 +47,7 @@ export default () => {
             return <LineChart key={uuid()} plotElements={plotElements} />;
           else if (isStackedBarChart)
             return <StackedPlot key={uuid()} plotElements={plotElements} />;
-          else if (isDeviationOccurChart)
+          //  (isDeviationOccurChart)
             return (
               <StackedPercentCol key={uuid()} plotElements={plotElements} />
             );

@@ -24,7 +24,6 @@ import { useSnackbar } from "notistack";
 import {
   normalizeSize,
   numberWithCommas,
-  normalizeTime
 } from "../../../../util/strings";
 import { fetchScenesData } from "../../../../util/scenes-search";
 

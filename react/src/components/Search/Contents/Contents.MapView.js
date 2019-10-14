@@ -33,7 +33,7 @@ export default props => {
         });
       }
     });
-  }, []);
+  }, [kmlFile]);
 
   const linePaint = {
     "line-color": "blue",

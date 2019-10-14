@@ -1,4 +1,5 @@
 let mongoose = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate");
 
 let taskSchema = mongoose.Schema({
   priority: Number,
@@ -32,5 +33,7 @@ let taskSchema = mongoose.Schema({
 
   otherParameters: {}
 });
+
+taskSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model("Task", taskSchema);

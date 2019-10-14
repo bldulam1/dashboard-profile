@@ -22,7 +22,7 @@ import ScheduleIcon from "@material-ui/icons/Schedule";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 const VIRTUAL_PAGE_SIZE = 100;
-const MAX_ROWS = 100;
+const MAX_ROWS = 50000;
 const getRowId = row => row._id;
 
 const CurrencyFormatter = ({ value }) => (
@@ -53,7 +53,7 @@ const StatusTypeProvider = props => (
         case "Pending":
           return <ScheduleIcon color="default" />;
         default:
-          return <ErrorIcon color="default" />;
+          return <ErrorIcon color="error" />;
       }
     }}
     {...props}

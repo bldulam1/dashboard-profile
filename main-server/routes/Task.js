@@ -20,6 +20,20 @@ const Path = require("path");
 const fs = require("fs");
 const mkdirp = require("mkdirp");
 
+router.get("/:project", async (req, res) => {
+  const skip = req.query.skip * 1;
+  const limit = req.query.limit * 1;
+  const { query, sort } = JSON.parse(req.query.queryString);
+  query.project = req.params.project;
+
+  const [count, tasks] = await Promise.all([
+    Task.countDocuments(query),
+    Task.find(query, null, { skip, limit, sort })
+  ]);
+
+  res.send({ skip, limit, count, tasks });
+});
+
 router.post("/:operation/new", async (req, res) => {
   const { operation } = req.params;
   const files = await Scene.find(
@@ -88,24 +102,6 @@ router.post(
       { fileName: 1 }
     );
     res.send(inValidFiles);
-  }
-);
-
-router.get(
-  "/:project/skip=:_skip/limit=:_limit/sort=:sortString(*)/query=:queryString(*)",
-  async (req, res) => {
-    const { _skip, _limit, sortString, queryString } = req.params;
-    const skip = _skip * 1;
-    const limit = _limit * 1;
-    const sort = JSON.parse(sortString);
-    const query = JSON.parse(queryString);
-
-    const count_tasks = await Promise.all([
-      Task.countDocuments(query),
-      Task.find(query, null, { skip, limit, sort })
-    ]);
-
-    res.send({ skip, limit, count: count_tasks[0], tasks: count_tasks[1] });
   }
 );
 

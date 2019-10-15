@@ -39,7 +39,7 @@ router.get("/:project", async (req, res) => {
       { skip, limit, sort }
     )
   ]);
-  console.log(tasks);
+  // console.log(tasks);
 
   res.send({ skip, limit, count, tasks });
 

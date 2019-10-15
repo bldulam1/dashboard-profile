@@ -61,11 +61,11 @@ export default params => {
     version: "SIMS_GEN12",
     versionOptions: ["SIMS_GEN12", "SIMS_GEN12_D"],
     simsLocation:
-      "V:/JP01/DataLake/Common_Write/ClarityResources/SIMSapp_FCR_R7_31_70D5_9",
+      "V:/JP01/DataLake/Common_Write/ClarityResources/SIMSapp_FCR_R7_31_70D6_11",
     simsLocationValid: true,
     simsLocationHelperText: "",
     commandLineArgs:
-      "-ECU 10 -ReplayDetect -VehicleData AMP -CAN1 1 -CAN2 4 -CanReDir 1 -OutVss",
+      "-ECU 10 -RegrTest -ReplayADC -LL_PROC SPU_EMU_AVX AMP_CAN AMP -CAN1 1 -CAN2 4 -CanReDir 1 -OutCVW -OutAsc",
     outputs: ["log", "mat"],
     outputOptions: [
       OutputOption("asc", false, false),

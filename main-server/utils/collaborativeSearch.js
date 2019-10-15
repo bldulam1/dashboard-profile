@@ -57,9 +57,9 @@ async function exploreDirectories(_root, startTime) {
     workers.forEach((worker, index) => {
       const { project, folder, root } = folders[index];
       const folderID = folders[index]._id;
-      const fullUrl = `${worker.url}/fileSearch/${project}/dir/${folder}`;
+      const fullUrl = `${worker.url}/fileSearch/${project}`;
 
-      Axios.post(fullUrl, { root })
+      Axios.get(fullUrl, { params: { root, dir: folder } })
         .then(async results => {
           Worker.findByIdAndUpdate(worker._id, { searchID: null }).then(() => {
             exploreDirectories(root, startTime);
@@ -71,7 +71,7 @@ async function exploreDirectories(_root, startTime) {
             Scene.deleteMany({ path: folder }).then(() => {
               Scene.insertMany(files);
             });
-            // console.log(`found ${files.length} files from ${folder}`);
+            console.log(`found ${files.length} files from ${folder}`);
           }
           if (directories.length) {
             Promise.all(

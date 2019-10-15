@@ -44,10 +44,10 @@ router.post("/max", async (req, res) => {
 });
 
 router.post("/execute", BlockingMiddleware, async (req, res) => {
-  console.log("execute");
+  console.log(new Date(), "execute");
   const { task } = req.body;
   startTask(task).then(child => {
-    console.log("start", task._id);
+    console.log(new Date(), "start", task._id);
     child.stdout.on("data", buff => handleNewLog(buff, task._id));
     child.stderr.on("data", buff => handleNewLog(buff, task._id));
     child.on("exit", (code, signal) => {
@@ -115,10 +115,9 @@ function startTask(task) {
   const { script, outputLocation, operation } = task;
   return new Promise((resolve, reject) => {
     if (["SIMS", "CVW Conversion"].includes(operation)) {
+      console.log(script);
       mkdirp(outputLocation, err => {
-        err
-          ? reject(err)
-          : resolve(spawn("powershell.exe", ["-windowstyle hidden", script]));
+        err ? reject(err) : resolve(spawn("powershell.exe", [script]));
       });
     } else if (operation !== "HIL") {
       resolve(spawn("powershell.exe", ["-windowstyle hidden", script]));

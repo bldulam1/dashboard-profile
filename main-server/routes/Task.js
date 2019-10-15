@@ -24,18 +24,30 @@ router.get("/:project", async (req, res) => {
   const { query, sort, skip, limit } = JSON.parse(req.query.queryString);
   query.project = req.params.project;
 
-  // const [count, tasks] = await Promise.all([
-  //   Task.countDocuments(query),
-  //   Task.paginate(query, { offset: skip, limit, sort })
+  const [count, tasks] = await Promise.all([
+    Task.countDocuments(query),
+    Task.find(
+      query,
+      {
+        inputFile: 1,
+        operation: 1,
+        requestedBy: 1,
+        requestDate: 1,
+        assignedWorker: 1,
+        status: 1
+      },
+      { skip, limit, sort }
+    )
+  ]);
+  console.log(tasks);
 
-  //   // Task.find(query, null, { skip, limit, sort })
-  // ]);
+  res.send({ skip, limit, count, tasks });
 
-  Task.paginate(query, { offset: skip, limit, sort }).then(
-    ({ docs, total, limit, offset }) => {
-      res.send({ skip: offset, limit, count: total, tasks: docs });
-    }
-  );
+  // Task.paginate(query, { offset: skip, limit, sort }).then(
+  //   ({ docs, total, limit, offset }) => {
+  //     res.send({ skip: offset, limit, count: total, tasks: docs });
+  //   }
+  // );
 });
 
 router.post("/:operation/new", async (req, res) => {

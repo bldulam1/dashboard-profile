@@ -10,51 +10,85 @@ var BlockingMiddleware = (req, res, next) => {
   next();
 };
 
-router.post("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
-  block = true;
-  const root = path.resolve(req.body.root);
-  const dir = path.resolve(req.params.dir);
-  // const dir_level = dir.split(/\\|\//).length - root.split(/\\|\//).length;
-  const project = req.params.project;
-  const files = [];
-  const directories = [];
+router.get("/:project", async (req, res) => {
+  const { dir, root } = req.query;
+  const { project } = req.params;
+  let files = new Set();
+  let directories = new Set();
+  console.log
 
-  const options = { alwaysStat: true, depth: 0, type: "files_directories" };
-  readdirp(dir, options)
-    .on("data", entry => {
-      const { fullPath, stats } = entry;
+  if (dir && root) {
+    readdirSync(dir).forEach(file => {
+      const fullPath = path.resolve(dir, file);
+      const stats = statSync(fullPath);
+      const { ext } = path.parse(fullPath);
       const { size, mtime, birthtime } = stats;
-      if (stats.isDirectory()) {
-        directories.push(fullPath);
-      } else {
-        const { base, ext, dir } = path.parse(fullPath);
-        files.push({
-          project,
-          fileName: base,
-          extension: ext.replace(".", ""),
-          root,
-          path: dir,
-          size: parseInt(size),
-          date: {
-            modified: mtime,
-            birth: birthtime,
-            mapped: new Date()
-          }
-        });
-      }
-    })
-    .on("warn", error => {
-      block = false;
-      console.error("non-fatal error", error);
-    })
-    .on("error", error => {
-      block = false;
-      console.error("fatal error", error);
-    })
-    .on("end", () => {
-      block = false;
-      res.send({ files, directories, project, root });
+      stats.isDirectory()
+        ? directories.add(fullPath)
+        : files.add({
+            project,
+            fileName: file,
+            extension: ext.replace(".", ""),
+            path: dir,
+            size: parseInt(size),
+            date: {
+              modified: mtime,
+              birth: birthtime,
+              mapped: new Date()
+            }
+          });
     });
+  }
+  console.log({ project, root, dir });
+
+  res.send({ project, root, files: [...files], directories: [...directories] });
 });
+
+// router.post("/:project/dir/:dir(*)", BlockingMiddleware, async (req, res) => {
+//   block = true;
+//   const root = path.resolve(req.body.root);
+//   const dir = path.resolve(req.params.dir);
+//   // const dir_level = dir.split(/\\|\//).length - root.split(/\\|\//).length;
+//   const project = req.params.project;
+//   const files = [];
+//   const directories = [];
+
+//   const options = { alwaysStat: true, depth: 0, type: "files_directories" };
+//   readdirp(dir, options)
+//     .on("data", entry => {
+//       const { fullPath, stats } = entry;
+//       const { size, mtime, birthtime } = stats;
+//       if (stats.isDirectory()) {
+//         directories.push(fullPath);
+//       } else {
+//         const { base, ext, dir } = path.parse(fullPath);
+//         files.push({
+//           project,
+//           fileName: base,
+//           extension: ext.replace(".", ""),
+//           root,
+//           path: dir,
+//           size: parseInt(size),
+//           date: {
+//             modified: mtime,
+//             birth: birthtime,
+//             mapped: new Date()
+//           }
+//         });
+//       }
+//     })
+//     .on("warn", error => {
+//       block = false;
+//       console.error("non-fatal error", error);
+//     })
+//     .on("error", error => {
+//       block = false;
+//       console.error("fatal error", error);
+//     })
+//     .on("end", () => {
+//       block = false;
+//       res.send({ files, directories, project, root });
+//     });
+// });
 
 module.exports = router;

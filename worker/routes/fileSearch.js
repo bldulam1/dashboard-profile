@@ -15,7 +15,6 @@ router.get("/:project", async (req, res) => {
   const { project } = req.params;
   let files = new Set();
   let directories = new Set();
-  console.log
 
   if (dir && root) {
     readdirSync(dir).forEach(file => {
@@ -29,6 +28,7 @@ router.get("/:project", async (req, res) => {
             project,
             fileName: file,
             extension: ext.replace(".", ""),
+            root,
             path: dir,
             size: parseInt(size),
             date: {
@@ -39,7 +39,6 @@ router.get("/:project", async (req, res) => {
           });
     });
   }
-  console.log({ project, root, dir });
 
   res.send({ project, root, files: [...files], directories: [...directories] });
 });

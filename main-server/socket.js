@@ -3,8 +3,8 @@ const https = require("https");
 const express = require("express");
 const app = express();
 const options = {
-  key: fs.readFileSync("./certificates/selfsigned.key"),
-  cert: fs.readFileSync("./certificates/selfsigned.crt")
+  key: fs.readFileSync("./certificates/ca-signed.key"),
+  cert: fs.readFileSync("./certificates/ca-signed.cer")
 };
 
 const socketIOServer = https.createServer(options, app);

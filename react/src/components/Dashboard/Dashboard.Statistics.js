@@ -47,7 +47,7 @@ export default () => {
     const url = `${api_server}/statistics/${activeProject}/${name}`;
     Axios.get(url).then(results => {
       const { activeUsers, fileDates, fileTypes, tasks } = results.data;
-      console.log(results.data);
+      // console.log(results.data);
       setstate({ activeUsers, fileDates, fileTypes, tasks });
     });
     return () => {};

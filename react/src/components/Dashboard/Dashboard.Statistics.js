@@ -68,7 +68,7 @@ export default () => {
         />
         <CardStatistics
           title="Clients"
-          value={state.activeUsers.filter(u => u._id === true).length}
+          value={state.activeUsers.filter(u => u._id === true)[0].count}
           unit={"Online"}
         />
         <CardStatistics

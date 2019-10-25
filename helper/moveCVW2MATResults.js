@@ -44,3 +44,22 @@ fs.readdir(location, (err, files) => {
     });
   }
 });
+
+// db.tasks.updateMany(
+//   {
+//     inputFile: {
+//       $in: [
+//         "20190825_161500_FCR_SBR_AD2_R0601D62_JARITSUKUBA_JSOIMPREZA_ISS_02_039_L_01.cvw",
+//         "20190825_161900_FCR_SBR_AD2_R0601D62_JARITSUKUBA_JSOIMPREZA_ISS_02_039_L_03.cvw",
+//         "20190825_161800_FCR_SBR_AD2_R0601D62_JARITSUKUBA_JSOIMPREZA_ISS_02_039_L_02.cvw"
+//       ]
+//     },
+//     requestDate: {
+//       $in: [
+//         ISODate("2019-10-16T08:42:35.266Z"),
+//         ISODate("2019-10-15T06:53:49.391Z")
+//       ]
+//     },
+//   },
+//   { $set: { status: { text: "Pending", value: 0 }, assignedWorker: null } }
+// );

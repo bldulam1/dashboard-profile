@@ -10,7 +10,7 @@ const https = require("https");
 const { getCPU_MEM, getNetworkStats } = require("./routines/routine.stats");
 const { executeTasks } = require("./utils/taskAssignment");
 const httpsPort = process.env.NODE_ENV === "development" ? 4444 : 443;
-const httpPort = process.env.NODE_ENV === "development" ? 8080 : 80;
+const httpPort = process.env.NODE_ENV === "development" ? 8080 : 8080;
 const socketIOPort = 8081;
 const { socketIOServer, io } = require("./socket");
 const Client = require("./schemas/user");

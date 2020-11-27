@@ -28,7 +28,7 @@
     "pm2": "^3.5.1",
     "read-xml": "^3.0.0",
     "readdirp": "^3.1.2",
-    "systeminformation": "^4.14.4",
+    "systeminformation": "^4.30.5",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
